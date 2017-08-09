@@ -8,3 +8,4 @@ def double(x):
     :return:
     """
     return np.multiply(2, x)
+
