@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         {
             uint8_t airsimros_stereo_image_message = 0;
 
-            chatterGroundtruth.publish(airsimros_stereo_image_message);
+            publisherStereoImage.publish(airsimros_stereo_image_message);
         }
     }
     catch (const ros::InvalidNodeNameException& e)
