@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>airsim_to_ros</name>
+  <version>0.0.0</version>
+  <description>The package containing the receiver node for data from AirSim.</description>
+
+  <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Schmalhofer</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rostest</build_depend>
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
