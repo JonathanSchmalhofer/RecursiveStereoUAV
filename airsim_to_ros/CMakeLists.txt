@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(airsim_to_ros)
 
+add_compile_options(
+    $<$<CXX_COMPILER_ID:GNU>:-Werror>
+    $<$<CXX_COMPILER_ID:GNU>:-Wall>
+    $<$<CXX_COMPILER_ID:GNU>:-Wextra>
+    $<$<CXX_COMPILER_ID:GNU>:-Werror=unused-result>
+    $<$<CXX_COMPILER_ID:GNU>:-std=c++14>
+)
+
 set(catkin_package_DEPENDENCIES
   roscpp
 )
