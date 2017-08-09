@@ -14,7 +14,7 @@ build:
     - export server_type="shippable"
     - export ros_release_name="kinetic"
     - export ubuntu_version_name="xenial"
-    - export used_modules="check_cache,check_build,code_style_check,check_deb_make,code_coverage"
+    - export used_modules="check_cache,code_style_check"
     - export remote_shell_script="https://raw.githubusercontent.com/shadow-robot/sr-build-tools/$toolset_branch/bin/sr-run-ci-build.sh"
     - apt-get update
     - apt-get install -y --no-install-recommends ca-certificates wget
@@ -23,4 +23,3 @@ build:
     - chmod 755 /tmp/oneliner
     - cd /tmp
     - gosu $MY_USERNAME /tmp/oneliner "$toolset_branch" $server_type $used_modules
- 
