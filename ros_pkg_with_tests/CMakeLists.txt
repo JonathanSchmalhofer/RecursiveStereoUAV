@@ -3,8 +3,7 @@ project(ros_pkg_with_tests)
 
 ## Find catkin macros and libraries
 find_package(catkin REQUIRED
-  roscpp
-  rospy)
+  roscpp)
 
 ###################################
 ## catkin specific configuration ##
@@ -32,6 +31,3 @@ catkin_add_gtest(${PROJECT_NAME}-test src/test/test_square.cpp)
 if(TARGET ${PROJECT_NAME}-test)
   target_link_libraries(${PROJECT_NAME}-test square)
 endif()
-
-## Add folders to be run by python nosetests
-catkin_add_nosetests(scripts/test)
