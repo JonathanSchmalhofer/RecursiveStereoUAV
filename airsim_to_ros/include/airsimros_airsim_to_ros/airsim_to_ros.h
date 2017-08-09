@@ -8,6 +8,7 @@
 #ifndef AIRSIMROS_AIRSIM_TO_ROS_H_
 #define AIRSIMROS_AIRSIM_TO_ROS_H_
 
+#include <stdint.h>
 #include <ros/ros.h>
 
 namespace airsimros
