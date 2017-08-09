@@ -6,13 +6,12 @@ set(catkin_package_DEPENDENCIES
 )
 
 ## Find catkin macros and libraries
-find_package(catkin REQUIRED COMPONENTS ${catkin_package_DEPENDENCIES})
+find_package(catkin REQUIRED ${catkin_package_DEPENDENCIES})
 
 ###################################
 ## catkin specific configuration ##
 ###################################
 catkin_package(
-  CATKIN_DEPENDS ${catkin_package_DEPENDENCIES}
 )
 
 ###########
