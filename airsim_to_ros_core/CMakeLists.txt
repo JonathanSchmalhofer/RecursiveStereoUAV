@@ -56,6 +56,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 if(CATKIN_ENABLE_TESTING)
-  #catkin_add_gtest(${PROJECT_NAME}_tests test/test_sample_cpp_class.cpp)
-  #target_link_libraries(${PROJECT_NAME}_tests sample_cpp_library ${catkin_LIBRARIES})
+  catkin_add_gtest(${PROJECT_NAME}_tests test/airsim_to_ros_test.cpp)
+  target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} ${catkin_LIBRARIES})
 endif()
