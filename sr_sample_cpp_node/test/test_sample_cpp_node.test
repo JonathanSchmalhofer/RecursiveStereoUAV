@@ -1,0 +1,6 @@
+<launch>
+
+  <node name="sample_cpp_node" pkg="sr_sample_cpp_node" type="sample_cpp_node" output="screen"/>
+
+  <test test-name="test_sample_cpp_node" pkg="sr_sample_cpp_node" type="test_sample_cpp_node"/>
+</launch>

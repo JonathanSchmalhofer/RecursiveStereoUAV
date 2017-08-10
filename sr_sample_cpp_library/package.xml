@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+  <name>sr_sample_cpp_library</name>
+  <version>0.0.1</version>
+  <description>The sr_sample_cpp_library package</description>
+  <maintainer email="software@shadowrobot.com">Shadow Robot's software team</maintainer>
+
+  <license>GPL</license>
+
+  <url type="repository">https://github.com/shadow-robot/build-servers-check</url>
+  <url type="bugtracker">https://github.com/shadow-robot/build-servers-check/issues</url>
+
+  <author>Andriy Petlovanyy</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <run_depend>roscpp</run_depend>
+
+</package>
