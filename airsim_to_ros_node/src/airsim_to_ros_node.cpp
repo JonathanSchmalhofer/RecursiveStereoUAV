@@ -1,7 +1,7 @@
 
 #include <string>
 #include "ros/ros.h"
-#include "airsim_to_ros_core/airsim_to_ros.h"
+#include "airsimros_airsim_to_ros/airsim_to_ros.h"
 
 
 int main(int argc, char **argv)
