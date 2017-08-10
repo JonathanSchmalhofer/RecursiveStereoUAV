@@ -48,9 +48,9 @@ add_library(${PROJECT_NAME}_lib
 #############
 
 ## Add gtest based cpp test target and link libraries
-catkin_add_gtest(${PROJECT_NAME}_tests
-  test/airsim_to_ros_test.cpp
-)
-if(TARGET ${PROJECT_NAME}_tests)
-  target_link_libraries(${PROJECT_NAME}_tests ${catkin_LIBRARIES} ${PROJECT_NAME}_lib)
-endif()
+#catkin_add_gtest(${PROJECT_NAME}_tests
+#  test/airsim_to_ros_test.cpp
+#)
+#if(TARGET ${PROJECT_NAME}_tests)
+#  target_link_libraries(${PROJECT_NAME}_tests ${catkin_LIBRARIES} ${PROJECT_NAME}_lib)
+#endif()
