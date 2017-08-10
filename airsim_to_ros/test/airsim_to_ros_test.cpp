@@ -26,7 +26,7 @@ TEST(AirSimToRosTest, DefaultStatus)
 	EXPECT_EQ(airsim_to_ros_status, 0);
 }
 
-
+/*
 TEST(AirSimToRosTest, SetAndGetStatus)
 {
     ros::Time::init();
@@ -41,6 +41,7 @@ TEST(AirSimToRosTest, SetAndGetStatus)
     // ASSERT
 	EXPECT_EQ(airsim_to_ros_status, 42);
 }
+*/
 }
 
 int main(int argc, char** argv)
