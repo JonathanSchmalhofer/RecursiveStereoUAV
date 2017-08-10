@@ -19,4 +19,9 @@ uint8_t AirSimToRos::GetStatus()
 {
     return status_;
 }
+
+void SetStaus(const std::uint8_t& status)
+{
+    status_ = status;
+}
 }

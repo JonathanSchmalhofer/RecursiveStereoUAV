@@ -23,11 +23,9 @@ class AirSimToRos
     /// @brief Sets the status of the AirSimToRos object.
     ///
     /// @param status The status of the AirSimToRos node with 0 = ok, else = error code
-    inline void SetStaus(const std::uint8_t& status)
-    {
-        status_ = status;
-    };
+    void SetStaus(const std::uint8_t& status);
 
+	/// @brief Gets the status of the AirSimToRos object.
     uint8_t GetStatus();
 
   private:
