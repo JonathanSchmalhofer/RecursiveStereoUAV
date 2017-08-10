@@ -21,6 +21,19 @@ TEST(AirSimToRosTestSuite, DefaultStatus)
     ASSERT_EQ(airsim_to_ros_status, 0);
 }
 
+TEST(AirSimToRosTestSuite, SetAndGetStatus)
+{
+    // ARRANGE
+    auto airsim_to_ros = airsimros::AirSimToRos();
+
+    // ACT
+    airsim_to_ros.SetStatus(42);
+    auto airsim_to_ros_status = airsim_to_ros.GetStatus();
+
+    // ASSERT
+    ASSERT_EQ(airsim_to_ros_status, 42);
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
