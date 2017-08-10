@@ -36,6 +36,10 @@ add_library(${PROJECT_NAME}
   src/airsim_to_ros.cpp
 )
 
+target_link_libraries(${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
+
 #############
 ## Install ##
 #############
