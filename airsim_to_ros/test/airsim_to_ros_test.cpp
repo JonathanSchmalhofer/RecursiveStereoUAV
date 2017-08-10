@@ -35,7 +35,7 @@ TEST(AirSimToRosTest, SetAndGetStatus)
     auto airsim_to_ros = AirSimToRos();
 
     // ACT
-	airsim_to_ros.SetStatus(42)
+	airsim_to_ros.SetStatus(42);
     auto airsim_to_ros_status = airsim_to_ros.GetStatus();
 
     // ASSERT
