@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>airsim_to_ros</name>
+  <name>airsim_to_ros_core</name>
   <version>0.0.0</version>
   <description>The package containing the receiver node for data from AirSim.</description>
 
