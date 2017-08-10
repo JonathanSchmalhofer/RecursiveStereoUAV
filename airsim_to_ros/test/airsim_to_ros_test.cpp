@@ -54,8 +54,8 @@ TEST(AirSimToRosTest, SetAndGetStatus)
     // ASSERT
 	EXPECT_EQ(airsim_to_ros_status, 42);
 }
-*/
 }
+*/
 
 int main(int argc, char** argv)
 {
