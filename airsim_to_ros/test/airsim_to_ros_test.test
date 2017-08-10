@@ -1,0 +1,3 @@
+<launch>
+    <test test-name="airsim_to_ros_tests" pkg="davidscheck" type="test_mynode" />
+</launch>

@@ -57,7 +57,7 @@ install(TARGETS ${PROJECT_NAME}
 
 if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
-  add_rostest_gtest(${PROJECT_NAME}_tests test/airsim_to_ros_test.cpp)
+  add_rostest_gtest(${PROJECT_NAME}_tests test/airsim_to_ros_test.test test/airsim_to_ros_test.cpp)
   target_link_libraries(${PROJECT_NAME}_tests ${catkin_LIBRARIES} ${PROJECT_NAME}_lib)
 endif()
 
