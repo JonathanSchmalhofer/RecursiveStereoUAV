@@ -44,8 +44,22 @@ add_library(${PROJECT_NAME}_lib
 )
 
 #############
+## Install ##
+#############
+
+install(TARGETS ${PROJECT_NAME}
+   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+#############
 ## Testing ##
 #############
+
+if(CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+  add_rostest_gtest(${PROJECT_NAME}_tests test/airsim_to_ros_test.cpp)
+  target_link_libraries(${PROJECT_NAME}_tests ${catkin_LIBRARIES} ${PROJECT_NAME}_lib)
+endif()
 
 ## Add gtest based cpp test target and link libraries
 #catkin_add_gtest(${PROJECT_NAME}_tests

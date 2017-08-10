@@ -7,8 +7,23 @@
 
 #include <gtest/gtest.h>
 #include <ros/time.h>
-
 #include "airsimros_airsim_to_ros/airsim_to_ros.h"
+
+TEST(AirSimToRosTest, DefaultStatus)
+{
+	ros::Time::init();
+
+    // ARRANGE
+    auto airsim_to_ros = airsimros::AirSimToRos();
+
+    // ACT
+    auto airsim_to_ros_status = airsim_to_ros.GetStatus();
+
+    // ASSERT
+	EXPECT_EQ(airsim_to_ros_status, 0);
+}
+
+/*
 
 namespace airsimros
 {
@@ -25,8 +40,6 @@ TEST(AirSimToRosTest, DefaultStatus)
     // ASSERT
 	EXPECT_EQ(airsim_to_ros_status, 0);
 }
-
-/*
 TEST(AirSimToRosTest, SetAndGetStatus)
 {
     ros::Time::init();
