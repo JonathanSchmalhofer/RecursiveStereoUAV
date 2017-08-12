@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>js_airsim_to_ros_node</name>
+  <version>0.0.1</version>
+  <description>The js_airsim_to_ros_node package</description>
+  <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Bryan Schmalhofer</maintainer>
+
+  <license>MIT</license>
+
+  <author>Jonathan Bryan Schmalhofer</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>js_airsim_to_ros_library</build_depend>
+  <build_depend>roscpp</build_depend>
+  <run_depend>js_airsim_to_ros_library</run_depend>
+  <run_depend>roscpp</run_depend>
+
+</package>
