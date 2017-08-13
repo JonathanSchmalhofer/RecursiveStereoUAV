@@ -1,20 +1,29 @@
 #include <gtest/gtest.h>
-#include <string>
-
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
-TEST(AirSimToRosClassTestSuite, checkGetParameterValueFromName)
+TEST(AirSimToRosClassTestSuite, DefaultStatus)
 {
-    js_airsim_to_ros_library::AirSimToRosClass sample_object;
+    // ARRANGE
+    auto airsim_to_ros = js_airsim_to_ros_library::AirSimToRosClass();
 
-    std::string param1("my_cpp_param_one");
-    std::string param2("my_cpp_param_two");
+    // ACT
+    auto airsim_to_ros_status = airsim_to_ros.GetStatus();
 
-    std::string expected_result1("my_cpp_param_one_test");
-    std::string expected_result2("my_cpp_param_two_test");
+    // ASSERT
+    ASSERT_EQ(airsim_to_ros_status, 0);
+}
 
-    ASSERT_EQ(expected_result1, sample_object.getParameterValueFromName(param1));
-    ASSERT_EQ(expected_result2, sample_object.getParameterValueFromName(param2));
+TEST(AirSimToRosClassTestSuite, SetAndGetStatus)
+{
+    // ARRANGE
+    auto airsim_to_ros = js_airsim_to_ros_library::AirSimToRosClass();
+
+    // ACT
+    airsim_to_ros.SetStatus(42);
+    auto airsim_to_ros_status = airsim_to_ros.GetStatus();
+
+    // ASSERT
+    ASSERT_EQ(airsim_to_ros_status, 42);
 }
 
 int main(int argc, char **argv)

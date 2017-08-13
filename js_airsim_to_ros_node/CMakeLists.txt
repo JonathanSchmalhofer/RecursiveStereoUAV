@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(js_airsim_to_ros_node)
 
+add_compile_options(
+    $<$<CXX_COMPILER_ID:GNU>:-std=c++14>
+)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
 )

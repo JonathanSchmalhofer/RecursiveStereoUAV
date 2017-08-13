@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(js_airsim_to_ros_library)
 
+add_compile_options(
+    $<$<CXX_COMPILER_ID:GNU>:-std=c++14>
+)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp
 )
@@ -19,7 +23,9 @@ catkin_package(
 ## Build ##
 ###########
 
-include_directories(include)
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS})
 
 add_library(airsim_to_ros_library
   src/airsim_to_ros_class.cpp

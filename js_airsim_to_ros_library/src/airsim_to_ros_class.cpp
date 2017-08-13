@@ -1,15 +1,28 @@
-#include "js_airsim_to_ros_library/airsim_to_ros_class.h"
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief AirSimToRos Implementation
+///
 
-#include <string>
+#include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
 namespace js_airsim_to_ros_library
 {
 
-std::string AirSimToRosClass::getParameterValueFromName(const std::string &parameter_name) const
+AirSimToRosClass::AirSimToRosClass()
 {
-    std::string result = parameter_name;
-    result.append("_test");
-    return result;
+    status_ = 0;
 }
 
+uint8_t AirSimToRosClass::GetStatus()
+{
+    return status_;
+}
+
+void AirSimToRosClass::SetStatus(const std::uint8_t& status)
+{
+    status_ = status;
+}
 }  // namespace js_airsim_to_ros_library
+
