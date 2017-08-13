@@ -1,0 +1,2 @@
+# This overrides the dependency tracker with the zeromq library file.
+set( @PROJECT_NAME@_LIBRARIES @CATKIN_DEVEL_PREFIX@/lib/libzmq${CMAKE_SHARED_LIBRARY_SUFFIX} )
