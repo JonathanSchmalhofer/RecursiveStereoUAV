@@ -1,6 +1,4 @@
 <launch>
-
-  <node name="airsim_to_ros_node" pkg="js_airsim_to_ros_node" type="airsim_to_ros_node" output="screen"/>
-
-  <test test-name="test_airsim_to_ros_node" pkg="js_airsim_to_ros_node" type="test_airsim_to_ros_node"/>
+    <node name="airsim_to_ros_node" pkg="js_airsim_to_ros_node" type="airsim_to_ros_node" output="screen"/>
+    <test test-name="test_airsim_to_ros_node" pkg="js_airsim_to_ros_node" type="test_airsim_to_ros_node"/>
 </launch>

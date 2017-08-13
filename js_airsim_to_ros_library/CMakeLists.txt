@@ -6,7 +6,7 @@ add_compile_options(
 )
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
+    roscpp
 )
 
 ###################################
@@ -14,9 +14,9 @@ find_package(catkin REQUIRED COMPONENTS
 ###################################
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES airsim_to_ros_library
-  CATKIN_DEPENDS roscpp
+    INCLUDE_DIRS include
+    LIBRARIES airsim_to_ros_library
+    CATKIN_DEPENDS roscpp
 )
 
 ###########
@@ -24,15 +24,15 @@ catkin_package(
 ###########
 
 include_directories(
-  include
-  ${catkin_INCLUDE_DIRS})
+    include
+    ${catkin_INCLUDE_DIRS})
 
 add_library(airsim_to_ros_library
-  src/airsim_to_ros_class.cpp
+    src/airsim_to_ros_class.cpp
 )
 
 target_link_libraries(airsim_to_ros_library
-  ${catkin_LIBRARIES}
+    ${catkin_LIBRARIES}
 )
 
 #############
@@ -40,13 +40,13 @@ target_link_libraries(airsim_to_ros_library
 #############
 
 install(TARGETS airsim_to_ros_library
-  LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
-  DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  FILES_MATCHING PATTERN "*.h"
-  PATTERN ".svn" EXCLUDE
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".svn" EXCLUDE
 )
 
 #############
@@ -54,6 +54,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 if(CATKIN_ENABLE_TESTING)
-  catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
-  target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES})
+    catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
+    target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES})
 endif()
