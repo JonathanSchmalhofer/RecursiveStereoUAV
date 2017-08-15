@@ -1,0 +1,6 @@
+table StarBuffer {
+    radius: double;
+    mass: double;
+    volume: double;
+}
+root_type StarBuffer;
