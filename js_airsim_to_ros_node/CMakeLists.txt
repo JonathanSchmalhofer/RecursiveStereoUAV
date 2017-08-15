@@ -7,7 +7,10 @@ add_compile_options(
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  roslaunch
 )
+
+roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_airsim_to_ros_library REQUIRED)
 

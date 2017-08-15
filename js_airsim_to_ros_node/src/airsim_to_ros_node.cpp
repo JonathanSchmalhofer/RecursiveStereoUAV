@@ -14,8 +14,12 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "airsim_to_ros_node");
     ros::NodeHandle nh;
+    
+    ROS_INFO("Starting node");
 
     js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros;
+    
+    ROS_INFO("Created airsim_to_ros");
     
     zmq::context_t context(1);
 
@@ -24,6 +28,8 @@ int main(int argc, char **argv)
     subscriber.setsockopt(ZMQ_IDENTITY, "Hello", 5);
     subscriber.setsockopt(ZMQ_SUBSCRIBE, "", 0);
     subscriber.connect("tcp://localhost:5565");
+    
+    ROS_INFO("Subscriber created");
     
     zmq::message_t receiveMessage;
     subscriber.recv(&receiveMessage);
@@ -45,6 +51,7 @@ int main(int argc, char **argv)
     {
         ros::spinOnce();
         r.sleep();
+        ROS_INFO("running");
     }
 
     return 0;
