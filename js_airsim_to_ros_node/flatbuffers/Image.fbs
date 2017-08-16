@@ -1,0 +1,15 @@
+include "Header.fbs";
+
+namespace airsim_to_ros;
+
+table Image {
+    header: Header;
+    height: uint;
+    width: uint;
+    encoding: string;
+    is_bigendian: ubyte;
+    step: uint;
+    data: [ubyte];
+}
+
+root_type Image;

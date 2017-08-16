@@ -1,0 +1,9 @@
+include "time.fbs";
+
+namespace airsim_to_ros;
+
+table Header {
+    seq: uint;
+    stamp: time;
+    frame_id: string;
+}

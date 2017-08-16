@@ -64,4 +64,12 @@ if(CATKIN_ENABLE_TESTING)
   find_package(rostest REQUIRED)
   add_rostest_gtest(test_airsim_to_ros_node test/test_airsim_to_ros_node.test test/test_airsim_to_ros_node.cpp)
   target_link_libraries(test_airsim_to_ros_node ${catkin_LIBRARIES} ${js_airsim_to_ros_node_LIBRARIES} ${zeromq_catkin_LIBRARY})
+  
+  add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp include/StarBuffers_generated.h)
+  
+  target_link_libraries(flatbuffer_zmq_publisher_node
+    ${zeromq_catkin_LIBRARIES}
+    ${flatbuffers_catkin_LIBRARIES}
+    ${catkin_LIBRARIES}
+  )
 endif()
