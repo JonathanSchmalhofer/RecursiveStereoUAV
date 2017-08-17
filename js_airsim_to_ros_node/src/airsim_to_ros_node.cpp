@@ -1,12 +1,13 @@
 #include <string>
-#include "ros/ros.h"
+#include <ros/ros.h>
+#include <image_transport/image_transport.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "airsim_to_ros_node");
-    ros::NodeHandle nh;
+    ros::NodeHandle node_handle;
     
     ROS_INFO("Starting node");
 
@@ -14,13 +15,21 @@ int main(int argc, char **argv)
     
     ROS_INFO("Created airsim_to_ros");
 
-    ros::Rate r(5);
+    // Todo: Create a Publisher here
+    image_transport::ImageTransport image_transport(node_handle);
+    image_transport::Publisher chatterAirSimMessage = image_transport.advertise("/AirSimImage", 1);
 
-    while (nh.ok())
+    while (ros::ok())
     {
-        ros::spinOnce();
-        r.sleep();
-        ROS_INFO("running");
+        if (airsim_to_ros.ReceivedMessage())
+        {
+            // Todo: create ROS-Message, fill with Zmq-Message and publish
+            sensor_msgs::ImagePtr airsim_image_msg;
+            if (true)
+            {
+                chatterAirSimMessage.publish(airsim_image_msg);
+            }
+        }
     }
 
     return 0;

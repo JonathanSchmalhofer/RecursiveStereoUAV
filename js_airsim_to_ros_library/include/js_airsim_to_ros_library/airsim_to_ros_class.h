@@ -10,13 +10,7 @@
 
 #include <cstdint>
 #include "zeromq_cpp/zmq.hpp"
-#include "StarBuffers_generated.h"
-
-struct Star {
-    double radius ;
-    double mass;
-    double volume;
-};
+#include "Image_generated.h"
 
 namespace js_airsim_to_ros_library
 {
@@ -34,6 +28,9 @@ public:
 
 	/// @brief Gets the status of the AirSimToRos object.
     std::uint8_t GetStatus();
+    
+    // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
+    bool ReceivedMessage();
 
   private:
     /// @brief A status indicator.

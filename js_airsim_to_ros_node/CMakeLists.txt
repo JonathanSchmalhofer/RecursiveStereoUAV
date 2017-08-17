@@ -7,6 +7,7 @@ add_compile_options(
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
+    image_transport
     roslaunch
 )
 
@@ -21,7 +22,7 @@ find_package(js_airsim_to_ros_library REQUIRED)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES airsim_to_ros_node
-    CATKIN_DEPENDS js_airsim_to_ros_library roscpp
+    CATKIN_DEPENDS js_airsim_to_ros_library roscpp image_transport
 )
 
 ###########

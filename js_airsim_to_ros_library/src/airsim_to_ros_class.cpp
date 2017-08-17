@@ -24,5 +24,10 @@ void AirSimToRosClass::SetStatus(const std::uint8_t& status)
 {
     status_ = status;
 }
+
+bool AirSimToRosClass::ReceivedMessage()
+{
+    return true;
+}
 }  // namespace js_airsim_to_ros_library
 
