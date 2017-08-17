@@ -15,7 +15,7 @@ AirSimToRosClass::AirSimToRosClass()
     status_ = 0;
 }
 
-uint8_t AirSimToRosClass::GetStatus()
+std::uint8_t AirSimToRosClass::GetStatus()
 {
     return status_;
 }

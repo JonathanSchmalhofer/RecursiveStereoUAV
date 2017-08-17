@@ -6,26 +6,22 @@ add_compile_options(
 )
 
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  roslaunch
+    roscpp
+    roslaunch
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_airsim_to_ros_library REQUIRED)
 
-find_package(zeromq_catkin REQUIRED)
-
-find_package(flatbuffers_catkin REQUIRED)
-
 ###################################
 ## catkin specific configuration ##
 ###################################
 
 catkin_package(
-  INCLUDE_DIRS include
-  LIBRARIES airsim_to_ros_node
-  CATKIN_DEPENDS js_airsim_to_ros_library zeromq_catkin flatbuffers_catkin
+    INCLUDE_DIRS
+    LIBRARIES airsim_to_ros_node
+    CATKIN_DEPENDS js_airsim_to_ros_library roscpp
 )
 
 ###########
@@ -33,19 +29,15 @@ catkin_package(
 ###########
 
 include_directories(
-  include
-  ${js_airsim_to_ros_library_INCLUDE_DIRS}
-  ${zeromq_catkin_INCLUDE_DIRS}
-  ${flatbuffers_catkin_INCLUDE_DIRS}
+    ${js_airsim_to_ros_library_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(airsim_to_ros_node src/airsim_to_ros_node.cpp include/StarBuffers_generated.h)
+add_executable(airsim_to_ros_node src/airsim_to_ros_node.cpp)
 
 target_link_libraries(airsim_to_ros_node
-  ${js_airsim_to_ros_library_LIBRARIES}
-  ${zeromq_catkin_LIBRARIES}
-  ${flatbuffers_catkin_LIBRARIES}
-  ${catkin_LIBRARIES}
+    ${js_airsim_to_ros_library_LIBRARIES}
+    ${catkin_LIBRARIES}
 )
 
 #############
@@ -53,7 +45,7 @@ target_link_libraries(airsim_to_ros_node
 #############
 
 install(TARGETS airsim_to_ros_node
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 #############
@@ -61,15 +53,7 @@ install(TARGETS airsim_to_ros_node
 #############
 
 if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest_gtest(test_airsim_to_ros_node test/test_airsim_to_ros_node.test test/test_airsim_to_ros_node.cpp)
-  target_link_libraries(test_airsim_to_ros_node ${catkin_LIBRARIES} ${js_airsim_to_ros_node_LIBRARIES} ${zeromq_catkin_LIBRARY})
-  
-  add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp include/StarBuffers_generated.h)
-  
-  target_link_libraries(flatbuffer_zmq_publisher_node
-    ${zeromq_catkin_LIBRARIES}
-    ${flatbuffers_catkin_LIBRARIES}
-    ${catkin_LIBRARIES}
-  )
+    find_package(rostest REQUIRED)
+    add_rostest_gtest(test_airsim_to_ros_node test/test_airsim_to_ros_node.test test/test_airsim_to_ros_node.cpp)
+    target_link_libraries(test_airsim_to_ros_node ${catkin_LIBRARIES} ${js_airsim_to_ros_node_LIBRARIES})
 endif()

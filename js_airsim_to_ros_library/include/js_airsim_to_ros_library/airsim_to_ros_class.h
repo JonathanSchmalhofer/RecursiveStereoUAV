@@ -8,8 +8,15 @@
 #ifndef JS_AIRSIM_TO_ROS_LIBRARY_AIRSIM_TO_ROS_CLASS_H_
 #define JS_AIRSIM_TO_ROS_LIBRARY_AIRSIM_TO_ROS_CLASS_H_
 
-#include <stdint.h>
-#include <ros/ros.h>
+#include <cstdint>
+#include "zeromq_cpp/zmq.hpp"
+#include "StarBuffers_generated.h"
+
+struct Star {
+    double radius ;
+    double mass;
+    double volume;
+};
 
 namespace js_airsim_to_ros_library
 {
@@ -26,11 +33,11 @@ public:
     void SetStatus(const std::uint8_t& status);
 
 	/// @brief Gets the status of the AirSimToRos object.
-    uint8_t GetStatus();
+    std::uint8_t GetStatus();
 
   private:
     /// @brief A status indicator.
-    uint8_t status_;
+    std::uint8_t status_;
 };
 }  // namespace js_airsim_to_ros_library
 

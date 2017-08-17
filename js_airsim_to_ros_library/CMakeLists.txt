@@ -6,8 +6,11 @@ add_compile_options(
 )
 
 find_package(catkin REQUIRED COMPONENTS
-    roscpp
 )
+
+find_package(zeromq_catkin REQUIRED)
+
+find_package(flatbuffers_catkin REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -16,7 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES airsim_to_ros_library
-    CATKIN_DEPENDS roscpp
+    CATKIN_DEPENDS zeromq_catkin flatbuffers_catkin 
 )
 
 ###########
@@ -25,13 +28,18 @@ catkin_package(
 
 include_directories(
     include
-    ${catkin_INCLUDE_DIRS})
+    ${zeromq_catkin_INCLUDE_DIRS}
+    ${flatbuffers_catkin_INCLUDE_DIRS}
+    ${catkin_INCLUDE_DIRS}
+)
 
 add_library(airsim_to_ros_library
     src/airsim_to_ros_class.cpp
 )
 
 target_link_libraries(airsim_to_ros_library
+    ${zeromq_catkin_LIBRARIES}
+    ${flatbuffers_catkin_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 
@@ -55,5 +63,13 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 if(CATKIN_ENABLE_TESTING)
     catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
-    target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES})
+    target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES} ${zeromq_catkin_LIBRARY} ${flatbuffers_catkin_LIBRARIES})
+    
+    #add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp include/js_airsim_to_ros_library/StarBuffers_generated.h)
+    
+    #target_link_libraries(flatbuffer_zmq_publisher_node
+    #    ${zeromq_catkin_LIBRARIES}
+    #    ${flatbuffers_catkin_LIBRARIES}
+    #    ${catkin_LIBRARIES}
+    #)
 endif()
