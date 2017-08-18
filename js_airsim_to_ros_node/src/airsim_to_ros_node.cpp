@@ -15,7 +15,6 @@ int main(int argc, char **argv)
     
     ROS_INFO("Created airsim_to_ros");
 
-    // Todo: Create a Publisher here
     image_transport::ImageTransport image_transport(node_handle);
     image_transport::Publisher chatterAirSimMessage = image_transport.advertise("/AirSimImage", 1);
 
@@ -23,11 +22,12 @@ int main(int argc, char **argv)
     {
         if (airsim_to_ros.ReceivedMessage())
         {
-            // Todo: create ROS-Message, fill with Zmq-Message and publish
+            // Todo: fill ROS-Message with Zmq-Message
             sensor_msgs::ImagePtr airsim_image_msg;
             if (true)
             {
                 chatterAirSimMessage.publish(airsim_image_msg);
+                ROS_INFO("Image sent");
             }
         }
     }

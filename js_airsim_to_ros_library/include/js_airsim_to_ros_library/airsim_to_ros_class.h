@@ -29,6 +29,9 @@ public:
 	/// @brief Gets the status of the AirSimToRos object.
     std::uint8_t GetStatus();
     
+    /// @brief Gets the Image received via ZeroMq as Flatbuffers object.
+    //airsim_to_ros::ImageT GetReceivedImage();
+    
     // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
     bool ReceivedMessage();
 

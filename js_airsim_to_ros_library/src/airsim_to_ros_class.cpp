@@ -25,16 +25,28 @@ std::uint8_t AirSimToRosClass::GetStatus()
     return status_;
 }
 
+    /*
+std::uint32_t AirSimToRosClass::GetReceivedImage()
+{
+    flatbuffers::FlatBufferBuilder fbb;
+    airsim_to_ros::ImageBuilder builder(fbb);
+
+    auto image = airsim_to_ros::GetImage(zmq_receivedMessage_.data());
+    
+    airsim_to_ros::ImageT imageobj;
+    // Deserialize from buffer into object.
+    airsim_to_ros::Image::UnPackTo(&imageobj, zmq_receivedMessage_.data());
+    return imageobj;
+}*/
+    
 void AirSimToRosClass::SetStatus(const std::uint8_t& status)
 {
     status_ = status;
 }
 
 bool AirSimToRosClass::ReceivedMessage()
-{
-    zmq_subscriber_.recv(&zmq_receivedMessage_);
-    
-    return true;
+{    
+    return zmq_subscriber_.recv(&zmq_receivedMessage_);
 }
 }  // namespace js_airsim_to_ros_library
 
