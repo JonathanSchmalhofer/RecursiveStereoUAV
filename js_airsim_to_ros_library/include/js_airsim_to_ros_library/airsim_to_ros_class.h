@@ -33,8 +33,20 @@ public:
     bool ReceivedMessage();
 
   private:
+    
+    /// @brief A ZeroMq context object encapsulating functionality dealing with the initialisation and termination.
+    zmq::context_t zmq_context_;
+    
+    /// @brief A ZeroMq socket for subscribing to incoming messages.
+    zmq::socket_t zmq_subscriber_;
+    
+    /// @brief A ZeroMq message that was received last. Might be empty if ReceivedMessage() never was true.
+    zmq::message_t zmq_receivedMessage_;
+    
     /// @brief A status indicator.
     std::uint8_t status_;
+ 
+    
 };
 }  // namespace js_airsim_to_ros_library
 
