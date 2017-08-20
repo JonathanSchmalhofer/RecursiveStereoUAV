@@ -19,24 +19,18 @@ class AirSimToRosClass
 {
 public:
     /// @brief Initializes a AirSimToRos class instance.
-    AirSimToRosClass();
-
-    /// @brief Sets the status of the AirSimToRos object.
-    ///
-    /// @param status The status of the AirSimToRos node with 0 = ok, else = error code
-    void SetStatus(const std::uint8_t& status);
-
-	/// @brief Gets the status of the AirSimToRos object.
-    std::uint8_t GetStatus();
+    AirSimToRosClass(std::string const& addr);
     
-    /// @brief Gets the Image received via ZeroMq as Flatbuffers object.
-    //airsim_to_ros::ImageT GetReceivedImage();
+    // @brief Gets the message data received via ZeroMq as pointer.
+    void* GetReceivedMessageData();
+    
+    // @brief Gets the message size received via ZeroMq as size_t.
+    std::size_t GetReceivedMessageSize();
     
     // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
     bool ReceivedMessage();
 
-  private:
-    
+private:    
     /// @brief A ZeroMq context object encapsulating functionality dealing with the initialisation and termination.
     zmq::context_t zmq_context_;
     
@@ -44,11 +38,7 @@ public:
     zmq::socket_t zmq_subscriber_;
     
     /// @brief A ZeroMq message that was received last. Might be empty if ReceivedMessage() never was true.
-    zmq::message_t zmq_receivedMessage_;
-    
-    /// @brief A status indicator.
-    std::uint8_t status_;
- 
+    zmq::message_t zmq_receivedMessage_; 
     
 };
 }  // namespace js_airsim_to_ros_library
