@@ -46,7 +46,7 @@ TEST(AirSimToRosClassTestSuite, NoMessageReceived)
     auto empty_size = airsim_to_ros.GetReceivedMessageSize();
 
     // ASSERT
-    ASSERT_EQ(empty_size, 0);
+    EXPECT_EQ(empty_size, 0);
 }
 
 // Check for received Message to be correct ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,27 +95,27 @@ TEST(AirSimToRosClassTestSuite, ReceivedMessageCorrect)
     usleep(100000);
 
     // ASSERT
-    ASSERT_GT(sent_bytes, 0); // Image was sent
-    ASSERT_EQ(airsim_to_ros.GetReceivedMessageSize(), 0); // No image yet received, because it was not yet retreived
-    ASSERT_TRUE(airsim_to_ros.ReceivedMessage()); // Image was received
-    ASSERT_GT(airsim_to_ros.GetReceivedMessageSize(), 0); // Received image is not empty
-    ASSERT_EQ(airsim_to_ros.GetReceivedMessageSize(), buffer_size); // Received Image has same size as sent image
+    EXPECT_GT(sent_bytes, 0); // Image was sent
+    EXPECT_EQ(airsim_to_ros.GetReceivedMessageSize(), 0); // No image yet received, because it was not yet retreived
+    EXPECT_TRUE(airsim_to_ros.ReceivedMessage()); // Image was received
+    EXPECT_GT(airsim_to_ros.GetReceivedMessageSize(), 0); // Received image is not empty
+    EXPECT_EQ(airsim_to_ros.GetReceivedMessageSize(), buffer_size); // Received Image has same size as sent image
     
     // ACT #2
     airsim_to_ros::ImageBuilder builder(fbb);
     auto image_rcvd = airsim_to_ros::GetImage(airsim_to_ros.GetReceivedMessageData());
     
     // ASSERT #2
-    ASSERT_EQ(image_rcvd->header()->seq(), 21);
-    ASSERT_EQ(image_rcvd->header()->stamp()->sec(), 42);
-    ASSERT_EQ(image_rcvd->header()->stamp()->nsec(), 24);
-    ASSERT_STREQ(image_rcvd->header()->frame_id()->c_str(), "test-header-ID");
-    ASSERT_EQ(image_rcvd->height(), 480);
-    ASSERT_EQ(image_rcvd->width(), 640);
-    ASSERT_STREQ(image_rcvd->encoding()->c_str(), "rgb8");
-    ASSERT_EQ(image_rcvd->is_bigendian(), isBigEndian());
-    ASSERT_EQ(image_rcvd->step(), sizeof(std::uint8_t) * 3 * 640);
-    ASSERT_EQ(image_rcvd->data()->size(), 3 * 640 * 480);
+    EXPECT_EQ(image_rcvd->header()->seq(), 21);
+    EXPECT_EQ(image_rcvd->header()->stamp()->sec(), 42);
+    EXPECT_EQ(image_rcvd->header()->stamp()->nsec(), 24);
+    EXPECT_STREQ(image_rcvd->header()->frame_id()->c_str(), "test-header-ID");
+    EXPECT_EQ(image_rcvd->height(), 480);
+    EXPECT_EQ(image_rcvd->width(), 640);
+    EXPECT_STREQ(image_rcvd->encoding()->c_str(), "rgb8");
+    EXPECT_EQ(image_rcvd->is_bigendian(), isBigEndian());
+    EXPECT_EQ(image_rcvd->step(), sizeof(std::uint8_t) * 3 * 640);
+    EXPECT_EQ(image_rcvd->data()->size(), 3 * 640 * 480);
     
     
 }

@@ -12,7 +12,7 @@ TEST(AirSimToRosNodeTestSuite, checkParameterValue)
     ros::spinOnce();
     rate.sleep();
 
-    ASSERT_EQ(42, 42);
+    EXPECT_EQ(42, 42);
 }
 
 int main(int argc, char **argv)
