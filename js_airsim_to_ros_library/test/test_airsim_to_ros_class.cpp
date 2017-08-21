@@ -61,7 +61,7 @@ TEST(AirSimToRosClassTestSuite, ReceivedMessageCorrect)
     
     zmq::context_t context = zmq::context_t(1);
     zmq::socket_t publishSocket = zmq::socket_t(context, ZMQ_PUB); //  We send updates via this socket
-    publishSocket.setsockopt(ZMQ_SNDTIMEO, 50);
+    publishSocket.setsockopt(ZMQ_SNDTIMEO, 500);
     publishSocket.bind(publisher_address);
     
     flatbuffers::FlatBufferBuilder fbb;

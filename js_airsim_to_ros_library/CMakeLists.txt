@@ -64,12 +64,4 @@ install(DIRECTORY include/${PROJECT_NAME}/
 if(CATKIN_ENABLE_TESTING)
     catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
     target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES} ${zeromq_catkin_LIBRARY} ${flatbuffers_catkin_LIBRARIES})
-    
-    #add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp include/js_airsim_to_ros_library/StarBuffers_generated.h)
-    
-    #target_link_libraries(flatbuffer_zmq_publisher_node
-    #    ${zeromq_catkin_LIBRARIES}
-    #    ${flatbuffers_catkin_LIBRARIES}
-    #    ${catkin_LIBRARIES}
-    #)
 endif()
