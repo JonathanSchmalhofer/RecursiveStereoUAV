@@ -3,6 +3,8 @@
 #include "zeromq_cpp/zmq.hpp"
 #include "js_airsim_to_ros_library/Image_generated.h"
 
+#include <iostream> // for std::cin.get();
+
 std::uint8_t isBigEndian()
 {
     // Source: https://stackoverflow.com/questions/280162/is-there-a-way-to-do-a-c-style-compile-time-assertion-to-determine-machines-e
@@ -40,6 +42,9 @@ int main(int argc, char **argv)
     sleep(5);
     
     ROS_INFO("Publisher created");
+
+    //std::cout << "Press enter to continue ...";
+    //std::cin.get();
 
     flatbuffers::FlatBufferBuilder fbb;
     // Image.header.stamp

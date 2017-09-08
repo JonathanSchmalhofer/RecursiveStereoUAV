@@ -38,7 +38,11 @@ private:
     zmq::socket_t zmq_subscriber_;
     
     /// @brief A ZeroMq message that was received last. Might be empty if ReceivedMessage() never was true.
-    zmq::message_t zmq_receivedMessage_; 
+    //zmq::message_t zmq_received_message_;
+
+    std::size_t received_message_size_;
+
+    std::uint8_t* received_message_data_;
     
 };
 }  // namespace js_airsim_to_ros_library
