@@ -28,9 +28,10 @@ AirSimToRosClass::AirSimToRosClass(std::string const& addr)
     image_height_               = 0;
     image_width_                = 0;
     image_encoding_             = "";
-    image_is_bigendian_         = false;
+    image_is_bigendian_         = 0;
     image_step_                 = 0;
     image_data_                 = NULL;
+    image_data_size_            = 0;
 }
     
 AirSimToRosClass::~AirSimToRosClass()
