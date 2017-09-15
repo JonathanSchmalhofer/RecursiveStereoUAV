@@ -8,6 +8,7 @@ add_compile_options(
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     image_transport
+    cv_bridge
     roslaunch
 )
 
@@ -22,7 +23,7 @@ find_package(js_airsim_to_ros_library REQUIRED)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES airsim_to_ros_node
-    CATKIN_DEPENDS js_airsim_to_ros_library roscpp image_transport
+    CATKIN_DEPENDS js_airsim_to_ros_library roscpp image_transport cv_bridge
 )
 
 ###########
@@ -60,6 +61,7 @@ if(CATKIN_ENABLE_TESTING)
     
     add_executable(flatbuffer_zmq_subscriber_node test/flatbuffer_subscriber_node/flatbuffer_zmq_subscriber_node.cpp)
     add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp)
+    add_executable(flatbuffer_zmq_image_publisher_node test/flatbuffer_image_publisher_node/flatbuffer_zmq_image_publisher_node.cpp)
     
     include_directories(
         ${js_airsim_to_ros_library_INCLUDE_DIRS}
@@ -73,6 +75,12 @@ if(CATKIN_ENABLE_TESTING)
     )
     
     target_link_libraries(flatbuffer_zmq_publisher_node
+        ${zeromq_catkin_LIBRARIES}
+        ${flatbuffers_catkin_LIBRARIES}
+        ${catkin_LIBRARIES}
+    )
+    
+    target_link_libraries(flatbuffer_zmq_image_publisher_node
         ${zeromq_catkin_LIBRARIES}
         ${flatbuffers_catkin_LIBRARIES}
         ${catkin_LIBRARIES}

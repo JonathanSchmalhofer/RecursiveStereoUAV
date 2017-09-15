@@ -20,7 +20,8 @@ int main(int argc, char **argv)
     while (ros::ok())
     {
         ROS_INFO("Waiting for data");
-        if (airsim_to_ros.ReceivedMessage())
+        int8_t received_return_value = airsim_to_ros.ReceivedMessage();
+        if (1 == received_return_value)
         {
             // Fill ROS message with Flatbuffers message received via ZeroMq
             sensor_msgs::Image airsim_image_msg;
@@ -56,6 +57,10 @@ int main(int argc, char **argv)
                 
             chatterAirSimMessage.publish(airsim_image_msg);
             ROS_INFO("Image forwarded");
+        }
+        else if (-1 == received_return_value)
+        {
+            ROS_INFO("Invalid Image received - did not forward");
         }
     }
 

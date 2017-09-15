@@ -38,7 +38,7 @@ AirSimToRosClass::~AirSimToRosClass()
     free(image_data_);
 }
 
-bool AirSimToRosClass::ReceivedMessage()
+int8_t AirSimToRosClass::ReceivedMessage()
 {
     zmq::message_t zmq_received_message;
     zmq_subscriber_.recv(&zmq_received_message);
@@ -49,29 +49,39 @@ bool AirSimToRosClass::ReceivedMessage()
     // Verify the message contents are trustworthy.
     flatbuffers::Verifier verifier((const unsigned char *)zmq_received_message.data(),
                                                           zmq_received_message.size());
-    
-    // Make sure the message has valid data.
-    if (airsim_to_ros::VerifyImageBuffer(verifier))
+    int8_t return_value = 0;
+
+
+    if (zmq_received_message.size() > 0)
     {
-        auto fb_image_rcvd = airsim_to_ros::GetImage(zmq_received_message.data());
-        
-        // Header
-        image_header_seq_           = fb_image_rcvd->header()->seq();
-        image_header_stamp_sec_     = fb_image_rcvd->header()->stamp()->sec();
-        image_header_stamp_nsec_    = fb_image_rcvd->header()->stamp()->nsec();
-        image_header_frame_id_      = fb_image_rcvd->header()->frame_id()->c_str();
-        // Image
-        image_height_               = fb_image_rcvd->height();
-        image_width_                = fb_image_rcvd->width();
-        image_encoding_             = fb_image_rcvd->encoding()->c_str();
-        image_is_bigendian_         = fb_image_rcvd->is_bigendian();
-        image_step_                 = fb_image_rcvd->step();
-        image_data_                 = (std::uint8_t*)realloc(image_data_, zmq_received_message.size());
-        image_data_size_            = image_step_ * image_height_;
-        memcpy(image_data_, fb_image_rcvd->data(), image_data_size_);
+      // Make sure the message has valid data.
+      if (airsim_to_ros::VerifyImageBuffer(verifier))
+      {
+          auto fb_image_rcvd = airsim_to_ros::GetImage(zmq_received_message.data());
+
+          // Header
+          image_header_seq_           = fb_image_rcvd->header()->seq();
+          image_header_stamp_sec_     = fb_image_rcvd->header()->stamp()->sec();
+          image_header_stamp_nsec_    = fb_image_rcvd->header()->stamp()->nsec();
+          image_header_frame_id_      = fb_image_rcvd->header()->frame_id()->c_str();
+          // Image
+          image_height_               = fb_image_rcvd->height();
+          image_width_                = fb_image_rcvd->width();
+          image_encoding_             = fb_image_rcvd->encoding()->c_str();
+          image_is_bigendian_         = fb_image_rcvd->is_bigendian();
+          image_step_                 = fb_image_rcvd->step();
+          image_data_                 = (std::uint8_t*)realloc(image_data_, zmq_received_message.size());
+          image_data_size_            = image_step_ * image_height_;
+          memcpy(image_data_, fb_image_rcvd->data(), image_data_size_);
+          return_value                = 1;
+      }
+      else
+      {
+          return_value                = -1;
+      }
     }
 
-    return zmq_received_message.size() > 0 && airsim_to_ros::VerifyImageBuffer(verifier);
+    return return_value;
 }
     
 uint32_t AirSimToRosClass::GetImageHeaderSeq()

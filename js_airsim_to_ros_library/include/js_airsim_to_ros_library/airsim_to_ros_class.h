@@ -25,7 +25,7 @@ public:
     ~AirSimToRosClass();
     
     // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
-    bool ReceivedMessage();
+    int8_t ReceivedMessage();
     
      // @brief Returns the attribute Image.Header.seq
      uint32_t GetImageHeaderSeq();
