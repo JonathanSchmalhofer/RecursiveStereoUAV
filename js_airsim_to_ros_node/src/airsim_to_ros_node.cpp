@@ -3,26 +3,6 @@
 #include <image_transport/image_transport.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
-/*
-void mapFlatbuffersImageToRosImage(js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros, sensor_msgs::ImagePtr& ros_image)
-{
-    // Header
-
-    ros_image->header.stamp.sec     = airsim_to_ros.
-    ros_image->header.stamp.nsec    = airsim_to_ros.
-    ros_image->header.frame_id      = airsim_to_ros.
-    // Image
-    ros_image->height               = airsim_to_ros.
-    ros_image->width                = airsim_to_ros.
-    ros_image->encoding             = airsim_to_ros.
-    ros_image->is_bigendian         = airsim_to_ros.
-    ros_image->step                 = airsim_to_ros.
-    ros_image->data.resize(airsim_to_ros.GetImageDataSize());
-    memcpy(airsim_to_ros.GetImageData(), flatbuffers_image->data(), airsim_to_ros.GetImageDataSize());
-
-}
-*/
-
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "airsim_to_ros_node");
@@ -59,7 +39,8 @@ int main(int argc, char **argv)
             airsim_image_msg.data.resize(airsim_to_ros.GetImageDataSize());
             memcpy((char*)(&airsim_image_msg.data[0]), airsim_to_ros.GetImageData(), airsim_to_ros.GetImageDataSize());
 
-            
+            /*
+            // TODO: Introduce Debug Mode
             ROS_INFO("Image received");
             ROS_INFO("  Image.header.seq %d", airsim_to_ros.GetImageHeaderSeq());
             ROS_INFO("  Image.header.stamp.sec %d", airsim_to_ros.GetImageHeaderStampSec());
@@ -71,6 +52,7 @@ int main(int argc, char **argv)
             ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
             ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
             ROS_INFO("  size(Image.data) %d", airsim_to_ros.GetImageDataSize());
+            */
                 
             chatterAirSimMessage.publish(airsim_image_msg);
             ROS_INFO("Image forwarded");
