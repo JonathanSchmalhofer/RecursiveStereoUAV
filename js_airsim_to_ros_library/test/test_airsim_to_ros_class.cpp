@@ -35,21 +35,31 @@ std::uint8_t isBigEndian()
         return 0;
     }
 }
-/*
-// Check for size of empty message to be zero /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-TEST(AirSimToRosClassTestSuite, NoMessageReceived)
+
+// Check for default values of constructor /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST(AirSimToRosClassTestSuite, DefaultValues)
 {
     // ARRANGE
-    auto airsim_to_ros = js_airsim_to_ros_library::AirSimToRosClass("tcp://localhost:5564");
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://localhost:5676");
 
     // ACT
-    auto empty_size = airsim_to_ros.GetReceivedMessageSize();
 
     // ASSERT
-    EXPECT_EQ(empty_size, 0);
+    EXPECT_EQ(airsim_to_ros.GetImageHeaderSeq(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageHeaderStampSec(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageHeaderStampNsec(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageHeaderFrameid(), "");
+    EXPECT_EQ(airsim_to_ros.GetImageHeight(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageWidth(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageEncoding(), "");
+    EXPECT_EQ(airsim_to_ros.GetImageIsBigendian(), 0);
+    EXPECT_EQ(airsim_to_ros.GetImageStep(), 0);
+    EXPECT_EQ(NULL, airsim_to_ros.GetImageData());
+    EXPECT_EQ(airsim_to_ros.GetImageDataSize(), 0);
 }
 
-// Check for received Message to be correct ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Check for received message to be correct ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST(AirSimToRosClassTestSuite, ReceivedMessageCorrect)
 {
     // ARRANGE
@@ -57,7 +67,7 @@ TEST(AirSimToRosClassTestSuite, ReceivedMessageCorrect)
     std::string port = generateRandomPortNumber(5); //"5676";
     std::string publisher_address = protocol + "*:" + port;
     std::string subscriber_address = protocol + "localhost:" + port;
-    auto airsim_to_ros = js_airsim_to_ros_library::AirSimToRosClass(subscriber_address);
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros(subscriber_address);
     
     zmq::context_t context = zmq::context_t(1);
     zmq::socket_t publishSocket = zmq::socket_t(context, ZMQ_PUB); //  We send updates via this socket
@@ -91,35 +101,30 @@ TEST(AirSimToRosClassTestSuite, ReceivedMessageCorrect)
     int buffer_size = fbb.GetSize();
     zmq::message_t image_msg(buffer_size);
     memcpy((void *)image_msg.data(), fbb.GetBufferPointer(), buffer_size);
-    int sent_bytes = publishSocket.send(image_msg);
+    int return_value = publishSocket.send(image_msg);
     usleep(100000);
 
     // ASSERT
-    EXPECT_GT(sent_bytes, 0); // Image was sent
-    EXPECT_EQ(airsim_to_ros.GetReceivedMessageSize(), 0); // No image yet received, because it was not yet retreived
-    EXPECT_TRUE(airsim_to_ros.ReceivedMessage()); // Image was received
-    EXPECT_GT(airsim_to_ros.GetReceivedMessageSize(), 0); // Received image is not empty
-    EXPECT_EQ(airsim_to_ros.GetReceivedMessageSize(), buffer_size); // Received Image has same size as sent image
-    
-    // ACT #2
-    airsim_to_ros::ImageBuilder builder(fbb);
-    auto image_rcvd = airsim_to_ros::GetImage(airsim_to_ros.GetReceivedMessageData());
-    
-    // ASSERT #2
-    EXPECT_EQ(image_rcvd->header()->seq(), 21);
-    EXPECT_EQ(image_rcvd->header()->stamp()->sec(), 42);
-    EXPECT_EQ(image_rcvd->header()->stamp()->nsec(), 24);
-    EXPECT_STREQ(image_rcvd->header()->frame_id()->c_str(), "test-header-ID");
-    EXPECT_EQ(image_rcvd->height(), 480);
-    EXPECT_EQ(image_rcvd->width(), 640);
-    EXPECT_STREQ(image_rcvd->encoding()->c_str(), "rgb8");
-    EXPECT_EQ(image_rcvd->is_bigendian(), isBigEndian());
-    EXPECT_EQ(image_rcvd->step(), sizeof(std::uint8_t) * 3 * 640);
-    EXPECT_EQ(image_rcvd->data()->size(), 3 * 640 * 480);
-    
+    EXPECT_NE(return_value, 0); // Image was sent without error
+    EXPECT_EQ(airsim_to_ros.GetImageDataSize(), 0); // No image yet received, because it was not yet retreived
+    if (airsim_to_ros.ReceivedMessage())
+    {
+      EXPECT_GT(airsim_to_ros.GetImageDataSize(), 0); // Received image is not empty
+
+      EXPECT_EQ(airsim_to_ros.GetImageHeaderSeq(), 21);
+      EXPECT_EQ(airsim_to_ros.GetImageHeaderStampSec(), 42);
+      EXPECT_EQ(airsim_to_ros.GetImageHeaderStampNsec(), 24);
+      EXPECT_EQ(airsim_to_ros.GetImageHeaderFrameid(), "test-header-ID");
+      EXPECT_EQ(airsim_to_ros.GetImageHeight(), 480);
+      EXPECT_EQ(airsim_to_ros.GetImageWidth(), 640);
+      EXPECT_EQ(airsim_to_ros.GetImageEncoding(), "rgb8");
+      EXPECT_EQ(airsim_to_ros.GetImageIsBigendian(), isBigEndian());
+      EXPECT_EQ(airsim_to_ros.GetImageStep(), sizeof(std::uint8_t) * 3 * 640);
+      EXPECT_EQ(airsim_to_ros.GetImageDataSize(), 3 * 640 * 480);
+    }
     
 }
-*/
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
