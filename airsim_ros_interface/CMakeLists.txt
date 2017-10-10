@@ -1,9 +1,45 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(airsim_ros_interface)
 
-set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
+
+################################################################################
+#
+# Configuration
+#
+################################################################################
 
 set(AIRSIM_ROOT_DIR "D:/AirSim")
+set(MSBUILD_V140_DIR "C:/Program Files (x86)/MSBuild/14.0/Bin")
+
+
+################################################################################
+
+
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
+
+include(ExternalProject)
+
+################################################################################
+#
+# Download, Compile & install external libraries
+#
+################################################################################
+
+ExternalProject_Add(zeromq_src
+  URL https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz
+  CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_src" mkdir zeromq_src
+  BUILD_COMMAND cd ../zeromq_src/builds/msvc/vs2015/libzmq && ${MSBUILD_V140_DIR}/MSBuild.exe libzmq.vcxproj /property:Configuration=DebugLIB /p:Platform=x64
+  INSTALL_COMMAND robocopy "../zeromq_src/include" "../../../include/zeromq_src" "zmq.h" "zmq_utils.h"
+)
+
+ExternalProject_Add(zeromq_cpp
+  URL https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz
+  DEPENDS zeromq_src
+  CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_cpp" mkdir zeromq_cpp
+  BUILD_COMMAND ""
+  INSTALL_COMMAND robocopy "../zeromq_cpp" "../../../include/zeromq_cpp" "zmq.hpp"
+)
 
 ################################################################################
 #
@@ -43,6 +79,10 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/bin)
 
+set(ZMQ_INCLUDES
+    build/include/zeromq_src
+    build/include
+)
 
 set(AIRSIM_INCLUDES
     ${AIRSIM_ROOT_DIR}/AirLib/include
@@ -62,7 +102,9 @@ set(AIRSIM_LIBRARIES_DEBUG
 
 include_directories(
     include
+    include/yuchen
     ${AIRSIM_INCLUDES}
+    ${ZMQ_INCLUDES}
 )
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
@@ -78,11 +120,29 @@ endif()
 add_executable(${OUTPUT_LIBRARY_NAME}
     src/main.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
+    src/yuchen/myException.cpp
+    src/yuchen/myHostInfo.cpp
+    src/yuchen/myLog.cpp
+    src/yuchen/mySocket.cpp
+    src/yuchen/winServer.cpp
+)
+
+add_executable(${OUTPUT_LIBRARY_NAME}_test
+    src/test/main_send_image.cpp
+    ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
 target_link_libraries(${OUTPUT_LIBRARY_NAME}
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+)
+
+target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
+)
+
+add_dependencies(${OUTPUT_LIBRARY_NAME}
+    zeromq_src
+    zeromq_cpp
 )
 
 # When building via conan, respect the compilation settings.

@@ -1,0 +1,29 @@
+#include "StereoImageGenerator2.hpp"
+#include "zmq.h"
+
+
+
+void runSteroImageGenerator(int num_samples, std::string storage_path)
+{
+    StereoImageGenerator gen(storage_path);
+    gen.generate(num_samples);
+}
+
+void runSteroImageGenerator(int argc, const char *argv[])
+{
+    runSteroImageGenerator(argc < 2 ? 50000 : std::stoi(argv[1]), argc < 3 ? 
+        common_utils::FileSystem::combine(
+            common_utils::FileSystem::getAppDataFolder(), "stereo_gen")
+        : std::string(argv[2]));
+}
+
+int main(int argc, const char *argv[])
+{
+    //zmq::context_t context = zmq::context_t(1);
+    //zmq::socket_t publishSocket = zmq::socket_t(context, ZMQ_PUB); //  We send updates via this socket
+	std::cout << "Press Enter to start StereoImageGenerator" << std::endl; std::cin.get();
+
+	runSteroImageGenerator(argc, argv);
+	
+    return 0;
+}
