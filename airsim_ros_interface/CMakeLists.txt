@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 project(airsim_ros_interface)
 
-SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
+#SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
 
 ################################################################################
 #
@@ -40,6 +40,11 @@ ExternalProject_Add(zeromq_cpp
   BUILD_COMMAND ""
   INSTALL_COMMAND robocopy "../zeromq_cpp" "../../../include/zeromq_cpp" "zmq.hpp"
 )
+
+set(Boost_USE_STATIC_LIBS ON)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost 1.65 REQUIRED COMPONENTS date_time)
 
 ################################################################################
 #
@@ -102,9 +107,9 @@ set(AIRSIM_LIBRARIES_DEBUG
 
 include_directories(
     include
-    include/yuchen
     ${AIRSIM_INCLUDES}
     ${ZMQ_INCLUDES}
+    ${Boost_INCLUDE_DIRS}
 )
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
@@ -118,23 +123,21 @@ else()
 endif()
 
 add_executable(${OUTPUT_LIBRARY_NAME}
-    src/main.cpp
+    src/airsim_rpc_client.cpp
+    src/StereoImageRpcClient.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
-    src/yuchen/myException.cpp
-    src/yuchen/myHostInfo.cpp
-    src/yuchen/myLog.cpp
-    src/yuchen/mySocket.cpp
-    src/yuchen/winServer.cpp
 )
 
 add_executable(${OUTPUT_LIBRARY_NAME}_test
     src/test/main_send_image.cpp
+    src/test/lodepng.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
 target_link_libraries(${OUTPUT_LIBRARY_NAME}
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+    ${Boost_LIBRARIES}
 )
 
 target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
