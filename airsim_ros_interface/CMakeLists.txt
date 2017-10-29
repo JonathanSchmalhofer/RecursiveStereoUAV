@@ -128,6 +128,11 @@ add_executable(${OUTPUT_LIBRARY_NAME}
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
+add_executable(airsim_zmq_bridge
+    src/airsim_zmq_bridge.cpp
+    ${AIRSIM_ROS_INTERFACE_HEADERS}
+)
+
 add_executable(${OUTPUT_LIBRARY_NAME}_test
     src/test/main_send_image.cpp
     src/test/lodepng.cpp
@@ -140,10 +145,21 @@ target_link_libraries(${OUTPUT_LIBRARY_NAME}
     ${Boost_LIBRARIES}
 )
 
+target_link_libraries(airsim_zmq_bridge
+    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+    ${Boost_LIBRARIES}
+)
+
 target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
 )
 
 add_dependencies(${OUTPUT_LIBRARY_NAME}
+    zeromq_src
+    zeromq_cpp
+)
+
+add_dependencies(airsim_zmq_bridge
     zeromq_src
     zeromq_cpp
 )
