@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.0.0)
 project(airsim_ros_interface)
 
 #SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
-#set(AIRSIM_ROS_INTERFACE_MSVC_STATIC_RUNTIME "on")
 
 ################################################################################
 #
@@ -131,7 +130,8 @@ include_directories(
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
     include/*.h
-    include/*.hpp)
+    include/*.hpp
+)
 
 if(AIRSIM_ROS_INTERFACE_NAME_SUFFIX)
     set(OUTPUT_LIBRARY_NAME ${CMAKE_PROJECT_NAME}-${AIRSIM_ROS_INTERFACE_NAME_SUFFIX})
@@ -140,15 +140,20 @@ else()
 endif()
 
 add_executable(${OUTPUT_LIBRARY_NAME}
+    src/dummy_main.cpp
+)
+
+add_executable(airsim_rpc_client
     src/airsim_rpc_client.cpp
     src/StereoImageRpcClient.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
-#add_executable(airsim_zmq_bridge
-#    src/airsim_zmq_bridge.cpp
-#    ${AIRSIM_ROS_INTERFACE_HEADERS}
-#)
+add_executable(airsim_zmq_bridge
+    src/airsim_zmq_bridge.cpp
+    src/StereoImageRpcClient.cpp
+    ${AIRSIM_ROS_INTERFACE_HEADERS}
+)
 
 add_executable(airsim_sender
     src/sender.cpp
@@ -162,23 +167,24 @@ add_executable(airsim_receiver
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
-add_executable(${OUTPUT_LIBRARY_NAME}_test
-    src/test/main_send_image.cpp
-    src/test/lodepng.cpp
-    ${AIRSIM_ROS_INTERFACE_HEADERS}
-)
+#add_executable(${OUTPUT_LIBRARY_NAME}_test
+#    src/test/main_send_image.cpp
+#    src/test/lodepng.cpp
+#    ${AIRSIM_ROS_INTERFACE_HEADERS}
+#)
 
-target_link_libraries(${OUTPUT_LIBRARY_NAME}
+target_link_libraries(airsim_rpc_client
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
     ${Boost_LIBRARIES}
 )
 
-#target_link_libraries(airsim_zmq_bridge
-#    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
-#    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
-#    ${Boost_LIBRARIES}
-#)
+target_link_libraries(airsim_zmq_bridge
+    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Debug>:${ZMQ_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+    ${Boost_LIBRARIES}
+)
 
 target_link_libraries(airsim_sender
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
@@ -193,12 +199,13 @@ target_link_libraries(airsim_receiver
     ${Boost_LIBRARIES}
 )
 
-target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
-)
+#target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
+#)
 
-add_dependencies(${OUTPUT_LIBRARY_NAME}
+add_dependencies(airsim_zmq_bridge
     zeromq_src
     zeromq_cpp
+    flatbuffers_src
 )
 
 add_dependencies(airsim_receiver
@@ -206,11 +213,6 @@ add_dependencies(airsim_receiver
     zeromq_cpp
     flatbuffers_src
 )
-
-#add_dependencies(airsim_zmq_bridge
-#    zeromq_src
-#    zeromq_cpp
-#)
 
 # When building via conan, respect the compilation settings.
 if ("${CONAN_LINK_RUNTIME}" STREQUAL "/MT")
