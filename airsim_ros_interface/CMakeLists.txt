@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 project(airsim_ros_interface)
 
 #SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /showIncludes")
+#set(AIRSIM_ROS_INTERFACE_MSVC_STATIC_RUNTIME "on")
 
 ################################################################################
 #
@@ -27,18 +28,25 @@ include(ExternalProject)
 ################################################################################
 
 ExternalProject_Add(zeromq_src
-  URL https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz
-  CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_src" mkdir zeromq_src
-  BUILD_COMMAND cd ../zeromq_src/builds/msvc/vs2015/libzmq && ${MSBUILD_V140_DIR}/MSBuild.exe libzmq.vcxproj /property:Configuration=DebugLIB /p:Platform=x64
-  INSTALL_COMMAND robocopy "../zeromq_src/include" "../../../include/zeromq_src" "zmq.h" "zmq_utils.h"
+    URL https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz
+    CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_src" mkdir zeromq_src
+    BUILD_COMMAND cd ../zeromq_src/builds/msvc/vs2015/libzmq && ${MSBUILD_V140_DIR}/MSBuild.exe libzmq.vcxproj /property:Configuration=DebugDLL /p:Platform=x64
+    INSTALL_COMMAND robocopy "../zeromq_src/include" "../../../include/zeromq_src" "zmq.h" "zmq_utils.h" && robocopy "../zeromq_src/bin/x64/Debug/v140/dynamic" "../../../output/lib/Debug" && robocopy "../zeromq_src/bin/x64/Debug/v140/dynamic" "../../../output/bin/Debug" "libzmq.dll"
 )
 
 ExternalProject_Add(zeromq_cpp
-  URL https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz
-  DEPENDS zeromq_src
-  CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_cpp" mkdir zeromq_cpp
-  BUILD_COMMAND ""
-  INSTALL_COMMAND robocopy "../zeromq_cpp" "../../../include/zeromq_cpp" "zmq.hpp"
+    URL https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz
+    DEPENDS zeromq_src
+    CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "zeromq_cpp" mkdir zeromq_cpp
+    BUILD_COMMAND ""
+    INSTALL_COMMAND robocopy "../zeromq_cpp" "../../../include/zeromq_cpp" "zmq.hpp"
+)
+
+ExternalProject_Add(flatbuffers_src
+    URL https://github.com/google/flatbuffers/archive/v1.7.1.tar.gz
+    CONFIGURE_COMMAND cd ../../../ && if not exist "include" mkdir include && cd include && if not exist "flatbuffers_src" mkdir flatbuffers_src && cd flatbuffers_src && if not exist "flatbuffers" mkdir flatbuffers #cd ../flatbuffers_src && cmake -G Unix\ Makefiles -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX}
+    BUILD_COMMAND ""
+    INSTALL_COMMAND robocopy "../flatbuffers_src/include/flatbuffers" "../../../include/flatbuffers_src/flatbuffers"
 )
 
 set(Boost_USE_STATIC_LIBS ON)
@@ -89,6 +97,10 @@ set(ZMQ_INCLUDES
     build/include
 )
 
+set(FLATBUFFERS_INCLUDES
+    build/include/flatbuffers_src
+)
+
 set(AIRSIM_INCLUDES
     ${AIRSIM_ROOT_DIR}/AirLib/include
 	${AIRSIM_ROOT_DIR}/external/rpclib/include
@@ -103,13 +115,18 @@ set(AIRSIM_LIBRARIES_DEBUG
 	${AIRSIM_ROOT_DIR}/external/rpclib/build/output/lib/Debug/rpc.lib
 	${AIRSIM_ROOT_DIR}/AirLib/lib/x64/Debug/AirLib.lib
 )
+set(ZMQ_LIBRARIES_DEBUG
+	${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/Debug/libzmq.lib
+)
 
 
 include_directories(
     include
     ${AIRSIM_INCLUDES}
     ${ZMQ_INCLUDES}
+    ${FLATBUFFERS_INCLUDES}
     ${Boost_INCLUDE_DIRS}
+    ../js_airsim_to_ros_library/include/
 )
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
@@ -128,8 +145,20 @@ add_executable(${OUTPUT_LIBRARY_NAME}
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
-add_executable(airsim_zmq_bridge
-    src/airsim_zmq_bridge.cpp
+#add_executable(airsim_zmq_bridge
+#    src/airsim_zmq_bridge.cpp
+#    ${AIRSIM_ROS_INTERFACE_HEADERS}
+#)
+
+add_executable(airsim_sender
+    src/sender.cpp
+    src/StereoImageRpcClient.cpp
+    ${AIRSIM_ROS_INTERFACE_HEADERS}
+)
+
+add_executable(airsim_receiver
+    src/receiver.cpp
+    src/StereoImageRpcClient.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
@@ -145,8 +174,21 @@ target_link_libraries(${OUTPUT_LIBRARY_NAME}
     ${Boost_LIBRARIES}
 )
 
-target_link_libraries(airsim_zmq_bridge
+#target_link_libraries(airsim_zmq_bridge
+#    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+#    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+#    ${Boost_LIBRARIES}
+#)
+
+target_link_libraries(airsim_sender
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+    ${Boost_LIBRARIES}
+)
+
+target_link_libraries(airsim_receiver
+    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Debug>:${ZMQ_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
     ${Boost_LIBRARIES}
 )
@@ -159,10 +201,16 @@ add_dependencies(${OUTPUT_LIBRARY_NAME}
     zeromq_cpp
 )
 
-add_dependencies(airsim_zmq_bridge
+add_dependencies(airsim_receiver
     zeromq_src
     zeromq_cpp
+    flatbuffers_src
 )
+
+#add_dependencies(airsim_zmq_bridge
+#    zeromq_src
+#    zeromq_cpp
+#)
 
 # When building via conan, respect the compilation settings.
 if ("${CONAN_LINK_RUNTIME}" STREQUAL "/MT")
@@ -177,14 +225,14 @@ endif()
 if (AIRSIM_ROS_INTERFACE_MSVC_STATIC_RUNTIME)
 	# Set compiler options.
 	set(variables
-	  CMAKE_C_FLAGS_DEBUG
-	  CMAKE_C_FLAGS_MINSIZEREL
-	  CMAKE_C_FLAGS_RELEASE
-	  CMAKE_C_FLAGS_RELWITHDEBINFO
-	  CMAKE_CXX_FLAGS_DEBUG
-	  CMAKE_CXX_FLAGS_MINSIZEREL
-	  CMAKE_CXX_FLAGS_RELEASE
-	  CMAKE_CXX_FLAGS_RELWITHDEBINFO
+        CMAKE_C_FLAGS_DEBUG
+        CMAKE_C_FLAGS_MINSIZEREL
+        CMAKE_C_FLAGS_RELEASE
+        CMAKE_C_FLAGS_RELWITHDEBINFO
+        CMAKE_CXX_FLAGS_DEBUG
+        CMAKE_CXX_FLAGS_MINSIZEREL
+        CMAKE_CXX_FLAGS_RELEASE
+        CMAKE_CXX_FLAGS_RELWITHDEBINFO
 	)
 
 	message(STATUS
@@ -193,7 +241,7 @@ if (AIRSIM_ROS_INTERFACE_MSVC_STATIC_RUNTIME)
 
 	foreach(variable ${variables})
 		if(${variable} MATCHES "/MD")
-			string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
+            string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
 		endif()
 	endforeach()
 
@@ -206,7 +254,8 @@ install(DIRECTORY include/
     PATTERN "*.h"
     PATTERN "*.hpp"
     PATTERN "*.inl"
-    PATTERN "*.in" EXCLUDE)
+    PATTERN "*.in" EXCLUDE
+)
 
 
 ################################################################################

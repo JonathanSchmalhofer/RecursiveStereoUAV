@@ -38,7 +38,7 @@ std::vector<msr::airlib::VehicleCameraBase::ImageResponse> StereoImageRpcClient:
         //uncompressed RGBA array bytes
         msr::airlib::VehicleCameraBase::ImageRequest(1, msr::airlib::VehicleCameraBase::ImageType::Scene, pixels_as_float_false, compress_false),       
         //floating point uncompressed image  
-        msr::airlib::VehicleCameraBase::ImageRequest(1, msr::airlib::VehicleCameraBase::ImageType::DepthPlanner, pixels_as_float_true, compress_false) 
+        msr::airlib::VehicleCameraBase::ImageRequest(1, msr::airlib::VehicleCameraBase::ImageType::DepthPlanner, pixels_as_float_false, compress_false) 
     };
 
     const std::vector<msr::airlib::VehicleCameraBase::ImageResponse>& response = pclient_accessor_->client_.simGetImages(request);
