@@ -10,7 +10,7 @@ int main(int argc, char **argv)
     
     ROS_INFO("Starting node");
 
-    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://*:5676");
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://192.168.178.50:5676");
     
     ROS_INFO("Created airsim_to_ros");
 
