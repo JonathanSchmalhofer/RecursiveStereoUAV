@@ -155,18 +155,6 @@ add_executable(airsim_zmq_bridge
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
-add_executable(airsim_sender
-    src/sender.cpp
-    src/StereoImageRpcClient.cpp
-    ${AIRSIM_ROS_INTERFACE_HEADERS}
-)
-
-add_executable(airsim_receiver
-    src/receiver.cpp
-    src/StereoImageRpcClient.cpp
-    ${AIRSIM_ROS_INTERFACE_HEADERS}
-)
-
 #add_executable(${OUTPUT_LIBRARY_NAME}_test
 #    src/test/main_send_image.cpp
 #    src/test/lodepng.cpp
@@ -186,29 +174,10 @@ target_link_libraries(airsim_zmq_bridge
     ${Boost_LIBRARIES}
 )
 
-target_link_libraries(airsim_sender
-    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
-    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
-    ${Boost_LIBRARIES}
-)
-
-target_link_libraries(airsim_receiver
-    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
-    "$<$<CONFIG:Debug>:${ZMQ_LIBRARIES_DEBUG}>"
-    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
-    ${Boost_LIBRARIES}
-)
-
 #target_link_libraries(${OUTPUT_LIBRARY_NAME}_test
 #)
 
 add_dependencies(airsim_zmq_bridge
-    zeromq_src
-    zeromq_cpp
-    flatbuffers_src
-)
-
-add_dependencies(airsim_receiver
     zeromq_src
     zeromq_cpp
     flatbuffers_src
