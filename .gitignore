@@ -29,6 +29,9 @@
 *.exe
 *.out
 *.app
+!HttpGet.exe
+!TarTool.exe
+!ICSharpCode.SharpZipLib.dll
 
 # Python byte code
 *.pyc
