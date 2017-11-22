@@ -6,7 +6,7 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <iostream>
 #include <cstdio>
-#include "trace_queue.hpp"
+#include "ProcessSynchronizationQueue.hpp"
 
 // Vector
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -75,7 +75,7 @@ int main(int argc, const char *argv[])
     try
     {
         //Set size
-        mutex_shared_memory.truncate(sizeof(trace_queue));
+        mutex_shared_memory.truncate(sizeof(ProcessSynchronizationQueue));
 
         //Map the whole shared memory in this process
         mapped_region region(mutex_shared_memory, read_write);
@@ -84,7 +84,7 @@ int main(int argc, const char *argv[])
         void *region_address = region.get_address();
 
         //Construct the shared structure in memory
-        trace_queue *mutex_data = new (region_address) trace_queue;
+        ProcessSynchronizationQueue *mutex_data = new (region_address) ProcessSynchronizationQueue;
 
         bool keep_looping = true;
         do

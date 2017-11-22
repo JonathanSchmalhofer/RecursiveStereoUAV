@@ -1,6 +1,6 @@
 #include "StereoImageRpcClient.hpp"
-#include "js_airsim_to_ros_library/Image_generated.h"
-#include "zeromq_cpp/zmq.hpp"
+#include <js_airsim_to_ros_library/Image_generated.h>
+#include <zeromq_cpp/zmq.hpp>
 
 // Synchronization
 #include <boost/interprocess/shared_memory_object.hpp>
@@ -8,7 +8,7 @@
 #include <boost/interprocess/sync/scoped_lock.hpp>
 #include <iostream>
 #include <cstring>
-#include "trace_queue.hpp"
+#include "ProcessSynchronizationQueue.hpp"
 
 // Vector
 #include <boost/interprocess/managed_shared_memory.hpp>
@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
         void *region_address = region.get_address();
 
         //Obtain a pointer to the shared structure
-        trace_queue *mutex_data = static_cast<trace_queue*>(region_address);
+        ProcessSynchronizationQueue *mutex_data = static_cast<ProcessSynchronizationQueue*>(region_address);
         
         bool keep_looping = true;
         do

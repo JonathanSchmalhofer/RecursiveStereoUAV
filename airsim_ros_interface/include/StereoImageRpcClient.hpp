@@ -1,8 +1,8 @@
 #ifndef STEREOIMAGERPCCLIENT_HPP_
 #define STEREOIMAGERPCCLIENT_HPP_
 
-#include "vehicles/multirotor/api/MultirotorRpcLibClient.hpp"
-#include "common/Common.hpp"
+#include <vehicles/multirotor/api/MultirotorRpcLibClient.hpp>
+#include <common/Common.hpp>
 
 class StereoImageRpcClient
 {
