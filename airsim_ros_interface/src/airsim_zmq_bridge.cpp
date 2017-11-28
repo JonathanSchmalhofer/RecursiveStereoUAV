@@ -72,7 +72,7 @@ int main(int argc, const char *argv[])
                 
                 std::vector<msr::airlib::VehicleCameraBase::ImageResponse> received_image_response_vector;
                 
-                while(mutex_data->number_sub_messages_ > 0)
+                while(mutex_data->number_remaining_sub_messages_ > 0)
                 {
                     if(!mutex_data->message_available_)
                     {
@@ -80,7 +80,7 @@ int main(int argc, const char *argv[])
                         mutex_data->condition_empty_.wait(lock);
                     }
                     
-                    std::cout << "mutex_data->number_sub_messages_ = " << unsigned(mutex_data->number_sub_messages_) << std::endl;
+                    std::cout << "mutex_data->number_remaining_sub_messages_ = " << unsigned(mutex_data->number_remaining_sub_messages_) << std::endl;
                     
                     msr::airlib::VehicleCameraBase::ImageResponse sub_message_image;
                     for(int i = 0; i < myvector->size(); ++i)
@@ -141,7 +141,7 @@ int main(int argc, const char *argv[])
                     /////////////////////////////////////////////////
                     
                     //Notify the other process that the buffer is empty
-                    mutex_data->number_sub_messages_--;
+                    mutex_data->number_remaining_sub_messages_--;
                     mutex_data->message_available_ = false;
                     mutex_data->condition_full_.notify_one();
                 }

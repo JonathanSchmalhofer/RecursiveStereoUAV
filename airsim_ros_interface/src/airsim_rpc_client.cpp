@@ -36,8 +36,8 @@ int main(int argc, const char *argv[])
     //std::cout << "Press ENTER to start StereoImageRpcClient" << std::endl; std::cin.get();
 
     StereoImageRpcClient *client = new StereoImageRpcClient();    
-    client->connect();
-    msr::airlib::Pose initial_pose = client->getPositionAndOrientation();
+    client->Connect();
+    msr::airlib::Pose initial_pose = client->GetPositionAndOrientation();
 
     std::cout << "Initial Pose:" << std::endl;
     std::cout << " x = " << initial_pose.position.x() << std::endl;
@@ -99,17 +99,17 @@ int main(int argc, const char *argv[])
             delta_pose = msr::airlib::Pose(msr::airlib::Vector3r(-0.01f, 0.0f, 0.01f), msr::airlib::Quaternionr(1.0f, 0.0f, 0.0f, 0.0f));
             new_pose = new_pose - delta_pose;
 
-            client->setPositionAndOrientation(new_pose);
+            client->SetPositionAndOrientation(new_pose);
 
-            std::cout << "Collided? Answer: " << client->hasCollided() << std::endl;
+            std::cout << "Collided? Answer: " << client->HasCollided() << std::endl;
 
-            std::vector<msr::airlib::VehicleCameraBase::ImageResponse> received_image_response_vector = client->requestStereoImagesAndDepthImage();
+            std::vector<std::pair<StereoImageType,msr::airlib::VehicleCameraBase::ImageResponse>> received_image_response_vector = client->RequestStereoImagesAndDepthImage();
 
-            mutex_data->number_sub_messages_ = static_cast<std::uint8_t>(received_image_response_vector.size());
+            mutex_data->number_remaining_sub_messages_ = static_cast<std::uint8_t>(received_image_response_vector.size());
                         
-            while(mutex_data->number_sub_messages_ > 1)
+            while(mutex_data->number_remaining_sub_messages_ > 1)
             {
-                const unsigned current_image_index = mutex_data->number_sub_messages_ - 1;
+                const unsigned current_image_index = mutex_data->number_remaining_sub_messages_ - 1;
                 if(mutex_data->message_available_)
                 {
                     std::cout << "Waiting" << std::endl;
@@ -118,9 +118,9 @@ int main(int argc, const char *argv[])
                 
                 myvector->clear();
                 
-                for(int i = 0; i < received_image_response_vector.at(current_image_index).image_data_uint8.size(); ++i)
+                for(int i = 0; i < received_image_response_vector.at(current_image_index).second.image_data_uint8.size(); ++i)
                 {
-                    myvector->push_back(received_image_response_vector.at(current_image_index).image_data_uint8.at(i));
+                    myvector->push_back(received_image_response_vector.at(current_image_index).second.image_data_uint8.at(i));
                 }
                 
                 //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
@@ -128,16 +128,17 @@ int main(int argc, const char *argv[])
                 mutex_data->message_image_information_.header_stamp_nsec_ = 0;
                 mutex_data->message_image_information_.header_seq_ = 0;
                 mutex_data->message_image_information_.header_frame_id_ = "";
-                mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).height;
-                mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).width;
+                mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
+                mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
                 mutex_data->message_image_information_.image_encoding_ = "rgba8";
                 mutex_data->message_image_information_.image_is_bigendian_ = false;
-                mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).height;
+                mutex_data->message_image_information_.type_ = StereoImageType::Unknown;
+                mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.height;
                 
                 //Notify to the other process that there is a message
                 mutex_data->condition_empty_.notify_one();
                 
-                std::cout << "mutex_data->number_sub_messages_ = " << unsigned(mutex_data->number_sub_messages_) << std::endl;
+                std::cout << "mutex_data->number_remaining_sub_messages_ = " << unsigned(mutex_data->number_remaining_sub_messages_) << std::endl;
                 std::cout << "myvector->size() = " << myvector->size() << std::endl;
                 std::cout << "myvector->at(0) = " << unsigned(myvector->at(0)) << std::endl;
 

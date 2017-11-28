@@ -3,18 +3,20 @@
 
 #include <vehicles/multirotor/api/MultirotorRpcLibClient.hpp>
 #include <common/Common.hpp>
+#include <utility> // for std::pair
+
+#include "StereoImageMetaDataDefinitions.hpp"
 
 class StereoImageRpcClient
 {
     public:
         StereoImageRpcClient();
         ~StereoImageRpcClient();
-        void connect();
-        std::vector<msr::airlib::VehicleCameraBase::ImageResponse> requestStereoImagesAndDepthImage();
-        bool hasCollided();
-        //void setPositionAndOrientation(msr::airlib::real_T position_x, msr::airlib::real_T position_y, msr::airlib::real_T position_z, msr::airlib::real_T orientation_w, msr::airlib::real_T orientation_x, msr::airlib::real_T orientation_y, msr::airlib::real_T orientation_z);
-        void setPositionAndOrientation(const msr::airlib::Pose& Pose);
-        msr::airlib::Pose getPositionAndOrientation();
+        void Connect();
+        std::vector<std::pair<StereoImageType,msr::airlib::VehicleCameraBase::ImageResponse>> RequestStereoImagesAndDepthImage();
+        bool HasCollided();
+        void SetPositionAndOrientation(const msr::airlib::Pose& Pose);
+        msr::airlib::Pose GetPositionAndOrientation();
     private:
         struct client_accessor;
         std::unique_ptr<client_accessor> pclient_accessor_;
