@@ -118,8 +118,9 @@ int main(int argc, const char *argv[])
                     // Image
                     //std::vector<std::uint8_t> image_data(3 * 640 * 480);
                     auto image = airsim_to_ros::CreateImage(
-                        fbb, 
-                        header, 
+                        fbb,
+                        0,
+                        header,
                         mutex_data->message_image_information_.image_height_,
                         mutex_data->message_image_information_.image_width_,
                         fbb.CreateString(mutex_data->message_image_information_.image_encoding_),

@@ -103,20 +103,20 @@ goto :prebuildstep4
 :downloadflatbufferssrc
 cd %ROOT_DIR%\build
 if exist "include/flatbuffers_src/flatbuffers/base.h" goto :prebuildstep6
-echo Downloading Flatbuffers 1.7.1
-%ROOT_DIR%\..\tools\httpget "https://github.com/google/flatbuffers/archive/v1.7.1.tar.gz"
+echo Downloading Flatbuffers 1.8.0
+%ROOT_DIR%\..\tools\httpget "https://github.com/google/flatbuffers/archive/v1.8.0.tar.gz"
 if ERRORLEVEL 1 goto :buildfailed
-echo Decompressing v1.7.1.tar.gz
-%ROOT_DIR%\..\tools\TarTool "v1.7.1.tar.gz" ./
+echo Decompressing v1.8.0.tar.gz
+%ROOT_DIR%\..\tools\TarTool "v1.8.0.tar.gz" ./
 if ERRORLEVEL 1 goto :buildfailed
-del v1.7.1.tar.gz
+del v1.8.0.tar.gz
 goto :prebuildstep5
 
 :installflatbufferssrc
 cd %ROOT_DIR%\build
 if not exist "include" mkdir include && cd include && if not exist "flatbuffers_src" mkdir flatbuffers_src && cd flatbuffers_src && if not exist "flatbuffers" mkdir flatbuffers 
 cd %ROOT_DIR%\build
-robocopy "flatbuffers-1.7.1/include/flatbuffers" "include/flatbuffers_src/flatbuffers"
+robocopy "flatbuffers-1.8.0/include/flatbuffers" "include/flatbuffers_src/flatbuffers"
 goto :prebuildstep6
 
 

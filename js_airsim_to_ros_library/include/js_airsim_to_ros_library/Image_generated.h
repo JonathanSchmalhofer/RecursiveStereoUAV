@@ -7,7 +7,6 @@
 #include "flatbuffers/flatbuffers.h"
 
 #include "Header_generated.h"
-#include "StereoImageType_generated.h"
 #include "time_generated.h"
 
 namespace airsim_to_ros {
@@ -25,8 +24,8 @@ struct Image FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_STEP = 16,
     VT_DATA = 18
   };
-  StereoImageType type() const {
-    return static_cast<StereoImageType>(GetField<int8_t>(VT_TYPE, 0));
+  int8_t type() const {
+    return GetField<int8_t>(VT_TYPE, 0);
   }
   const Header *header() const {
     return GetPointer<const Header *>(VT_HEADER);
@@ -69,8 +68,8 @@ struct Image FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct ImageBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_type(StereoImageType type) {
-    fbb_.AddElement<int8_t>(Image::VT_TYPE, static_cast<int8_t>(type), 0);
+  void add_type(int8_t type) {
+    fbb_.AddElement<int8_t>(Image::VT_TYPE, type, 0);
   }
   void add_header(flatbuffers::Offset<Header> header) {
     fbb_.AddOffset(Image::VT_HEADER, header);
@@ -107,7 +106,7 @@ struct ImageBuilder {
 
 inline flatbuffers::Offset<Image> CreateImage(
     flatbuffers::FlatBufferBuilder &_fbb,
-    StereoImageType type = StereoImageType_Unknown,
+    int8_t type = 0,
     flatbuffers::Offset<Header> header = 0,
     uint32_t height = 0,
     uint32_t width = 0,
@@ -129,7 +128,7 @@ inline flatbuffers::Offset<Image> CreateImage(
 
 inline flatbuffers::Offset<Image> CreateImageDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    StereoImageType type = StereoImageType_Unknown,
+    int8_t type = 0,
     flatbuffers::Offset<Header> header = 0,
     uint32_t height = 0,
     uint32_t width = 0,

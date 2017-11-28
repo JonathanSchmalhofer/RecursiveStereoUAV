@@ -9,7 +9,7 @@ include(ExternalProject)
 file(MAKE_DIRECTORY ${CATKIN_DEVEL_PREFIX}/include)
 
 ExternalProject_Add(flatbuffers_src
-    URL https://github.com/google/flatbuffers/archive/v1.7.1.tar.gz
+    URL https://github.com/google/flatbuffers/archive/v1.8.0.tar.gz
     CONFIGURE_COMMAND cd ../flatbuffers_src && cmake -G Unix\ Makefiles -DCMAKE_INSTALL_PREFIX:PATH=${CATKIN_DEVEL_PREFIX}
     BUILD_COMMAND cd ../flatbuffers_src && make -j8
     INSTALL_COMMAND cd ../flatbuffers_src && make install -j8
