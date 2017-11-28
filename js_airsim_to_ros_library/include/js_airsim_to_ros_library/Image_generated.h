@@ -7,6 +7,7 @@
 #include "flatbuffers/flatbuffers.h"
 
 #include "Header_generated.h"
+#include "StereoImageType_generated.h"
 #include "time_generated.h"
 
 namespace airsim_to_ros {
@@ -15,16 +16,20 @@ struct Image;
 
 struct Image FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_HEADER = 4,
-    VT_HEIGHT = 6,
-    VT_WIDTH = 8,
-    VT_ENCODING = 10,
-    VT_IS_BIGENDIAN = 12,
-    VT_STEP = 14,
-    VT_DATA = 16
+    VT_TYPE = 4,
+    VT_HEADER = 6,
+    VT_HEIGHT = 8,
+    VT_WIDTH = 10,
+    VT_ENCODING = 12,
+    VT_IS_BIGENDIAN = 14,
+    VT_STEP = 16,
+    VT_DATA = 18
   };
-  const airsim_to_ros::Header *header() const {
-    return GetPointer<const airsim_to_ros::Header *>(VT_HEADER);
+  StereoImageType type() const {
+    return static_cast<StereoImageType>(GetField<int8_t>(VT_TYPE, 0));
+  }
+  const Header *header() const {
+    return GetPointer<const Header *>(VT_HEADER);
   }
   uint32_t height() const {
     return GetField<uint32_t>(VT_HEIGHT, 0);
@@ -46,6 +51,7 @@ struct Image FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<int8_t>(verifier, VT_TYPE) &&
            VerifyOffset(verifier, VT_HEADER) &&
            verifier.VerifyTable(header()) &&
            VerifyField<uint32_t>(verifier, VT_HEIGHT) &&
@@ -63,7 +69,10 @@ struct Image FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct ImageBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_header(flatbuffers::Offset<airsim_to_ros::Header> header) {
+  void add_type(StereoImageType type) {
+    fbb_.AddElement<int8_t>(Image::VT_TYPE, static_cast<int8_t>(type), 0);
+  }
+  void add_header(flatbuffers::Offset<Header> header) {
     fbb_.AddOffset(Image::VT_HEADER, header);
   }
   void add_height(uint32_t height) {
@@ -84,13 +93,13 @@ struct ImageBuilder {
   void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
     fbb_.AddOffset(Image::VT_DATA, data);
   }
-  ImageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit ImageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
   ImageBuilder &operator=(const ImageBuilder &);
   flatbuffers::Offset<Image> Finish() {
-    const auto end = fbb_.EndTable(start_, 7);
+    const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<Image>(end);
     return o;
   }
@@ -98,7 +107,8 @@ struct ImageBuilder {
 
 inline flatbuffers::Offset<Image> CreateImage(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<airsim_to_ros::Header> header = 0,
+    StereoImageType type = StereoImageType_Unknown,
+    flatbuffers::Offset<Header> header = 0,
     uint32_t height = 0,
     uint32_t width = 0,
     flatbuffers::Offset<flatbuffers::String> encoding = 0,
@@ -113,12 +123,14 @@ inline flatbuffers::Offset<Image> CreateImage(
   builder_.add_height(height);
   builder_.add_header(header);
   builder_.add_is_bigendian(is_bigendian);
+  builder_.add_type(type);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<Image> CreateImageDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<airsim_to_ros::Header> header = 0,
+    StereoImageType type = StereoImageType_Unknown,
+    flatbuffers::Offset<Header> header = 0,
     uint32_t height = 0,
     uint32_t width = 0,
     const char *encoding = nullptr,
@@ -127,6 +139,7 @@ inline flatbuffers::Offset<Image> CreateImageDirect(
     const std::vector<uint8_t> *data = nullptr) {
   return airsim_to_ros::CreateImage(
       _fbb,
+      type,
       header,
       height,
       width,

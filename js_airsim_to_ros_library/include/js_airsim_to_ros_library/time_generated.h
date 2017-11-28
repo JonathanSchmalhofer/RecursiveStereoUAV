@@ -19,9 +19,6 @@ MANUALLY_ALIGNED_STRUCT(4) time FLATBUFFERS_FINAL_CLASS {
   time() {
     memset(this, 0, sizeof(time));
   }
-  time(const time &_o) {
-    memcpy(this, &_o, sizeof(time));
-  }
   time(uint32_t _sec, uint32_t _nsec)
       : sec_(flatbuffers::EndianScalar(_sec)),
         nsec_(flatbuffers::EndianScalar(_nsec)) {

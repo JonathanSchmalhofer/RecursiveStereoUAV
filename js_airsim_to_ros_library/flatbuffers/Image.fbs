@@ -1,8 +1,10 @@
+include "StereoImageType.fbs";
 include "Header.fbs";
 
 namespace airsim_to_ros;
 
 table Image {
+    type: StereoImageType;
     header: Header;
     height: uint;
     width: uint;

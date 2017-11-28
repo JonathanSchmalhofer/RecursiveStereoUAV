@@ -44,13 +44,13 @@ struct StarBufferBuilder {
   void add_volume(double volume) {
     fbb_.AddElement<double>(StarBuffer::VT_VOLUME, volume, 0.0);
   }
-  StarBufferBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit StarBufferBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
   StarBufferBuilder &operator=(const StarBufferBuilder &);
   flatbuffers::Offset<StarBuffer> Finish() {
-    const auto end = fbb_.EndTable(start_, 3);
+    const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<StarBuffer>(end);
     return o;
   }

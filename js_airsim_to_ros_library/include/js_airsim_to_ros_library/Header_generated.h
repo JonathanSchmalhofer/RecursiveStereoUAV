@@ -21,8 +21,8 @@ struct Header FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   uint32_t seq() const {
     return GetField<uint32_t>(VT_SEQ, 0);
   }
-  const airsim_to_ros::time *stamp() const {
-    return GetStruct<const airsim_to_ros::time *>(VT_STAMP);
+  const time *stamp() const {
+    return GetStruct<const time *>(VT_STAMP);
   }
   const flatbuffers::String *frame_id() const {
     return GetPointer<const flatbuffers::String *>(VT_FRAME_ID);
@@ -30,7 +30,7 @@ struct Header FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_SEQ) &&
-           VerifyField<airsim_to_ros::time>(verifier, VT_STAMP) &&
+           VerifyField<time>(verifier, VT_STAMP) &&
            VerifyOffset(verifier, VT_FRAME_ID) &&
            verifier.Verify(frame_id()) &&
            verifier.EndTable();
@@ -43,19 +43,19 @@ struct HeaderBuilder {
   void add_seq(uint32_t seq) {
     fbb_.AddElement<uint32_t>(Header::VT_SEQ, seq, 0);
   }
-  void add_stamp(const airsim_to_ros::time *stamp) {
+  void add_stamp(const time *stamp) {
     fbb_.AddStruct(Header::VT_STAMP, stamp);
   }
   void add_frame_id(flatbuffers::Offset<flatbuffers::String> frame_id) {
     fbb_.AddOffset(Header::VT_FRAME_ID, frame_id);
   }
-  HeaderBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+  explicit HeaderBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
   }
   HeaderBuilder &operator=(const HeaderBuilder &);
   flatbuffers::Offset<Header> Finish() {
-    const auto end = fbb_.EndTable(start_, 3);
+    const auto end = fbb_.EndTable(start_);
     auto o = flatbuffers::Offset<Header>(end);
     return o;
   }
@@ -64,7 +64,7 @@ struct HeaderBuilder {
 inline flatbuffers::Offset<Header> CreateHeader(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t seq = 0,
-    const airsim_to_ros::time *stamp = 0,
+    const time *stamp = 0,
     flatbuffers::Offset<flatbuffers::String> frame_id = 0) {
   HeaderBuilder builder_(_fbb);
   builder_.add_frame_id(frame_id);
@@ -76,7 +76,7 @@ inline flatbuffers::Offset<Header> CreateHeader(
 inline flatbuffers::Offset<Header> CreateHeaderDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t seq = 0,
-    const airsim_to_ros::time *stamp = 0,
+    const time *stamp = 0,
     const char *frame_id = nullptr) {
   return airsim_to_ros::CreateHeader(
       _fbb,
