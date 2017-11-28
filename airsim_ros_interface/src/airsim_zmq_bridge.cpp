@@ -119,7 +119,7 @@ int main(int argc, const char *argv[])
                     //std::vector<std::uint8_t> image_data(3 * 640 * 480);
                     auto image = airsim_to_ros::CreateImage(
                         fbb,
-                        0,
+                        static_cast<std::int8_t>(mutex_data->message_image_information_.type_),
                         header,
                         mutex_data->message_image_information_.image_height_,
                         mutex_data->message_image_information_.image_width_,
@@ -135,6 +135,7 @@ int main(int argc, const char *argv[])
                     publishSocket.send(image_msg);
                     std::cout << "Sent flatbuffer message via zmq: " << buffersize << std::endl;
                     std::cout << "    buffersize: " << buffersize << std::endl;
+                    std::cout << "    type: " << unsigned(mutex_data->message_image_information_.type_) << std::endl;
                     std::cout << "    height: " << unsigned(mutex_data->message_image_information_.image_height_) << std::endl;
                     std::cout << "    width: " << unsigned(mutex_data->message_image_information_.image_width_) << std::endl;
                     std::cout << "    step: " << unsigned(mutex_data->message_image_information_.image_step_) << std::endl;

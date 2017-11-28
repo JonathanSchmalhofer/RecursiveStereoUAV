@@ -4,14 +4,14 @@
 enum class StereoImageType
 {
     Unknown = 0,
-    LeftStereoImage,
-    RightStereoImage,
-    DepthPlannerImage,
-    DepthPerspectiveImage,
-    DepthVisImage,
-    DisparityNormalizedImage,
-    SegmentationImage,
-    SurfaceNormalsImage
+    LeftStereoImage = 1,
+    RightStereoImage = 2,
+    DepthPlannerImage = 3,
+    DepthPerspectiveImage = 4,
+    DepthVisImage = 5,
+    DisparityNormalizedImage = 6,
+    SegmentationImage = 7,
+    SurfaceNormalsImage = 8
 };
 
 struct ImageMetaData

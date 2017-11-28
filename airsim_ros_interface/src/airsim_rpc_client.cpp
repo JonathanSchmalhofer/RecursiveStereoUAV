@@ -109,12 +109,12 @@ int main(int argc, const char *argv[])
                         
             while(mutex_data->number_remaining_sub_messages_ > 1)
             {
-                const unsigned current_image_index = mutex_data->number_remaining_sub_messages_ - 1;
                 if(mutex_data->message_available_)
                 {
                     std::cout << "Waiting" << std::endl;
                     mutex_data->condition_full_.wait(lock);
                 }
+                const unsigned current_image_index = (mutex_data->number_remaining_sub_messages_ - 1);
                 
                 myvector->clear();
                 
@@ -132,12 +132,13 @@ int main(int argc, const char *argv[])
                 mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
                 mutex_data->message_image_information_.image_encoding_ = "rgba8";
                 mutex_data->message_image_information_.image_is_bigendian_ = false;
-                mutex_data->message_image_information_.type_ = StereoImageType::Unknown;
+                mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
                 mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.height;
                 
                 //Notify to the other process that there is a message
                 mutex_data->condition_empty_.notify_one();
                 
+                std::cout << "mutex_data->message_image_information_.type_ = " << signed(mutex_data->message_image_information_.type_) << std::endl;
                 std::cout << "mutex_data->number_remaining_sub_messages_ = " << unsigned(mutex_data->number_remaining_sub_messages_) << std::endl;
                 std::cout << "myvector->size() = " << myvector->size() << std::endl;
                 std::cout << "myvector->at(0) = " << unsigned(myvector->at(0)) << std::endl;

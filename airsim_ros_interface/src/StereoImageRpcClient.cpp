@@ -41,9 +41,9 @@ std::vector<std::pair<StereoImageType,msr::airlib::VehicleCameraBase::ImageRespo
     
     std::vector<std::pair<StereoImageType,msr::airlib::VehicleCameraBase::ImageResponse>> response_cumulated;
     
-    response_cumulated.emplace_back(StereoImageType::LeftStereoImage, response_left_image.at(0));
-    response_cumulated.emplace_back(StereoImageType::RightStereoImage, response_right_image.at(0));
     response_cumulated.emplace_back(StereoImageType::DepthPlannerImage, response_depthplanner_image.at(0));
+    response_cumulated.emplace_back(StereoImageType::RightStereoImage, response_right_image.at(0));
+    response_cumulated.emplace_back(StereoImageType::LeftStereoImage, response_left_image.at(0));
     
     return response_cumulated;
 }
