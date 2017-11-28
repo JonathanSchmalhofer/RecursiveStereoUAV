@@ -87,6 +87,7 @@ int main(int argc, char **argv)
     std::vector<std::uint8_t> image_data(3 * 640 * 480);
     auto image = airsim_to_ros::CreateImage(
         fbb, 
+        0, 
         header, 
         ros_image.height,
         ros_image.width,
