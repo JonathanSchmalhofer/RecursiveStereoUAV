@@ -73,7 +73,8 @@ int main(int argc, char **argv)
                 right_stereoimage_chatter.publish(airsim_image_msg);
                 break;
             default:
-            } 
+                break;
+            }
             
             ROS_INFO("Image forwarded");
         }
