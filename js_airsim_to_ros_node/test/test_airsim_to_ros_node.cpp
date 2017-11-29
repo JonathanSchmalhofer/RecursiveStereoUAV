@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Test for ros node airsim_to_ros
+///
 #include <gtest/gtest.h>
 #include <string>
 #include "ros/ros.h"

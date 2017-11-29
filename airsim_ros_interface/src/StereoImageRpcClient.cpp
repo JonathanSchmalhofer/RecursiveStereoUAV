@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Implementation of class StereoImageRpcClient based on original AirSim code
+///
 #include "StereoImageRpcClient.hpp"
 
 struct StereoImageRpcClient::client_accessor

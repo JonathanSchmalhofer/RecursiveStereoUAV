@@ -1,3 +1,10 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Test Implementation for AirSimToRos
+///
+
 #include <gtest/gtest.h>
 #include <random>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"

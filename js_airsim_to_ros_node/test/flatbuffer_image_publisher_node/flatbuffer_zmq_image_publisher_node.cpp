@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Example ros node to publish real flatbuffer image via zmq
+///
 #include <string>
 #include "ros/ros.h"
 #include <opencv2/imgproc/imgproc.hpp>
@@ -67,7 +73,7 @@ int main(int argc, char **argv)
     ROS_INFO("Image Publisher created");
     
     cv_bridge::CvImage cv_image;
-    cv_image.image = cv::imread("/home/q386212/master_ws/src/RecursiveStereoUAV/js_airsim_to_ros_node/test/flatbuffer_image_publisher_node/lena.png", CV_LOAD_IMAGE_COLOR);
+    cv_image.image = cv::imread("lena.png", CV_LOAD_IMAGE_COLOR);
     cv_image.encoding = "rgb8";
     
     sensor_msgs::Image ros_image;

@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief zmq publisher reading stereo images from shared memory queue
+///
 #include "StereoImageRpcClient.hpp"
 #include "airsim_zmq_bridge.hpp"
 #include "InputParser.hpp"

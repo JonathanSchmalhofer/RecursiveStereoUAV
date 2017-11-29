@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Definition of additional datatypes for shared memory queue adapted from boost example and collected includes
+///
 #ifndef AIRSIM_RPC_CLIENT_HPP_
 #define AIRSIM_RPC_CLIENT_HPP_
 

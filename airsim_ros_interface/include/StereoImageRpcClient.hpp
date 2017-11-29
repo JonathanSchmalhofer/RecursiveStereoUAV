@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Definition of class StereoImageRpcClient based on original AirSim code
+///
 #ifndef STEREOIMAGERPCCLIENT_HPP_
 #define STEREOIMAGERPCCLIENT_HPP_
 

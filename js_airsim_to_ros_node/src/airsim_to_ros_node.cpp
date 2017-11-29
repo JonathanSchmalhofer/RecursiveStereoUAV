@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Node to wrap airsim_to_ros to receive Data from AirSim and make available in ROS as ROS-Message
+///
 #include <string>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>

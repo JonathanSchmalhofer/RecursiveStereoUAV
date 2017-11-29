@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Definition of datatypes for shared memory queue adapted from boost example
+///
 #ifndef PROCESSSYNCHRONIZATIONQUEUE_HPP_
 #define PROCESSSYNCHRONIZATIONQUEUE_HPP_
 

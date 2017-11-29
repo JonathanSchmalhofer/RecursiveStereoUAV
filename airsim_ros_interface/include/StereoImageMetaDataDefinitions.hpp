@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Definition of additional datatypes to specify images in shared memory queue
+///
 #ifndef STEREOIMAGEMETADATADEFINITIONS_HPP_
 #define STEREOIMAGEMETADATADEFINITIONS_HPP_
 

@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief Example ros node to publish dummy flatbuffer image via zmq
+///
 #include <string>
 #include "ros/ros.h"
 #include "zeromq_cpp/zmq.hpp"

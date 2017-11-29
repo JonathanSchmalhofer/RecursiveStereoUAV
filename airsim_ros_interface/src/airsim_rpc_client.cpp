@@ -1,3 +1,9 @@
+///
+/// @file
+/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+///
+/// @brief rpc client receiving stereo images from AirSim and writing them in shared memory queue
+///
 #include "StereoImageRpcClient.hpp"
 #include "airsim_rpc_client.hpp"
 #include "InputParser.hpp"

@@ -1,7 +1,11 @@
+///
+/// @file
+/// @copyright see https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
+///
+/// @brief Implementation of an InputParser for command line arguments
+///
 #ifndef INPUTPARSER_HPP_
 #define INPUTPARSER_HPP_
-
-// SOURCE: https://stackoverflow.com/questions/865668/how-to-parse-command-line-arguments-in-c
 
 #include <vector>
 #include <string>
