@@ -47,7 +47,7 @@ int main(int argc, char **argv)
             airsim_image_msg.data.resize(airsim_to_ros.GetImageDataSize());
             memcpy((char*)(&airsim_image_msg.data[0]), airsim_to_ros.GetImageData(), airsim_to_ros.GetImageDataSize());
 
-            /*
+            
             // TODO: Introduce Debug Mode
             ROS_INFO("Image received");
             ROS_INFO("  Image.header.seq %d", airsim_to_ros.GetImageHeaderSeq());
@@ -60,23 +60,23 @@ int main(int argc, char **argv)
             ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
             ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
             ROS_INFO("  size(Image.data) %d", airsim_to_ros.GetImageDataSize());
-            */
+            
             
             switch (airsim_to_ros.GetImageType())
             {
             case 0: // Unknown
                 break;
             case 1: // Left
+                ROS_INFO("Left image forwarded");
                 left_stereoimage_chatter.publish(airsim_image_msg);
                 break;
             case 2: // Right
+                ROS_INFO("Right image forwarded");
                 right_stereoimage_chatter.publish(airsim_image_msg);
                 break;
             default:
                 break;
             }
-            
-            ROS_INFO("Image forwarded");
         }
         else if (-1 == received_return_value)
         {
