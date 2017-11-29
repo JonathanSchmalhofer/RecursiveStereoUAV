@@ -4,7 +4,6 @@
 
 bool debug_mode_activated = false;
 
-
 int main(int argc, const char *argv[])
 {
     InputParser input_parser(argc, argv);
@@ -52,6 +51,10 @@ int main(int argc, const char *argv[])
             scoped_lock<interprocess_mutex> lock(mutex_data->mutex_);
             if(mutex_data->message_available_)
             {
+                if (debug_mode_activated)
+                {
+                    std::cout << "Waiting" << std::endl;
+                }
                 mutex_data->condition_full_.wait(lock);
             }
 
