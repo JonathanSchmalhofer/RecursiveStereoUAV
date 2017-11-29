@@ -32,6 +32,7 @@ AirSimToRosClass::AirSimToRosClass(std::string const& addr)
     image_step_                 = 0;
     image_data_                 = NULL;
     image_data_size_            = 0;
+    image_type_                 = 0;
 }
     
 AirSimToRosClass::~AirSimToRosClass()
@@ -58,22 +59,23 @@ int8_t AirSimToRosClass::ReceivedMessage()
       // Make sure the message has valid data.
       if (airsim_to_ros::VerifyImageBuffer(verifier))
       {
-          auto fb_image_rcvd = airsim_to_ros::GetImage(zmq_received_message.data());
+          auto flatbuffer_image_rcvd = airsim_to_ros::GetImage(zmq_received_message.data());
 
           // Header
-          image_header_seq_           = fb_image_rcvd->header()->seq();
-          image_header_stamp_sec_     = fb_image_rcvd->header()->stamp()->sec();
-          image_header_stamp_nsec_    = fb_image_rcvd->header()->stamp()->nsec();
-          image_header_frame_id_      = fb_image_rcvd->header()->frame_id()->c_str();
+          image_header_seq_           = flatbuffer_image_rcvd->header()->seq();
+          image_header_stamp_sec_     = flatbuffer_image_rcvd->header()->stamp()->sec();
+          image_header_stamp_nsec_    = flatbuffer_image_rcvd->header()->stamp()->nsec();
+          image_header_frame_id_      = flatbuffer_image_rcvd->header()->frame_id()->c_str();
           // Image
-          image_height_               = fb_image_rcvd->height();
-          image_width_                = fb_image_rcvd->width();
-          image_encoding_             = fb_image_rcvd->encoding()->c_str();
-          image_is_bigendian_         = fb_image_rcvd->is_bigendian();
-          image_step_                 = fb_image_rcvd->step();
+          image_height_               = flatbuffer_image_rcvd->height();
+          image_width_                = flatbuffer_image_rcvd->width();
+          image_encoding_             = flatbuffer_image_rcvd->encoding()->c_str();
+          image_is_bigendian_         = flatbuffer_image_rcvd->is_bigendian();
+          image_step_                 = flatbuffer_image_rcvd->step();
           image_data_                 = (std::uint8_t*)realloc(image_data_, zmq_received_message.size());
           image_data_size_            = image_step_ * image_height_;
-          memcpy(image_data_, fb_image_rcvd->data(), image_data_size_);
+          memcpy(image_data_, flatbuffer_image_rcvd->data(), image_data_size_);
+          image_type_                 = flatbuffer_image_rcvd->type();
           return_value                = 1;
       }
       else
@@ -138,6 +140,11 @@ std::uint8_t* AirSimToRosClass::GetImageData()
 size_t AirSimToRosClass::GetImageDataSize()
 {
     return image_data_size_;
+}
+    
+int8_t AirSimToRosClass::GetImageType()
+{
+    return image_type_;
 }
 }  // namespace js_airsim_to_ros_library
 

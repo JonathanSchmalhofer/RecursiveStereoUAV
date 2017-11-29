@@ -16,12 +16,13 @@ int main(int argc, char **argv)
     
     ROS_INFO("Starting node");
 
-    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://192.168.178.50:5676");
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://192.168.178.56:5676");
     
     ROS_INFO("Created airsim_to_ros");
 
     image_transport::ImageTransport image_transport(node_handle);
-    image_transport::Publisher chatterAirSimMessage = image_transport.advertise("/AirSimImage", 1);
+    image_transport::Publisher left_stereoimage_chatter = image_transport.advertise("/AirSimLeftStereoImage", 1);
+    image_transport::Publisher right_stereoimage_chatter = image_transport.advertise("/AirSimRightStereoImage", 1);
 
     while (ros::ok())
     {
@@ -60,8 +61,20 @@ int main(int argc, char **argv)
             ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
             ROS_INFO("  size(Image.data) %d", airsim_to_ros.GetImageDataSize());
             */
-                
-            chatterAirSimMessage.publish(airsim_image_msg);
+            
+            switch (airsim_to_ros.GetImageType())
+            {
+            case 0: // Unknown
+                break;
+            case 1: // Left
+                left_stereoimage_chatter.publish(airsim_image_msg);
+                break;
+            case 2: // Right
+                right_stereoimage_chatter.publish(airsim_image_msg);
+                break;
+            default:
+            } 
+            
             ROS_INFO("Image forwarded");
         }
         else if (-1 == received_return_value)

@@ -4,7 +4,6 @@
 ///
 /// @brief Class to receive Data from AirSim and make available in ROS as ROS-Message
 ///
-
 #ifndef JS_AIRSIM_TO_ROS_LIBRARY_AIRSIM_TO_ROS_CLASS_H_
 #define JS_AIRSIM_TO_ROS_LIBRARY_AIRSIM_TO_ROS_CLASS_H_
 
@@ -27,38 +26,41 @@ public:
     // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
     int8_t ReceivedMessage();
     
-     // @brief Returns the attribute Image.Header.seq
-     uint32_t GetImageHeaderSeq();
+    // @brief Returns the attribute Image.Header.seq
+    uint32_t GetImageHeaderSeq();
     
-     // @brief Returns the attribute Image.stamp.sec
-     uint32_t GetImageHeaderStampSec();
+    // @brief Returns the attribute Image.stamp.sec
+    uint32_t GetImageHeaderStampSec();
     
-     // @brief Returns the attribute Image.stamp.nsec
-     uint32_t GetImageHeaderStampNsec();
+    // @brief Returns the attribute Image.stamp.nsec
+    uint32_t GetImageHeaderStampNsec();
     
-     // @brief Returns the attribute Image.frame_id
-     std::string GetImageHeaderFrameid();
+    // @brief Returns the attribute Image.frame_id
+    std::string GetImageHeaderFrameid();
     
-     // @brief Returns the attribute Image.height
-     uint32_t GetImageHeight();
+    // @brief Returns the attribute Image.height
+    uint32_t GetImageHeight();
     
-     // @brief Returns the attribute Image.width
-     uint32_t GetImageWidth();
+    // @brief Returns the attribute Image.width
+    uint32_t GetImageWidth();
     
-     // @brief Returns the attribute Image.encoding
-     std::string GetImageEncoding();
+    // @brief Returns the attribute Image.encoding
+    std::string GetImageEncoding();
     
-     // @brief Returns the attribute Image.is_bigendian
-     uint8_t GetImageIsBigendian();
+    // @brief Returns the attribute Image.is_bigendian
+    uint8_t GetImageIsBigendian();
     
-     // @brief Returns the attribute Image.step
-     uint32_t GetImageStep();
+    // @brief Returns the attribute Image.step
+    uint32_t GetImageStep();
     
-     // @brief Returns pointer to the attribute Image.data
-     std::uint8_t* GetImageData();
+    // @brief Returns pointer to the attribute Image.data
+    std::uint8_t* GetImageData();
     
-     // @brief Returns the size of the image data.
-     size_t GetImageDataSize();
+    // @brief Returns the size of the image data.
+    size_t GetImageDataSize();
+    
+    // @brief Returns attribute Image.type
+    int8_t GetImageType();
 
 private:    
     /// @brief A ZeroMq context object encapsulating functionality dealing with the initialisation and termination.
@@ -99,6 +101,9 @@ private:
     
     /// @brief Holds the size of the image data (which is step * height).
     size_t image_data_size_;    
+
+    /// @brief Holds the attribute Image.type of the last received message.
+    int8_t image_type_;
 };
 }  // namespace js_airsim_to_ros_library
 
