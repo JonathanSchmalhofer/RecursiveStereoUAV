@@ -65,6 +65,21 @@ inline flatbuffers::Offset<Trajectory3D> CreateTrajectory3DDirect(
       trajectory ? _fbb.CreateVector<const Trajectory3DPointStamped *>(*trajectory) : 0);
 }
 
+inline const airsim_to_ros::Trajectory3D *GetTrajectory3D(const void *buf) {
+  return flatbuffers::GetRoot<airsim_to_ros::Trajectory3D>(buf);
+}
+
+inline bool VerifyTrajectory3DBuffer(
+    flatbuffers::Verifier &verifier) {
+  return verifier.VerifyBuffer<airsim_to_ros::Trajectory3D>(nullptr);
+}
+
+inline void FinishTrajectory3DBuffer(
+    flatbuffers::FlatBufferBuilder &fbb,
+    flatbuffers::Offset<airsim_to_ros::Trajectory3D> root) {
+  fbb.Finish(root);
+}
+
 }  // namespace airsim_to_ros
 
 #endif  // FLATBUFFERS_GENERATED_TRAJECTORY3D_AIRSIM_TO_ROS_H_

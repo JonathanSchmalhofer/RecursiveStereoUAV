@@ -5,3 +5,5 @@ namespace airsim_to_ros;
 table Trajectory3D {
     trajectory: [Trajectory3DPointStamped];
 }
+
+root_type Trajectory3D;

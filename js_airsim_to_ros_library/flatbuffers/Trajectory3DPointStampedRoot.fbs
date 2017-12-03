@@ -1,0 +1,11 @@
+include "time.fbs";
+include "Pose.fbs";
+
+namespace airsim_to_ros;
+
+table Trajectory3DPointStamped {
+    time: time;
+    pose: Pose;
+}
+
+root_type Trajectory3DPointStamped;
