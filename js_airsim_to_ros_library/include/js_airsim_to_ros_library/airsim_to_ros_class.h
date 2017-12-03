@@ -8,7 +8,7 @@
 #define JS_AIRSIM_TO_ROS_LIBRARY_AIRSIM_TO_ROS_CLASS_H_
 
 #include <cstdint>
-#include "zeromq_cpp/zmq.hpp"
+#include <zeromq_cpp/zmq.hpp>
 #include "Image_generated.h"
 
 namespace js_airsim_to_ros_library
