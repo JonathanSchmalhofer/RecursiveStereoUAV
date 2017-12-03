@@ -9,6 +9,8 @@
 #include "InputParser.hpp"
 
 bool debug_mode_activated = false;
+bool initial_pose_set = false;
+msr::airlib::Pose initial_pose, new_pose;
 
 int main(int argc, const char *argv[])
 {
@@ -21,9 +23,12 @@ int main(int argc, const char *argv[])
 
     StereoImageRpcClient *client = new StereoImageRpcClient();    
     client->Connect();
-    msr::airlib::Pose initial_pose = client->GetPositionAndOrientation();
-
-    msr::airlib::Pose delta_pose, new_pose = initial_pose;
+    if (false == initial_pose_set)
+    {
+        initial_pose = client->GetPositionAndOrientation();
+        new_pose = initial_pose;
+        initial_pose_set = true;
+    }
 
     //Create a shared memory object.
     shared_memory_object mutex_shared_memory(create_only, "MutexSharedMemory", read_write);
@@ -40,7 +45,7 @@ int main(int argc, const char *argv[])
     try
     {
         //Set size
-        mutex_shared_memory.truncate(sizeof(ProcessSynchronizationQueue));
+        mutex_shared_memory.truncate(sizeof(airsim_to_ros::ProcessSynchronizationQueue));
 
         //Map the whole shared memory in this process
         mapped_region region(mutex_shared_memory, read_write);
@@ -49,24 +54,48 @@ int main(int argc, const char *argv[])
         void *region_address = region.get_address();
 
         //Construct the shared structure in memory
-        ProcessSynchronizationQueue *mutex_data = new (region_address) ProcessSynchronizationQueue;
+        airsim_to_ros::ProcessSynchronizationQueue *mutex_data = new (region_address) airsim_to_ros::ProcessSynchronizationQueue;
+        
+        //Set initial pose in queue
+        mutex_data->initial_pose_.position_.x_ = initial_pose.position.x();
+        mutex_data->initial_pose_.position_.y_ = initial_pose.position.y();
+        mutex_data->initial_pose_.position_.z_ = initial_pose.position.z();
+        mutex_data->initial_pose_.orientation_.x_ = initial_pose.orientation.x();
+        mutex_data->initial_pose_.orientation_.y_ = initial_pose.orientation.y();
+        mutex_data->initial_pose_.orientation_.z_ = initial_pose.orientation.z();
+        mutex_data->initial_pose_.orientation_.w_ = initial_pose.orientation.w();
 
         bool keep_looping = true;
         do
         {
             scoped_lock<interprocess_mutex> lock(mutex_data->mutex_);
+
+            // After last loop, wait until queue has been emptied
             if(mutex_data->message_available_)
             {
                 if (debug_mode_activated)
                 {
-                    std::cout << "Waiting" << std::endl;
+                    std::cout << "Waiting for queue to be emptied and trajectory point to be set" << std::endl;
                 }
-                mutex_data->condition_full_.wait(lock);
+                // this condition will only be triggered once a new trajectory is available
+                mutex_data->condition_trajectory_.wait(lock);
+                if (debug_mode_activated)
+                {
+                    std::cout << "New trajectory point received" << std::endl;
+                }
             }
-
-            // TODO: set new pose as it was reported back from trajectory planner
-            delta_pose = msr::airlib::Pose(msr::airlib::Vector3r(-0.01f, 0.0f, 0.01f), msr::airlib::Quaternionr(1.0f, 0.0f, 0.0f, 0.0f));
-            new_pose = new_pose - delta_pose;
+            
+            // if the trajectory point has been updated in the queue, get it
+            new_pose = msr::airlib::Pose(
+                msr::airlib::Vector3r(
+                    mutex_data->trajectory_pose_.position_.x_,
+                    mutex_data->trajectory_pose_.position_.y_,
+                    mutex_data->trajectory_pose_.position_.z_),
+                msr::airlib::Quaternionr(
+                    mutex_data->trajectory_pose_.orientation_.w_,
+                    mutex_data->trajectory_pose_.orientation_.x_,
+                    mutex_data->trajectory_pose_.orientation_.y_,
+                    mutex_data->trajectory_pose_.orientation_.z_));
             client->SetPositionAndOrientation(new_pose);
 
             // get process queue of stereo images from client
@@ -80,7 +109,7 @@ int main(int argc, const char *argv[])
                 {
                     if (debug_mode_activated)
                     {
-                        std::cout << "Waiting" << std::endl;
+                        std::cout << "  Waiting for queue to be emptied for next image" << std::endl;
                     }
                     mutex_data->condition_full_.wait(lock);
                 }
@@ -103,7 +132,7 @@ int main(int argc, const char *argv[])
                 mutex_data->message_image_information_.image_encoding_ = "rgba8";
                 mutex_data->message_image_information_.image_is_bigendian_ = false;
                 mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
-                mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.height;
+                mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.width;
                 
                 //Notify to the other process that there is a message
                 mutex_data->condition_empty_.notify_one();
@@ -122,6 +151,8 @@ int main(int argc, const char *argv[])
             {
                 std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             }
+            
+            
         }
         while(keep_looping);
     }

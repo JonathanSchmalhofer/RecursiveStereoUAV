@@ -36,7 +36,7 @@ int main(int argc, const char *argv[])
         void *region_address = region.get_address();
 
         //Obtain a pointer to the shared structure
-        ProcessSynchronizationQueue *mutex_data = static_cast<ProcessSynchronizationQueue*>(region_address);
+        airsim_to_ros::ProcessSynchronizationQueue *mutex_data = static_cast<airsim_to_ros::ProcessSynchronizationQueue*>(region_address);
         
         bool keep_looping = true;
         do
@@ -139,8 +139,9 @@ int main(int argc, const char *argv[])
                 {
                     std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
                 }
-                mutex_data->message_available_ = false;
-                mutex_data->condition_full_.notify_one();
+                
+                // TODO: receive new trajectory point
+                mutex_data->condition_trajectory_.notify_one();
             }
         }
         while(keep_looping);
