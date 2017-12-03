@@ -1,0 +1,8 @@
+namespace airsim_to_ros;
+
+struct Quaternion {
+    x: double;
+    y: double;
+    z: double;
+    w: double;
+}

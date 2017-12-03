@@ -1,0 +1,9 @@
+include "Point.fbs";
+include "Quaternion.fbs";
+
+namespace airsim_to_ros;
+
+struct Pose {
+    position: Point;
+    orientation: Quaternion;
+}

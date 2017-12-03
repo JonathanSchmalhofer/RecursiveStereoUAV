@@ -1,0 +1,9 @@
+include "time.fbs";
+include "Pose.fbs";
+
+namespace airsim_to_ros;
+
+struct Trajectory3DPointStamped {
+    time: time;
+    pose: Pose;
+}

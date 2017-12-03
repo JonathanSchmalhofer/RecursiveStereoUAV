@@ -1,0 +1,7 @@
+include "Trajectory3DPointStamped.fbs";
+
+namespace airsim_to_ros;
+
+table Trajectory3D {
+    trajectory: [Trajectory3DPointStamped];
+}
