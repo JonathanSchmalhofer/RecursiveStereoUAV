@@ -69,35 +69,35 @@ install(TARGETS airsim_to_ros_node
 ## Testing ##
 #############
 
-if(CATKIN_ENABLE_TESTING)
-    find_package(rostest REQUIRED)
-    add_rostest_gtest(test_airsim_to_ros_node test/test_airsim_to_ros_node.test test/test_airsim_to_ros_node.cpp)
-    target_link_libraries(test_airsim_to_ros_node ${catkin_LIBRARIES} ${js_airsim_to_ros_node_LIBRARIES})
+# if(CATKIN_ENABLE_TESTING)
+    # find_package(rostest REQUIRED)
+    # add_rostest_gtest(test_airsim_to_ros_node test/test_airsim_to_ros_node.test test/test_airsim_to_ros_node.cpp)
+    # target_link_libraries(test_airsim_to_ros_node ${catkin_LIBRARIES} ${js_airsim_to_ros_node_LIBRARIES})
     
-    add_executable(flatbuffer_zmq_subscriber_node test/flatbuffer_subscriber_node/flatbuffer_zmq_subscriber_node.cpp)
-    add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp)
-    add_executable(flatbuffer_zmq_image_publisher_node test/flatbuffer_image_publisher_node/flatbuffer_zmq_image_publisher_node.cpp)
+    # add_executable(flatbuffer_zmq_subscriber_node test/flatbuffer_subscriber_node/flatbuffer_zmq_subscriber_node.cpp)
+    # add_executable(flatbuffer_zmq_publisher_node test/flatbuffer_publisher_node/flatbuffer_zmq_publisher_node.cpp)
+    # add_executable(flatbuffer_zmq_image_publisher_node test/flatbuffer_image_publisher_node/flatbuffer_zmq_image_publisher_node.cpp)
     
-    include_directories(
-        ${js_airsim_to_ros_library_INCLUDE_DIRS}
-        ${catkin_INCLUDE_DIRS}
-    )
+    # include_directories(
+        # ${js_airsim_to_ros_library_INCLUDE_DIRS}
+        # ${catkin_INCLUDE_DIRS}
+    # )
     
-    target_link_libraries(flatbuffer_zmq_subscriber_node
-        ${zeromq_catkin_LIBRARIES}
-        ${flatbuffers_catkin_LIBRARIES}
-        ${catkin_LIBRARIES}
-    )
+    # target_link_libraries(flatbuffer_zmq_subscriber_node
+        # ${zeromq_catkin_LIBRARIES}
+        # ${flatbuffers_catkin_LIBRARIES}
+        # ${catkin_LIBRARIES}
+    # )
     
-    target_link_libraries(flatbuffer_zmq_publisher_node
-        ${zeromq_catkin_LIBRARIES}
-        ${flatbuffers_catkin_LIBRARIES}
-        ${catkin_LIBRARIES}
-    )
+    # target_link_libraries(flatbuffer_zmq_publisher_node
+        # ${zeromq_catkin_LIBRARIES}
+        # ${flatbuffers_catkin_LIBRARIES}
+        # ${catkin_LIBRARIES}
+    # )
     
-    target_link_libraries(flatbuffer_zmq_image_publisher_node
-        ${zeromq_catkin_LIBRARIES}
-        ${flatbuffers_catkin_LIBRARIES}
-        ${catkin_LIBRARIES}
-    )
-endif()
+    # target_link_libraries(flatbuffer_zmq_image_publisher_node
+        # ${zeromq_catkin_LIBRARIES}
+        # ${flatbuffers_catkin_LIBRARIES}
+        # ${catkin_LIBRARIES}
+    # )
+# endif()
