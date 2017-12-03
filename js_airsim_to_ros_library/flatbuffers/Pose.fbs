@@ -1,9 +1,9 @@
 include "Point.fbs";
 include "Quaternion.fbs";
 
-namespace airsim_to_ros;
+namespace ros_to_airsim;
 
-struct Pose {
+table Pose {
     position: Point;
     orientation: Quaternion;
 }

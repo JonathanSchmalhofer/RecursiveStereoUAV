@@ -1,6 +1,6 @@
-namespace airsim_to_ros;
+namespace ros_to_airsim;
 
-struct Quaternion {
+table Quaternion {
     x: double;
     y: double;
     z: double;

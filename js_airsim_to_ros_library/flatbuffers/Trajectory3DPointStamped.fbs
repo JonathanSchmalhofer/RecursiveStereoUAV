@@ -1,9 +1,9 @@
-include "time.fbs";
+include "time_ros_to_airsim.fbs";
 include "Pose.fbs";
 
-namespace airsim_to_ros;
+namespace ros_to_airsim;
 
-struct Trajectory3DPointStamped {
+table Trajectory3DPointStamped {
     time: time;
     pose: Pose;
 }

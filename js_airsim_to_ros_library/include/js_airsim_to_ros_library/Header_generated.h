@@ -22,7 +22,7 @@ struct Header FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return GetField<uint32_t>(VT_SEQ, 0);
   }
   const time *stamp() const {
-    return GetStruct<const time *>(VT_STAMP);
+    return GetPointer<const time *>(VT_STAMP);
   }
   const flatbuffers::String *frame_id() const {
     return GetPointer<const flatbuffers::String *>(VT_FRAME_ID);
@@ -30,7 +30,8 @@ struct Header FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint32_t>(verifier, VT_SEQ) &&
-           VerifyField<time>(verifier, VT_STAMP) &&
+           VerifyOffset(verifier, VT_STAMP) &&
+           verifier.VerifyTable(stamp()) &&
            VerifyOffset(verifier, VT_FRAME_ID) &&
            verifier.Verify(frame_id()) &&
            verifier.EndTable();
@@ -43,8 +44,8 @@ struct HeaderBuilder {
   void add_seq(uint32_t seq) {
     fbb_.AddElement<uint32_t>(Header::VT_SEQ, seq, 0);
   }
-  void add_stamp(const time *stamp) {
-    fbb_.AddStruct(Header::VT_STAMP, stamp);
+  void add_stamp(flatbuffers::Offset<time> stamp) {
+    fbb_.AddOffset(Header::VT_STAMP, stamp);
   }
   void add_frame_id(flatbuffers::Offset<flatbuffers::String> frame_id) {
     fbb_.AddOffset(Header::VT_FRAME_ID, frame_id);
@@ -64,7 +65,7 @@ struct HeaderBuilder {
 inline flatbuffers::Offset<Header> CreateHeader(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t seq = 0,
-    const time *stamp = 0,
+    flatbuffers::Offset<time> stamp = 0,
     flatbuffers::Offset<flatbuffers::String> frame_id = 0) {
   HeaderBuilder builder_(_fbb);
   builder_.add_frame_id(frame_id);
@@ -76,7 +77,7 @@ inline flatbuffers::Offset<Header> CreateHeader(
 inline flatbuffers::Offset<Header> CreateHeaderDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     uint32_t seq = 0,
-    const time *stamp = 0,
+    flatbuffers::Offset<time> stamp = 0,
     const char *frame_id = nullptr) {
   return airsim_to_ros::CreateHeader(
       _fbb,

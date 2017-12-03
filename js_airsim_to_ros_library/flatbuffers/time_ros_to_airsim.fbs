@@ -1,4 +1,4 @@
-namespace airsim_to_ros;
+namespace ros_to_airsim;
 
 table time {
     sec: uint;
