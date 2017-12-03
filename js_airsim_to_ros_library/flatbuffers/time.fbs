@@ -1,6 +1,6 @@
 namespace airsim_to_ros;
 
-table time {
+struct time {
     sec: uint;
     nsec: uint;
 }

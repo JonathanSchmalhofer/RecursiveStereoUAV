@@ -17,21 +17,19 @@ struct Trajectory3DPointStamped;
 
 struct Trajectory3DPointStamped FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_TIME = 4,
+    VT_TIMESTAMP = 4,
     VT_POSE = 6
   };
-  const time *time() const {
-    return GetPointer<const time *>(VT_TIME);
+  const time *timestamp() const {
+    return GetStruct<const time *>(VT_TIMESTAMP);
   }
   const Pose *pose() const {
-    return GetPointer<const Pose *>(VT_POSE);
+    return GetStruct<const Pose *>(VT_POSE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyOffset(verifier, VT_TIME) &&
-           verifier.VerifyTable(time()) &&
-           VerifyOffset(verifier, VT_POSE) &&
-           verifier.VerifyTable(pose()) &&
+           VerifyField<time>(verifier, VT_TIMESTAMP) &&
+           VerifyField<Pose>(verifier, VT_POSE) &&
            verifier.EndTable();
   }
 };
@@ -39,11 +37,11 @@ struct Trajectory3DPointStamped FLATBUFFERS_FINAL_CLASS : private flatbuffers::T
 struct Trajectory3DPointStampedBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_time(flatbuffers::Offset<time> time) {
-    fbb_.AddOffset(Trajectory3DPointStamped::VT_TIME, time);
+  void add_timestamp(const time *timestamp) {
+    fbb_.AddStruct(Trajectory3DPointStamped::VT_TIMESTAMP, timestamp);
   }
-  void add_pose(flatbuffers::Offset<Pose> pose) {
-    fbb_.AddOffset(Trajectory3DPointStamped::VT_POSE, pose);
+  void add_pose(const Pose *pose) {
+    fbb_.AddStruct(Trajectory3DPointStamped::VT_POSE, pose);
   }
   explicit Trajectory3DPointStampedBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -59,11 +57,11 @@ struct Trajectory3DPointStampedBuilder {
 
 inline flatbuffers::Offset<Trajectory3DPointStamped> CreateTrajectory3DPointStamped(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<time> time = 0,
-    flatbuffers::Offset<Pose> pose = 0) {
+    const time *timestamp = 0,
+    const Pose *pose = 0) {
   Trajectory3DPointStampedBuilder builder_(_fbb);
   builder_.add_pose(pose);
-  builder_.add_time(time);
+  builder_.add_timestamp(timestamp);
   return builder_.Finish();
 }
 

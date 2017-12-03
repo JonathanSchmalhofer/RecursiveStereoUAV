@@ -4,7 +4,7 @@ include "Pose.fbs";
 namespace ros_to_airsim;
 
 table Trajectory3DPointStamped {
-    time: time;
+    timestamp: time;
     pose: Pose;
 }
 

@@ -10,65 +10,32 @@ namespace ros_to_airsim {
 
 struct Point;
 
-struct Point FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_X = 4,
-    VT_Y = 6,
-    VT_Z = 8
-  };
+MANUALLY_ALIGNED_STRUCT(8) Point FLATBUFFERS_FINAL_CLASS {
+ private:
+  double x_;
+  double y_;
+  double z_;
+
+ public:
+  Point() {
+    memset(this, 0, sizeof(Point));
+  }
+  Point(double _x, double _y, double _z)
+      : x_(flatbuffers::EndianScalar(_x)),
+        y_(flatbuffers::EndianScalar(_y)),
+        z_(flatbuffers::EndianScalar(_z)) {
+  }
   double x() const {
-    return GetField<double>(VT_X, 0.0);
+    return flatbuffers::EndianScalar(x_);
   }
   double y() const {
-    return GetField<double>(VT_Y, 0.0);
+    return flatbuffers::EndianScalar(y_);
   }
   double z() const {
-    return GetField<double>(VT_Z, 0.0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<double>(verifier, VT_X) &&
-           VerifyField<double>(verifier, VT_Y) &&
-           VerifyField<double>(verifier, VT_Z) &&
-           verifier.EndTable();
+    return flatbuffers::EndianScalar(z_);
   }
 };
-
-struct PointBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_x(double x) {
-    fbb_.AddElement<double>(Point::VT_X, x, 0.0);
-  }
-  void add_y(double y) {
-    fbb_.AddElement<double>(Point::VT_Y, y, 0.0);
-  }
-  void add_z(double z) {
-    fbb_.AddElement<double>(Point::VT_Z, z, 0.0);
-  }
-  explicit PointBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  PointBuilder &operator=(const PointBuilder &);
-  flatbuffers::Offset<Point> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Point>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Point> CreatePoint(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    double x = 0.0,
-    double y = 0.0,
-    double z = 0.0) {
-  PointBuilder builder_(_fbb);
-  builder_.add_z(z);
-  builder_.add_y(y);
-  builder_.add_x(x);
-  return builder_.Finish();
-}
+STRUCT_END(Point, 24);
 
 }  // namespace ros_to_airsim
 

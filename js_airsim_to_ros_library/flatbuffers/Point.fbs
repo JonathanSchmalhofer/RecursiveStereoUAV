@@ -1,6 +1,6 @@
 namespace ros_to_airsim;
 
-table Point {
+struct Point {
     x: double;
     y: double;
     z: double;

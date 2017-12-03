@@ -19,37 +19,32 @@ RosToAirSimClass::RosToAirSimClass(std::string const& addr)
     zmq_subscriber_.setsockopt(ZMQ_RCVTIMEO, 5000);
     zmq_subscriber_.connect(addr);
     
-    // Header
-    image_header_seq_           = 0;
-    image_header_stamp_sec_     = 0;
-    image_header_stamp_nsec_    = 0;
-    image_header_frame_id_      = "";
-    // Image
-    image_height_               = 0;
-    image_width_                = 0;
-    image_encoding_             = "";
-    image_is_bigendian_         = 0;
-    image_step_                 = 0;
-    image_data_                 = NULL;
-    image_data_size_            = 0;
-    image_type_                 = 0;
+    // Trajectory3DPoint
+    trajectory3dpoint_time_sec_             = 0;
+    trajectory3dpoint_time_nsec_            = 0;
+    trajectory3dpoint_pose_position_x_      = 0;
+    trajectory3dpoint_pose_position_y_      = 0;
+    trajectory3dpoint_pose_position_z_      = 0;
+    trajectory3dpoint_pose_orientation_x_   = 0;
+    trajectory3dpoint_pose_orientation_y_   = 0;
+    trajectory3dpoint_pose_orientation_z_   = 0;
+    trajectory3dpoint_pose_orientation_w_   = 0;
 }
     
 RosToAirSimClass::~RosToAirSimClass()
 {
-    free(image_data_);
 }
 
 int8_t RosToAirSimClass::ReceivedMessage()
 {
     zmq::message_t zmq_received_message;
     zmq_subscriber_.recv(&zmq_received_message);
-    
-    int8_t return_value = 0;
 
+    int8_t return_value = 0;
+    
     /*
     flatbuffers::FlatBufferBuilder fbb;
-    airsim_to_ros::ImageBuilder builder(fbb);
+    ros_to_airsim::Trajectory3DPointStampedBuilder builder(fbb);
 
     // Verify the message contents are trustworthy.
     flatbuffers::Verifier verifier((const unsigned char *)zmq_received_message.data(),
@@ -60,25 +55,21 @@ int8_t RosToAirSimClass::ReceivedMessage()
     if (zmq_received_message.size() > 0)
     {
       // Make sure the message has valid data.
-      if (airsim_to_ros::VerifyImageBuffer(verifier))
+      if (ros_to_airsim::VerifyTrajectory3DBuffer(verifier))
       {
-          auto flatbuffer_image_rcvd = airsim_to_ros::GetImage(zmq_received_message.data());
+          auto flatbuffer_trajectory3d_rcvd = ros_to_airsim::GetTrajectory3DPointStamped(zmq_received_message.data());
 
-          // Header
-          image_header_seq_           = flatbuffer_image_rcvd->header()->seq();
-          image_header_stamp_sec_     = flatbuffer_image_rcvd->header()->stamp()->sec();
-          image_header_stamp_nsec_    = flatbuffer_image_rcvd->header()->stamp()->nsec();
-          image_header_frame_id_      = flatbuffer_image_rcvd->header()->frame_id()->c_str();
-          // Image
-          image_height_               = flatbuffer_image_rcvd->height();
-          image_width_                = flatbuffer_image_rcvd->width();
-          image_encoding_             = flatbuffer_image_rcvd->encoding()->c_str();
-          image_is_bigendian_         = flatbuffer_image_rcvd->is_bigendian();
-          image_step_                 = flatbuffer_image_rcvd->step();
-          image_data_                 = (std::uint8_t*)realloc(image_data_, zmq_received_message.size());
-          image_data_size_            = image_step_ * image_height_;
-          memcpy(image_data_, flatbuffer_image_rcvd->data(), image_data_size_);
-          image_type_                 = flatbuffer_image_rcvd->type();
+          // Trajectory3DPoint
+          trajectory3dpoint_time_sec_           = flatbuffer_trajectory3d_rcvd->time()->sec();
+          trajectory3dpoint_time_nsec_          = flatbuffer_trajectory3d_rcvd->time()->nsec();
+          trajectory3dpoint_pose_position_x_    = flatbuffer_trajectory3d_rcvd->pose()->position()->x();
+          trajectory3dpoint_pose_position_y_    = flatbuffer_trajectory3d_rcvd->pose()->position()->y();
+          trajectory3dpoint_pose_position_z_    = flatbuffer_trajectory3d_rcvd->pose()->position()->z();
+          trajectory3dpoint_pose_orientation_x_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->x();
+          trajectory3dpoint_pose_orientation_y_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->y();
+          trajectory3dpoint_pose_orientation_z_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->z();
+          trajectory3dpoint_pose_orientation_w_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->w();
+          
           return_value                = 1;
       }
       else
@@ -90,64 +81,49 @@ int8_t RosToAirSimClass::ReceivedMessage()
     return return_value;
 }
     
-uint32_t RosToAirSimClass::GetImageHeaderSeq()
+uint32_t RosToAirSimClass::GetTrajectory3DPointTimeSec()
 {
-    return image_header_seq_;
-}
-    
-uint32_t RosToAirSimClass::GetImageHeaderStampSec()
-{
-    return image_header_stamp_sec_;
+    return trajectory3dpoint_time_sec_;
 }
 
-uint32_t RosToAirSimClass::GetImageHeaderStampNsec()
+uint32_t RosToAirSimClass::GetTrajectory3DPointTimeNsec()
 {
-    return image_header_stamp_nsec_;
+    return trajectory3dpoint_time_nsec_;
 }
 
-std::string RosToAirSimClass::GetImageHeaderFrameid()
+double RosToAirSimClass::GetTrajectory3DPointPosePositionX()
 {
-    return image_header_frame_id_;
+    return trajectory3dpoint_pose_position_x_;
 }
 
-uint32_t RosToAirSimClass::GetImageHeight()
+double RosToAirSimClass::GetTrajectory3DPointPosePositionY()
 {
-    return image_height_;
+    return trajectory3dpoint_pose_position_y_;
 }
 
-uint32_t RosToAirSimClass::GetImageWidth()
+double RosToAirSimClass::GetTrajectory3DPointPosePositionZ()
 {
-    return image_width_;
+    return trajectory3dpoint_pose_position_z_;
 }
 
-std::string RosToAirSimClass::GetImageEncoding()
+double RosToAirSimClass::GetTrajectory3DPointPoseOrientationX()
 {
-    return image_encoding_;
+    return trajectory3dpoint_pose_orientation_x_;
 }
 
-uint8_t RosToAirSimClass::GetImageIsBigendian()
+double RosToAirSimClass::GetTrajectory3DPointPoseOrientationY()
 {
-    return image_is_bigendian_;
+    return trajectory3dpoint_pose_orientation_y_;
 }
 
-uint32_t RosToAirSimClass::GetImageStep()
+double RosToAirSimClass::GetTrajectory3DPointPoseOrientationZ()
 {
-    return image_step_;
+    return trajectory3dpoint_pose_orientation_z_;
 }
 
-std::uint8_t* RosToAirSimClass::GetImageData()
+double RosToAirSimClass::GetTrajectory3DPointPoseOrientationW()
 {
-    return image_data_;
-}
-    
-size_t RosToAirSimClass::GetImageDataSize()
-{
-    return image_data_size_;
-}
-    
-int8_t RosToAirSimClass::GetImageType()
-{
-    return image_type_;
+    return trajectory3dpoint_pose_orientation_w_;
 }
 }  // namespace js_airsim_to_ros_library
 

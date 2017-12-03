@@ -10,75 +10,37 @@ namespace ros_to_airsim {
 
 struct Quaternion;
 
-struct Quaternion FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_X = 4,
-    VT_Y = 6,
-    VT_Z = 8,
-    VT_W = 10
-  };
+MANUALLY_ALIGNED_STRUCT(8) Quaternion FLATBUFFERS_FINAL_CLASS {
+ private:
+  double x_;
+  double y_;
+  double z_;
+  double w_;
+
+ public:
+  Quaternion() {
+    memset(this, 0, sizeof(Quaternion));
+  }
+  Quaternion(double _x, double _y, double _z, double _w)
+      : x_(flatbuffers::EndianScalar(_x)),
+        y_(flatbuffers::EndianScalar(_y)),
+        z_(flatbuffers::EndianScalar(_z)),
+        w_(flatbuffers::EndianScalar(_w)) {
+  }
   double x() const {
-    return GetField<double>(VT_X, 0.0);
+    return flatbuffers::EndianScalar(x_);
   }
   double y() const {
-    return GetField<double>(VT_Y, 0.0);
+    return flatbuffers::EndianScalar(y_);
   }
   double z() const {
-    return GetField<double>(VT_Z, 0.0);
+    return flatbuffers::EndianScalar(z_);
   }
   double w() const {
-    return GetField<double>(VT_W, 0.0);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<double>(verifier, VT_X) &&
-           VerifyField<double>(verifier, VT_Y) &&
-           VerifyField<double>(verifier, VT_Z) &&
-           VerifyField<double>(verifier, VT_W) &&
-           verifier.EndTable();
+    return flatbuffers::EndianScalar(w_);
   }
 };
-
-struct QuaternionBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_x(double x) {
-    fbb_.AddElement<double>(Quaternion::VT_X, x, 0.0);
-  }
-  void add_y(double y) {
-    fbb_.AddElement<double>(Quaternion::VT_Y, y, 0.0);
-  }
-  void add_z(double z) {
-    fbb_.AddElement<double>(Quaternion::VT_Z, z, 0.0);
-  }
-  void add_w(double w) {
-    fbb_.AddElement<double>(Quaternion::VT_W, w, 0.0);
-  }
-  explicit QuaternionBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  QuaternionBuilder &operator=(const QuaternionBuilder &);
-  flatbuffers::Offset<Quaternion> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Quaternion>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Quaternion> CreateQuaternion(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    double x = 0.0,
-    double y = 0.0,
-    double z = 0.0,
-    double w = 0.0) {
-  QuaternionBuilder builder_(_fbb);
-  builder_.add_w(w);
-  builder_.add_z(z);
-  builder_.add_y(y);
-  builder_.add_x(x);
-  return builder_.Finish();
-}
+STRUCT_END(Quaternion, 32);
 
 }  // namespace ros_to_airsim
 

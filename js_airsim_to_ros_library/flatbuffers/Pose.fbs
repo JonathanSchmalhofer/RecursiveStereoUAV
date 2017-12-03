@@ -3,7 +3,7 @@ include "Quaternion.fbs";
 
 namespace ros_to_airsim;
 
-table Pose {
+struct Pose {
     position: Point;
     orientation: Quaternion;
 }
