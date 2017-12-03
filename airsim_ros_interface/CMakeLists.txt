@@ -129,6 +129,7 @@ add_executable(airsim_rpc_client
 add_executable(airsim_zmq_bridge
     src/airsim_zmq_bridge.cpp
     src/StereoImageRpcClient.cpp
+    src/ros_to_airsim_class.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 

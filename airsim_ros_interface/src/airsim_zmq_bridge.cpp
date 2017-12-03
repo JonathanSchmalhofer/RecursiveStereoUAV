@@ -2,30 +2,48 @@
 /// @file
 /// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
 ///
-/// @brief zmq publisher reading stereo images from shared memory queue
+/// @brief zmq publisher and subscriber reading stereo images from shared memory queue
 ///
 #include "StereoImageRpcClient.hpp"
 #include "airsim_zmq_bridge.hpp"
+#include "ros_to_airsim_class.h"
 #include "InputParser.hpp"
 
 bool debug_mode_activated = false;
+std::string address;
 
 int main(int argc, const char *argv[])
 {
     InputParser input_parser(argc, argv);
-
+    
     if (input_parser.cmdOptionExists("-d") || input_parser.cmdOptionExists("--debug"))
     {
         debug_mode_activated = true;
+    }    
+    if (input_parser.cmdOptionExists("-a"))
+    {
+        address = input_parser.getCmdOption("-a");
     }
+    if (input_parser.cmdOptionExists("--address"))
+    {
+        address = input_parser.getCmdOption("--address");
+    }    
     
     //Create a shared memory object.
     shared_memory_object mutex_shared_memory(open_only, "MutexSharedMemory", read_write);
 
     //  We send updates via this socket
     zmq::context_t context(1);
-    zmq::socket_t publishSocket = zmq::socket_t(context, ZMQ_PUB);
-    publishSocket.bind("tcp://*:5676");
+    
+    // Publisher
+    zmq::socket_t publish_socket = zmq::socket_t(context, ZMQ_PUB);
+    publish_socket.bind("tcp://*:5676");
+    
+    if (debug_mode_activated)
+    {
+        std::cout << "Subscribing to " << address << std::endl;
+    }
+    ros_to_airsim::RosToAirSimClass ros_to_airsim(address);
     
     try
     {
@@ -117,7 +135,7 @@ int main(int argc, const char *argv[])
                     int buffersize = fbb.GetSize();
                     zmq::message_t image_msg(buffersize);
                     memcpy((void *)image_msg.data(), fbb.GetBufferPointer(), buffersize);
-                    publishSocket.send(image_msg);
+                    publish_socket.send(image_msg);
                     
                     if (debug_mode_activated)
                     {
