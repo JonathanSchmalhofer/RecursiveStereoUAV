@@ -39,10 +39,8 @@ int8_t RosToAirSimClass::ReceivedMessage()
 {
     zmq::message_t zmq_received_message;
     zmq_subscriber_.recv(&zmq_received_message);
-
-    int8_t return_value = 0;
     
-    /*
+    
     flatbuffers::FlatBufferBuilder fbb;
     ros_to_airsim::Trajectory3DPointStampedBuilder builder(fbb);
 
@@ -51,24 +49,23 @@ int8_t RosToAirSimClass::ReceivedMessage()
                                                           zmq_received_message.size());
     int8_t return_value = 0;
 
-
     if (zmq_received_message.size() > 0)
     {
       // Make sure the message has valid data.
-      if (ros_to_airsim::VerifyTrajectory3DBuffer(verifier))
+      if (ros_to_airsim::VerifyTrajectory3DPointStampedBuffer(verifier))
       {
           auto flatbuffer_trajectory3d_rcvd = ros_to_airsim::GetTrajectory3DPointStamped(zmq_received_message.data());
 
           // Trajectory3DPoint
-          trajectory3dpoint_time_sec_           = flatbuffer_trajectory3d_rcvd->time()->sec();
-          trajectory3dpoint_time_nsec_          = flatbuffer_trajectory3d_rcvd->time()->nsec();
-          trajectory3dpoint_pose_position_x_    = flatbuffer_trajectory3d_rcvd->pose()->position()->x();
-          trajectory3dpoint_pose_position_y_    = flatbuffer_trajectory3d_rcvd->pose()->position()->y();
-          trajectory3dpoint_pose_position_z_    = flatbuffer_trajectory3d_rcvd->pose()->position()->z();
-          trajectory3dpoint_pose_orientation_x_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->x();
-          trajectory3dpoint_pose_orientation_y_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->y();
-          trajectory3dpoint_pose_orientation_z_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->z();
-          trajectory3dpoint_pose_orientation_w_ = flatbuffer_trajectory3d_rcvd->pose()->orientation()->w();
+          trajectory3dpoint_time_sec_           = flatbuffer_trajectory3d_rcvd->timestamp()->sec();
+          trajectory3dpoint_time_nsec_          = flatbuffer_trajectory3d_rcvd->timestamp()->nsec();
+          trajectory3dpoint_pose_position_x_    = flatbuffer_trajectory3d_rcvd->pose()->position().x();
+          trajectory3dpoint_pose_position_y_    = flatbuffer_trajectory3d_rcvd->pose()->position().y();
+          trajectory3dpoint_pose_position_z_    = flatbuffer_trajectory3d_rcvd->pose()->position().z();
+          trajectory3dpoint_pose_orientation_x_ = flatbuffer_trajectory3d_rcvd->pose()->orientation().x();
+          trajectory3dpoint_pose_orientation_y_ = flatbuffer_trajectory3d_rcvd->pose()->orientation().y();
+          trajectory3dpoint_pose_orientation_z_ = flatbuffer_trajectory3d_rcvd->pose()->orientation().z();
+          trajectory3dpoint_pose_orientation_w_ = flatbuffer_trajectory3d_rcvd->pose()->orientation().w();
           
           return_value                = 1;
       }
@@ -76,7 +73,7 @@ int8_t RosToAirSimClass::ReceivedMessage()
       {
           return_value                = -1;
       }
-    }*/
+    }
 
     return return_value;
 }
