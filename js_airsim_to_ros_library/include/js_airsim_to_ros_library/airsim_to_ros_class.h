@@ -9,7 +9,7 @@
 
 #include <cstdint>
 #include <zeromq_cpp/zmq.hpp>
-#include "Image_generated.h"
+#include <js_messages/Image_generated.h>
 
 namespace js_airsim_to_ros_library
 {
