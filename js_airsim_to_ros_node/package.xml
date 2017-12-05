@@ -14,9 +14,7 @@
     <build_depend>roscpp</build_depend>
     <build_depend>image_transport</build_depend>
     <build_depend>cv_bridge</build_depend>
-    <build_depend>message_generation</build_depend>
     <run_depend>js_airsim_to_ros_library</run_depend>
-    <run_depend>message_runtime</run_depend>
     <run_depend>roscpp</run_depend>
     <run_depend>image_transport</run_depend>
     <run_depend>cv_bridge</run_depend>

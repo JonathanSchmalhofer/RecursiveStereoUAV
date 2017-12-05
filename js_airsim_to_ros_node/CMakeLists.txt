@@ -10,21 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
     image_transport
     cv_bridge
     roslaunch
-    std_msgs
-    geometry_msgs
-    message_generation
-)
-
-add_message_files(
-    FILES
-    Trajectory3D.msg
-    Trajectory3DPointStamped.msg
-)
-
-generate_messages(
-    DEPENDENCIES
-    std_msgs
-    geometry_msgs
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
@@ -38,7 +23,7 @@ find_package(js_airsim_to_ros_library REQUIRED)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES airsim_to_ros_node
-    CATKIN_DEPENDS js_airsim_to_ros_library roscpp image_transport cv_bridge message_runtime
+    CATKIN_DEPENDS js_airsim_to_ros_library roscpp image_transport cv_bridge
 )
 
 ###########

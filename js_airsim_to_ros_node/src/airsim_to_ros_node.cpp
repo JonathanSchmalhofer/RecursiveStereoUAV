@@ -7,7 +7,6 @@
 #include <string>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <js_airsim_to_ros_node/Trajectory3D.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
 int main(int argc, char **argv)

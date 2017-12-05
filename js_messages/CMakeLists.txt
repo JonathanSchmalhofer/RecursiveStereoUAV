@@ -28,7 +28,7 @@ generate_messages(
 ###################################
 
 catkin_package(
-    INCLUDE_DIRS
+    INCLUDE_DIRS include
     LIBRARIES
     CATKIN_DEPENDS message_runtime
 )
@@ -44,7 +44,7 @@ catkin_package(
 install(DIRECTORY include/${PROJECT_NAME}/
     DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
     FILES_MATCHING PATTERN "*.h"
-    PATTERN ".git" EXCLUDE
+    PATTERN ".svn" EXCLUDE
 )
 
 #############
