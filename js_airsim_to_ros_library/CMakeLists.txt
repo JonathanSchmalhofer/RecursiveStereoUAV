@@ -21,7 +21,7 @@ find_package(js_messages REQUIRED)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES airsim_to_ros_library
-    CATKIN_DEPENDS zeromq_catkin flatbuffers_catkin
+    CATKIN_DEPENDS zeromq_catkin flatbuffers_catkin js_messages
 )
 
 ###########
@@ -32,6 +32,7 @@ include_directories(
     include
     ${zeromq_catkin_INCLUDE_DIRS}
     ${flatbuffers_catkin_INCLUDE_DIRS}
+    ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
