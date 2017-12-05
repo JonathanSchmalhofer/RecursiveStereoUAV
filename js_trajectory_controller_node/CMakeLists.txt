@@ -8,26 +8,12 @@ add_compile_options(
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
-    std_msgs
-    geometry_msgs
-    message_generation
+    js_messages
 )
-
-add_message_files(
-#    FILES
-#    Trajectory3D.msg
-#    Trajectory3DPointStamped.msg
-)
-
-#generate_messages(
-#    DEPENDENCIES
-#    std_msgs
-#    geometry_msgs
-#)
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
-#find_package(js_airsim_to_ros_library REQUIRED)
+find_package(js_messages REQUIRED)
 
 ###################################
 ## catkin specific configuration ##
@@ -36,7 +22,7 @@ roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES ideal_trajectory_controller_node
-    CATKIN_DEPENDS roscpp message_runtime
+    CATKIN_DEPENDS roscpp js_messages
 )
 
 ###########
@@ -44,15 +30,18 @@ catkin_package(
 ###########
 
 include_directories(
-#    ${js_airsim_to_ros_library_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(ideal_trajectory_controller_node src/ideal_trajectory_controller_node.cpp)
+add_executable(ideal_trajectory_controller_node
+    src/ideal_trajectory_controller_node.cpp)
 
 target_link_libraries(ideal_trajectory_controller_node
-#    ${js_airsim_to_ros_library_LIBRARIES}
     ${catkin_LIBRARIES}
+)
+
+add_dependencies(ideal_trajectory_controller_node
+    js_messages_generate_messages_cpp
 )
 
 #############

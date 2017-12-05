@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-    <name>js_trajectory_controller_node</name>
+    <name>js_messages</name>
     <version>0.0.1</version>
-    <description>The js_trajectory_controller_node package</description>
+    <description>The js_messages package</description>
     <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Bryan Schmalhofer</maintainer>
 
     <license>MIT</license>
@@ -10,11 +10,7 @@
     <author>Jonathan Bryan Schmalhofer</author>
 
     <buildtool_depend>catkin</buildtool_depend>
-    <build_depend>roscpp</build_depend>
-    <build_depend>js_messages</build_depend>
     <build_depend>message_generation</build_depend>
     <run_depend>message_runtime</run_depend>
-    <run_depend>js_messages</run_depend>
-    <run_depend>roscpp</run_depend>
 
 </package>

@@ -6,6 +6,7 @@
 ///
 #include <string>
 #include <ros/ros.h>
+#include <js_messages/Trajectory3D.h>
 
 int main(int argc, char **argv)
 {
