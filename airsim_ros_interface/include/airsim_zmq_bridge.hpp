@@ -7,7 +7,7 @@
 #ifndef AIRSIM_ZMQ_BRIDGE_HPP_
 #define AIRSIM_ZMQ_BRIDGE_HPP_
 
-#include <js_airsim_to_ros_library/Image_generated.h>
+#include <js_messages/Image_generated.h>
 #include <zeromq_cpp/zmq.hpp>
 
 // Synchronization

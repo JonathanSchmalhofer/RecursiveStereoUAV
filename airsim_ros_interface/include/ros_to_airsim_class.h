@@ -9,7 +9,7 @@
 
 #include <cstdint>
 #include <zeromq_cpp/zmq.hpp>
-#include <js_airsim_to_ros_library/Trajectory3DPointStampedRoot_generated.h>
+#include <js_messages/Trajectory3DPointStampedRoot_generated.h>
 
 namespace ros_to_airsim
 {

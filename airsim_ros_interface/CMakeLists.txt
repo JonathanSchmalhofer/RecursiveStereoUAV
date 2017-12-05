@@ -102,7 +102,7 @@ include_directories(
     ${ZMQ_INCLUDES}
     ${FLATBUFFERS_INCLUDES}
     ${Boost_INCLUDE_DIRS}
-    ../js_airsim_to_ros_library/include/
+    ../js_messages/include/
 )
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
