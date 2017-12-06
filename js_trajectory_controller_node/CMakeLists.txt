@@ -15,6 +15,10 @@ roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_messages REQUIRED)
 
+find_package(zeromq_catkin REQUIRED)
+
+find_package(flatbuffers_catkin REQUIRED)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -22,7 +26,7 @@ find_package(js_messages REQUIRED)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES ideal_trajectory_controller_node
-    CATKIN_DEPENDS roscpp js_messages
+    CATKIN_DEPENDS roscpp js_messages flatbuffers_catkin zeromq_catkin
 )
 
 ###########
@@ -30,13 +34,22 @@ catkin_package(
 ###########
 
 include_directories(
+    include
+    ${zeromq_catkin_INCLUDE_DIRS}
+    ${flatbuffers_catkin_INCLUDE_DIRS}
+    ${js_messages_INCLUDE_DIRS}/includes
+    ${js_messages_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 
 add_executable(ideal_trajectory_controller_node
-    src/ideal_trajectory_controller_node.cpp)
+    src/ideal_trajectory_controller_node.cpp
+    src/trajectory_point_to_airsim_class.cpp
+)
 
 target_link_libraries(ideal_trajectory_controller_node
+    ${zeromq_catkin_LIBRARIES}
+    ${flatbuffers_catkin_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 
