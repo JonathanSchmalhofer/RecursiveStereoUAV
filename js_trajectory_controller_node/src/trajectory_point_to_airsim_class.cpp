@@ -26,43 +26,71 @@ Trajectory3DPointToAirSimClass::Trajectory3DPointToAirSimClass(std::string const
     trajectory3dpoint_pose_orientation_y_   = 0;
     trajectory3dpoint_pose_orientation_z_   = 0;
     trajectory3dpoint_pose_orientation_w_   = 0;
-        
-    flatbuffers::FlatBufferBuilder fbb;
-    
-    /*
-    // Image.header.stamp
-    airsim_to_ros::time message_time(ros_image.header.stamp.sec,ros_image.header.stamp.nsec);
-    // Image.header
-    auto header = airsim_to_ros::CreateHeader(
-        fbb, 
-        ros_image.header.seq,
-        &message_time,
-        fbb.CreateString(ros_image.header.frame_id));
-    fbb.Finish(header);
-    // Image
-    std::vector<std::uint8_t> image_data(3 * 640 * 480);
-    auto image = airsim_to_ros::CreateImage(
-        fbb, 
-        0, 
-        header, 
-        ros_image.height,
-        ros_image.width,
-        fbb.CreateString(ros_image.encoding),
-        ros_image.is_bigendian,
-        ros_image.step,
-        fbb.CreateVector<std::uint8_t>(ros_image.data));
-    fbb.Finish(image);
+}
 
-    ROS_INFO("   Sending Image");
-    */
-    int buffersize = fbb.GetSize();
-    zmq::message_t image_msg(buffersize);
-    memcpy((void *)image_msg.data(), fbb.GetBufferPointer(), buffersize);
-    zmq_publisher_.send(image_msg);
-    //ROS_INFO("   Image Sent (%d Bytes)", buffersize);
+void Trajectory3DPointToAirSimClass::SendTrajectory3DPoint()
+{
+  flatbuffers::FlatBufferBuilder fbb;
+
+  // Trajectory3DPointStamped.timestamp
+  ros_to_airsim::time trajectory_timestamp(trajectory3dpoint_timestamp_sec_,trajectory3dpoint_timestamp_nsec_);
+
+  // Trajectory3DPointStamped.pose
+  ros_to_airsim::Point trajectory_position(trajectory3dpoint_pose_position_x_, trajectory3dpoint_pose_position_y_, trajectory3dpoint_pose_position_z_);
+  ros_to_airsim::Quaternion trajectory_orientation(trajectory3dpoint_pose_orientation_x_, trajectory3dpoint_pose_orientation_y_, trajectory3dpoint_pose_orientation_z_, trajectory3dpoint_pose_orientation_w_);
+  ros_to_airsim::Pose trajectory_pose(trajectory_position, trajectory_orientation);
+
+  // Trajectory3DPointStamped
+  auto trajectory3dpoint = ros_to_airsim::CreateTrajectory3DPointStamped(
+      fbb,
+        &trajectory_timestamp,
+        &trajectory_pose
+      );
+  fbb.Finish(trajectory3dpoint);
+
+  int buffersize = fbb.GetSize();
+  zmq::message_t trajectory3dpoint_msg(buffersize);
+  memcpy((void *)trajectory3dpoint_msg.data(), fbb.GetBufferPointer(), buffersize);
+  zmq_publisher_.send(trajectory3dpoint_msg);
 }
     
 Trajectory3DPointToAirSimClass::~Trajectory3DPointToAirSimClass()
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointTimeStampSec(std::uint32_t sec)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointTimeStampNsec(std::uint32_t nsec)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPosePositionX(double x)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPosePositionY(double y)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPosePositionZ(double z)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPoseOrientationX(double x)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPoseOrientationY(double y)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPoseOrientationZ(double z)
+{
+}
+
+void Trajectory3DPointToAirSimClass::SetTrajectory3DPointPoseOrientationW(double w)
 {
 }
 }  // namespace js_airsim_to_ros_library
