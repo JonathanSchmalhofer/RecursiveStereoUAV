@@ -1,6 +1,9 @@
 # build folders
 */build/*/*.*
 
+# Unreal Environment Binaries
+*/Unreal/*/*.*
+
 # Compiled Object files
 *.slo
 *.lo
