@@ -13,12 +13,13 @@ bool camera_calibration_mode_activated = false;
 bool initial_pose_set = false;
 msr::airlib::Pose initial_pose, new_pose;
 
-void WaitForAnyKeyPress()
+void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height)
 {
-    do 
-    {
-        std::cout << "\n" << "Press enter to take a camera calibration snapshot\n";
-    } while (std::cin.get() != '\n');
+  //Encode the image
+  unsigned error = lodepng::encode(filename, image, width, height);
+
+  //if there's an error, display it
+  if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
 }
 
 int main(int argc, const char *argv[])
@@ -80,6 +81,7 @@ int main(int argc, const char *argv[])
         mutex_data->initial_pose_.orientation_.z_ = initial_pose.orientation.z();
         mutex_data->initial_pose_.orientation_.w_ = initial_pose.orientation.w();
 
+        std::uint32_t loop_counter = 0;
         bool keep_looping = true;
         do
         {
@@ -102,6 +104,7 @@ int main(int argc, const char *argv[])
                 {
                     WaitForAnyKeyPress();
                 }
+                loop_counter++;
             }
             
             // if the trajectory point has been updated in the queue, get it
@@ -142,6 +145,39 @@ int main(int argc, const char *argv[])
                 for(int i = 0; i < received_image_response_vector.at(current_image_index).second.image_data_uint8.size(); ++i)
                 {
                     image_vector->push_back(received_image_response_vector.at(current_image_index).second.image_data_uint8.at(i));
+                }
+                
+                
+                if (camera_calibration_mode_activated)
+                {
+                    std::ostringstream filename_stringstream;                
+                    switch(received_image_response_vector.at(current_image_index).first)
+                    {
+                        case StereoImageType::LeftStereoImage:
+                                filename_stringstream << "left_";
+                                break;
+                        case StereoImageType::RightStereoImage:
+                                filename_stringstream << "right_";
+                                break;
+                        default:
+                                filename_stringstream << "unknown_";
+                                break;
+                    }
+                    filename_stringstream << std::setfill('0') << std::setw(5) << loop_counter << ".png";
+                    
+                    std::string filename_image = filename_stringstream.str();
+                    
+                    if (    StereoImageType::LeftStereoImage == received_image_response_vector.at(current_image_index).first
+                        ||  StereoImageType::RightStereoImage == received_image_response_vector.at(current_image_index).first
+                        )
+                    {
+                        EncodeAndSaveImageAsPng(
+                            filename_image.c_str(),
+                            received_image_response_vector.at(current_image_index).second.image_data_uint8,
+                            received_image_response_vector.at(current_image_index).second.width,
+                            received_image_response_vector.at(current_image_index).second.height
+                        );
+                    }
                 }
                 
                 //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
@@ -185,4 +221,24 @@ int main(int argc, const char *argv[])
     }
 
     return 0;
+}
+
+void WaitForAnyKeyPress()
+{
+    do 
+    {
+        std::cout << "\n" << "Press enter to take a camera calibration snapshot\n";
+    } while (std::cin.get() != '\n');
+}
+
+void EncodeAndSaveImageAsPng(const char* filename, std::vector<std::uint8_t>& image, unsigned width, unsigned height)
+{
+  std::vector<std::uint8_t> png;
+  lodepng::State state; //optionally customize this one
+
+  unsigned error = lodepng::encode(png, image, width, height, state);
+  if(!error) lodepng::save_file(png, filename);
+
+  //if there's an error, display it
+  if(error) std::cout << "png encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
 }

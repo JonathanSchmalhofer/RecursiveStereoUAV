@@ -123,6 +123,7 @@ add_executable(${OUTPUT_LIBRARY_NAME}
 add_executable(airsim_rpc_client
     src/airsim_rpc_client.cpp
     src/StereoImageRpcClient.cpp
+    src/lodepng.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 

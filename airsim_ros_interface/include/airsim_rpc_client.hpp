@@ -7,6 +7,9 @@
 #ifndef AIRSIM_RPC_CLIENT_HPP_
 #define AIRSIM_RPC_CLIENT_HPP_
 
+// Formating filenames
+#include <boost/format.hpp> 
+
 // Synchronization
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
@@ -24,6 +27,7 @@
 
 #include <cstdint> //std::uint8_t
 
+#include "lodepng.h" //class for saving png files in camera calibration mode
 
 
 using namespace boost::interprocess;
@@ -35,6 +39,12 @@ typedef allocator<std::uint8_t, managed_shared_memory::segment_manager>  SharedM
 //Alias a vector that uses the previous STL-like allocator so that allocates
 //its values from the segment
 typedef vector<std::uint8_t, SharedMemoryAllocator> ImageVector;
+
+//Encode image data as png with lib lodepng and save file
+void EncodeAndSaveImageAsPng(const char* filename, std::vector<std::uint8_t>& image, unsigned width, unsigned height);
+
+//Wait and loop until ENTER was pressed
+void WaitForAnyKeyPress();
 
 //Erase previous shared memory and schedule erasure on exit
 struct shared_memory_remove_helper
