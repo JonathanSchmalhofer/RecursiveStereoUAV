@@ -2,7 +2,7 @@
 */build/*/*.*
 
 # Unreal Environment Binaries
-/Unreal/*/*.*
+Unreal/*/*.*
 
 # Compiled Object files
 *.slo
