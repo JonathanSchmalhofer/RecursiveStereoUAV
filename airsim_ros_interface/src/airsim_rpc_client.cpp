@@ -9,8 +9,17 @@
 #include "InputParser.hpp"
 
 bool debug_mode_activated = false;
+bool camera_calibration_mode_activated = false;
 bool initial_pose_set = false;
 msr::airlib::Pose initial_pose, new_pose;
+
+void WaitForAnyKeyPress()
+{
+    do 
+    {
+        std::cout << "\n" << "Press enter to take a camera calibration snapshot\n";
+    } while (std::cin.get() != '\n');
+}
 
 int main(int argc, const char *argv[])
 {
@@ -19,6 +28,12 @@ int main(int argc, const char *argv[])
     if (input_parser.cmdOptionExists("-d") || input_parser.cmdOptionExists("--debug"))
     {
         debug_mode_activated = true;
+    }
+
+    if (input_parser.cmdOptionExists("-cc") || input_parser.cmdOptionExists("--camera-calibration"))
+    {
+        std::cout << "Camera calibration mode activated\n";
+        camera_calibration_mode_activated = true;
     }
 
     StereoImageRpcClient *client = new StereoImageRpcClient();    
@@ -76,12 +91,16 @@ int main(int argc, const char *argv[])
                 if (debug_mode_activated)
                 {
                     std::cout << "Waiting for queue to be emptied and trajectory point to be set" << std::endl;
-                }
+                }    
                 // this condition will only be triggered once a new trajectory is available
                 mutex_data->condition_trajectory_.wait(lock);
                 if (debug_mode_activated)
                 {
                     std::cout << "New trajectory point received" << std::endl;
+                }
+                if (camera_calibration_mode_activated)
+                {
+                    WaitForAnyKeyPress();
                 }
             }
             
@@ -96,7 +115,10 @@ int main(int argc, const char *argv[])
                     mutex_data->trajectory_pose_.orientation_.x_,
                     mutex_data->trajectory_pose_.orientation_.y_,
                     mutex_data->trajectory_pose_.orientation_.z_));
-            client->SetPositionAndOrientation(new_pose);
+            if (false == camera_calibration_mode_activated)
+            {
+                client->SetPositionAndOrientation(new_pose);
+            }
 
             // get process queue of stereo images from client
             auto received_image_response_vector = client->RequestStereoImagesAndDepthImage();

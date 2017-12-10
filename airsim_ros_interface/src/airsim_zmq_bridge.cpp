@@ -10,6 +10,7 @@
 #include "InputParser.hpp"
 
 bool debug_mode_activated = false;
+bool camera_calibration_mode_activated = false;
 std::string address;
 
 int main(int argc, const char *argv[])
@@ -27,7 +28,12 @@ int main(int argc, const char *argv[])
     if (input_parser.cmdOptionExists("--address"))
     {
         address = input_parser.getCmdOption("--address");
-    }    
+    }
+    if (input_parser.cmdOptionExists("-cc") || input_parser.cmdOptionExists("--camera-calibration"))
+    {
+        std::cout << "Camera calibration mode activated\n";
+        camera_calibration_mode_activated = true;
+    }
     
     //Create a shared memory object.
     shared_memory_object mutex_shared_memory(open_only, "MutexSharedMemory", read_write);
@@ -158,41 +164,43 @@ int main(int argc, const char *argv[])
                     std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
                 }
                 
-                uint8_t wait_loop_counter = 0;
-                int8_t received_message = 0;
-                do
+                if (false == camera_calibration_mode_activated)
                 {
-                    received_message = ros_to_airsim.ReceivedMessage();
-                    if (wait_loop_counter > 300)
+                    uint8_t wait_loop_counter = 0;
+                    int8_t received_message = 0;
+                    do
                     {
-                        if (debug_mode_activated)
+                        received_message = ros_to_airsim.ReceivedMessage();
+                        if (wait_loop_counter > 300)
                         {
-                            std::cout << "!!!!! Timeout while waiting for new trajectory !!!!!" << std::endl;
+                            if (debug_mode_activated)
+                            {
+                                std::cout << "!!!!! Timeout while waiting for new trajectory !!!!!" << std::endl;
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    if (-1 == received_message)
-                    {
-                        if (debug_mode_activated)
+                        if (-1 == received_message)
                         {
-                            std::cout << "!!!!! Received Message of wrong size or format !!!!!" << std::endl;
+                            if (debug_mode_activated)
+                            {
+                                std::cout << "!!!!! Received Message of wrong size or format !!!!!" << std::endl;
+                            }
+                            break;
                         }
-                        break;
+                        
+                        wait_loop_counter++;
                     }
+                    while(0 == received_message);
                     
-                    wait_loop_counter++;
+                    // Write last received data into shared memory
+                    mutex_data->trajectory_pose_.position_.x_ = ros_to_airsim.GetTrajectory3DPointPosePositionX();
+                    mutex_data->trajectory_pose_.position_.y_ = ros_to_airsim.GetTrajectory3DPointPosePositionY();
+                    mutex_data->trajectory_pose_.position_.z_ = ros_to_airsim.GetTrajectory3DPointPosePositionZ();
+                    mutex_data->trajectory_pose_.orientation_.x_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationX();
+                    mutex_data->trajectory_pose_.orientation_.y_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationY();
+                    mutex_data->trajectory_pose_.orientation_.z_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationZ();
+                    mutex_data->trajectory_pose_.orientation_.w_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationW();
                 }
-                while(0 == received_message);
-                
-                // Write last received data into shared memory
-                mutex_data->trajectory_pose_.position_.x_ = ros_to_airsim.GetTrajectory3DPointPosePositionX();
-                mutex_data->trajectory_pose_.position_.y_ = ros_to_airsim.GetTrajectory3DPointPosePositionY();
-                mutex_data->trajectory_pose_.position_.z_ = ros_to_airsim.GetTrajectory3DPointPosePositionZ();
-                mutex_data->trajectory_pose_.orientation_.x_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationX();
-                mutex_data->trajectory_pose_.orientation_.y_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationY();
-                mutex_data->trajectory_pose_.orientation_.z_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationZ();
-                mutex_data->trajectory_pose_.orientation_.w_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationW();
-                
                 // Notify waiting rpc client that a new trajectory has been sent
                 mutex_data->condition_trajectory_.notify_one();
             }
