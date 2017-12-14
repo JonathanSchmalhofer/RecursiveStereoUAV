@@ -183,7 +183,7 @@ int main(int argc, const char *argv[])
                 //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
                 mutex_data->message_image_information_.header_stamp_sec_ = 0;
                 mutex_data->message_image_information_.header_stamp_nsec_ = 0;
-                mutex_data->message_image_information_.header_seq_ = 0;
+                mutex_data->message_image_information_.header_seq_ = loop_counter;
                 mutex_data->message_image_information_.header_frame_id_ = "";
                 mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
                 mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
