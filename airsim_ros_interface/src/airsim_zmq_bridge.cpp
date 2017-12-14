@@ -11,6 +11,7 @@
 
 bool debug_mode_activated = false;
 bool camera_calibration_mode_activated = false;
+bool no_zeromq_forwarding = false;
 std::string address;
 
 int main(int argc, const char *argv[])
@@ -33,6 +34,11 @@ int main(int argc, const char *argv[])
     {
         std::cout << "Camera calibration mode activated\n";
         camera_calibration_mode_activated = true;
+    }
+    if (input_parser.cmdOptionExists("-nz") || input_parser.cmdOptionExists("--no-zeromq-forwarding"))
+    {
+        std::cout << "Deactivated ZeroMQ Forwarding.\n";
+        no_zeromq_forwarding = true;
     }
     
     //Create a shared memory object.
@@ -96,62 +102,65 @@ int main(int argc, const char *argv[])
                         std::cout << "mutex_data->number_remaining_sub_messages_ = " << unsigned(mutex_data->number_remaining_sub_messages_) << std::endl;
                     }
                     
-                    msr::airlib::VehicleCameraBase::ImageResponse sub_message_image;
-                    for(int i = 0; i < image_vector->size(); ++i)
+                    if (false == no_zeromq_forwarding)
                     {
-                        sub_message_image.image_data_uint8.push_back(image_vector->at(i));
-                    }
-                    received_image_response_vector.push_back(sub_message_image);
-                    if (debug_mode_activated)
-                    {
-                        std::cout << "image_vector->size() = " << image_vector->size() << std::endl;
-                        std::cout << "image_vector->at(0) = " << unsigned(image_vector->at(0)) << std::endl;
-                    }
-                    
-                    // copy image into flatbuffers
-                    flatbuffers::FlatBufferBuilder fbb;
-                    
-                    // Image.header.stamp
-                    airsim_to_ros::time message_time(
-                        mutex_data->message_image_information_.header_stamp_sec_,
-                        mutex_data->message_image_information_.header_stamp_nsec_);
-                    
-                    // Image.header
-                    auto header = airsim_to_ros::CreateHeader(
-                        fbb, 
-                        mutex_data->message_image_information_.header_seq_,
-                        &message_time,
-                        fbb.CreateString(mutex_data->message_image_information_.header_frame_id_));
-                    fbb.Finish(header);
-                    
-                    // Image
-                    auto image = airsim_to_ros::CreateImage(
-                        fbb,
-                        static_cast<std::int8_t>(mutex_data->message_image_information_.type_),
-                        header,
-                        mutex_data->message_image_information_.image_height_,
-                        mutex_data->message_image_information_.image_width_,
-                        fbb.CreateString(mutex_data->message_image_information_.image_encoding_),
-                        mutex_data->message_image_information_.image_is_bigendian_,
-                        mutex_data->message_image_information_.image_step_,
-                        fbb.CreateVector<std::uint8_t>(sub_message_image.image_data_uint8));
-                    fbb.Finish(image);
-                    
-                    // Copy flatbuffers into zmq message and send it
-                    int buffersize = fbb.GetSize();
-                    zmq::message_t image_msg(buffersize);
-                    memcpy((void *)image_msg.data(), fbb.GetBufferPointer(), buffersize);
-                    publish_socket.send(image_msg);
-                    
-                    if (debug_mode_activated)
-                    {
-                        std::cout << "Sent flatbuffer message via zmq: " << buffersize << std::endl;
-                        std::cout << "    buffersize: " << buffersize << std::endl;
-                        std::cout << "    type: " << unsigned(mutex_data->message_image_information_.type_) << std::endl;
-                        std::cout << "    height: " << unsigned(mutex_data->message_image_information_.image_height_) << std::endl;
-                        std::cout << "    width: " << unsigned(mutex_data->message_image_information_.image_width_) << std::endl;
-                        std::cout << "    step: " << unsigned(mutex_data->message_image_information_.image_step_) << std::endl;
-                        std::cout << "    encoding: " << mutex_data->message_image_information_.image_encoding_ << std::endl;
+                        msr::airlib::VehicleCameraBase::ImageResponse sub_message_image;
+                        for(int i = 0; i < image_vector->size(); ++i)
+                        {
+                            sub_message_image.image_data_uint8.push_back(image_vector->at(i));
+                        }
+                        received_image_response_vector.push_back(sub_message_image);
+                        if (debug_mode_activated)
+                        {
+                            std::cout << "image_vector->size() = " << image_vector->size() << std::endl;
+                            std::cout << "image_vector->at(0) = " << unsigned(image_vector->at(0)) << std::endl;
+                        }
+                        
+                        // copy image into flatbuffers
+                        flatbuffers::FlatBufferBuilder fbb;
+                        
+                        // Image.header.stamp
+                        airsim_to_ros::time message_time(
+                            mutex_data->message_image_information_.header_stamp_sec_,
+                            mutex_data->message_image_information_.header_stamp_nsec_);
+                        
+                        // Image.header
+                        auto header = airsim_to_ros::CreateHeader(
+                            fbb, 
+                            mutex_data->message_image_information_.header_seq_,
+                            &message_time,
+                            fbb.CreateString(mutex_data->message_image_information_.header_frame_id_));
+                        fbb.Finish(header);
+                        
+                        // Image
+                        auto image = airsim_to_ros::CreateImage(
+                            fbb,
+                            static_cast<std::int8_t>(mutex_data->message_image_information_.type_),
+                            header,
+                            mutex_data->message_image_information_.image_height_,
+                            mutex_data->message_image_information_.image_width_,
+                            fbb.CreateString(mutex_data->message_image_information_.image_encoding_),
+                            mutex_data->message_image_information_.image_is_bigendian_,
+                            mutex_data->message_image_information_.image_step_,
+                            fbb.CreateVector<std::uint8_t>(sub_message_image.image_data_uint8));
+                        fbb.Finish(image);
+                        
+                        // Copy flatbuffers into zmq message and send it
+                        int buffersize = fbb.GetSize();
+                        zmq::message_t image_msg(buffersize);
+                        memcpy((void *)image_msg.data(), fbb.GetBufferPointer(), buffersize);
+                        publish_socket.send(image_msg);
+                        
+                        if (debug_mode_activated)
+                        {
+                            std::cout << "Sent flatbuffer message via zmq: " << buffersize << std::endl;
+                            std::cout << "    buffersize: " << buffersize << std::endl;
+                            std::cout << "    type: " << unsigned(mutex_data->message_image_information_.type_) << std::endl;
+                            std::cout << "    height: " << unsigned(mutex_data->message_image_information_.image_height_) << std::endl;
+                            std::cout << "    width: " << unsigned(mutex_data->message_image_information_.image_width_) << std::endl;
+                            std::cout << "    step: " << unsigned(mutex_data->message_image_information_.image_step_) << std::endl;
+                            std::cout << "    encoding: " << mutex_data->message_image_information_.image_encoding_ << std::endl;
+                        }
                     }
                     
                     // Decrease remaining number in queue and notify the other process that the buffer has been emptied
@@ -191,16 +200,17 @@ int main(int argc, const char *argv[])
                         wait_loop_counter++;
                     }
                     while(0 == received_message);
-                    
-                    // Write last received data into shared memory
-                    mutex_data->trajectory_pose_.position_.x_ = ros_to_airsim.GetTrajectory3DPointPosePositionX();
-                    mutex_data->trajectory_pose_.position_.y_ = ros_to_airsim.GetTrajectory3DPointPosePositionY();
-                    mutex_data->trajectory_pose_.position_.z_ = ros_to_airsim.GetTrajectory3DPointPosePositionZ();
-                    mutex_data->trajectory_pose_.orientation_.x_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationX();
-                    mutex_data->trajectory_pose_.orientation_.y_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationY();
-                    mutex_data->trajectory_pose_.orientation_.z_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationZ();
-                    mutex_data->trajectory_pose_.orientation_.w_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationW();
                 }
+                
+                // Write last received data into shared memory
+                mutex_data->trajectory_pose_.position_.x_ = ros_to_airsim.GetTrajectory3DPointPosePositionX();
+                mutex_data->trajectory_pose_.position_.y_ = ros_to_airsim.GetTrajectory3DPointPosePositionY();
+                mutex_data->trajectory_pose_.position_.z_ = ros_to_airsim.GetTrajectory3DPointPosePositionZ();
+                mutex_data->trajectory_pose_.orientation_.x_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationX();
+                mutex_data->trajectory_pose_.orientation_.y_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationY();
+                mutex_data->trajectory_pose_.orientation_.z_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationZ();
+                mutex_data->trajectory_pose_.orientation_.w_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationW();
+                
                 // Notify waiting rpc client that a new trajectory has been sent
                 mutex_data->condition_trajectory_.notify_one();
             }

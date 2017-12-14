@@ -29,6 +29,11 @@
 
 #include "lodepng.h" //class for saving png files in camera calibration mode
 
+#include <cmath> // std::sqrt
+
+#include <thread>
+#include <chrono>
+
 
 using namespace boost::interprocess;
 
@@ -45,6 +50,9 @@ void EncodeAndSaveImageAsPng(const char* filename, std::vector<std::uint8_t>& im
 
 //Wait and loop until ENTER was pressed
 void WaitForAnyKeyPress();
+
+//Check whether two poses are significantly different (hardcoded threshold)
+bool significantDifferenceInPose(msr::airlib::Pose one, msr::airlib::Pose two);
 
 //Erase previous shared memory and schedule erasure on exit
 struct shared_memory_remove_helper

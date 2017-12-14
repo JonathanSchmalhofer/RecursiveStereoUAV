@@ -10,13 +10,28 @@
 
 bool debug_mode_activated = false;
 bool camera_calibration_mode_activated = false;
+bool camera_calibration_automatic_recording = false;
 bool initial_pose_set = false;
-msr::airlib::Pose initial_pose, new_pose;
+msr::airlib::Pose initial_pose, new_pose, last_recorded_pose;
+
+bool significantDifferenceInPose(msr::airlib::Pose one, msr::airlib::Pose two)
+{
+    bool significant_change = false;
+    double threshold = 2.0f;
+    double difference = std::sqrt(std::pow(one.position.x()-two.position.x(), 2) + std::pow(one.position.y()-two.position.y(), 2) + std::pow(one.position.z()-two.position.z(), 2));
+    if (difference>threshold)
+    {
+        std::cout << "Significant change of " << difference << "\n";
+        significant_change = true;
+    }
+    return significant_change;
+}
 
 void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height)
 {
   //Encode the image
   unsigned error = lodepng::encode(filename, image, width, height);
+  
 
   //if there's an error, display it
   if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
@@ -30,11 +45,16 @@ int main(int argc, const char *argv[])
     {
         debug_mode_activated = true;
     }
-
     if (input_parser.cmdOptionExists("-cc") || input_parser.cmdOptionExists("--camera-calibration"))
     {
         std::cout << "Camera calibration mode activated\n";
         camera_calibration_mode_activated = true;
+    }
+    if (input_parser.cmdOptionExists("-cca") || input_parser.cmdOptionExists("--camera-calibration-automatic"))
+    {
+        std::cout << "Camera calibration mode with automatic recording activated\n";
+        camera_calibration_mode_activated = true;
+        camera_calibration_automatic_recording = true;
     }
 
     StereoImageRpcClient *client = new StereoImageRpcClient();    
@@ -43,6 +63,7 @@ int main(int argc, const char *argv[])
     {
         initial_pose = client->GetPositionAndOrientation();
         new_pose = initial_pose;
+        last_recorded_pose = initial_pose;
         initial_pose_set = true;
     }
 
@@ -102,7 +123,23 @@ int main(int argc, const char *argv[])
                 }
                 if (camera_calibration_mode_activated)
                 {
-                    WaitForAnyKeyPress();
+                    if (true == camera_calibration_automatic_recording)
+                    {
+                        std::cout << "\n" << "Waiting for significant change in pose" << std::endl;
+                        // wait for position change
+                        msr::airlib::Pose current_pose;
+                        do
+                        {
+                            current_pose = client->GetPositionAndOrientation();
+                            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                        }
+                        while(false==significantDifferenceInPose(current_pose, last_recorded_pose));
+                        last_recorded_pose = current_pose;
+                    }
+                    else
+                    {
+                        WaitForAnyKeyPress();
+                    }
                 }
                 loop_counter++;
             }
@@ -141,10 +178,14 @@ int main(int argc, const char *argv[])
                 const unsigned current_image_index = (mutex_data->number_remaining_sub_messages_ - 1);
                 
                 // extract image data
-                image_vector->clear();                
-                for(int i = 0; i < received_image_response_vector.at(current_image_index).second.image_data_uint8.size(); ++i)
+                image_vector->clear();
+                // Only copy if image needs to be forwarded
+                if (false == camera_calibration_automatic_recording)
                 {
-                    image_vector->push_back(received_image_response_vector.at(current_image_index).second.image_data_uint8.at(i));
+                    for(int i = 0; i < received_image_response_vector.at(current_image_index).second.image_data_uint8.size(); ++i)
+                    {
+                        image_vector->push_back(received_image_response_vector.at(current_image_index).second.image_data_uint8.at(i));
+                    }
                 }
                 
                 
@@ -178,19 +219,19 @@ int main(int argc, const char *argv[])
                             received_image_response_vector.at(current_image_index).second.height
                         );
                     }
+                    
+                    //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
+                    mutex_data->message_image_information_.header_stamp_sec_ = 0;
+                    mutex_data->message_image_information_.header_stamp_nsec_ = 0;
+                    mutex_data->message_image_information_.header_seq_ = loop_counter;
+                    mutex_data->message_image_information_.header_frame_id_ = "";
+                    mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
+                    mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
+                    mutex_data->message_image_information_.image_encoding_ = "rgba8";
+                    mutex_data->message_image_information_.image_is_bigendian_ = false;
+                    mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
+                    mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.width;
                 }
-                
-                //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
-                mutex_data->message_image_information_.header_stamp_sec_ = 0;
-                mutex_data->message_image_information_.header_stamp_nsec_ = 0;
-                mutex_data->message_image_information_.header_seq_ = loop_counter;
-                mutex_data->message_image_information_.header_frame_id_ = "";
-                mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
-                mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
-                mutex_data->message_image_information_.image_encoding_ = "rgba8";
-                mutex_data->message_image_information_.image_is_bigendian_ = false;
-                mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
-                mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.width;
                 
                 //Notify to the other process that there is a message
                 mutex_data->condition_empty_.notify_one();
@@ -199,7 +240,10 @@ int main(int argc, const char *argv[])
                     std::cout << "mutex_data->message_image_information_.type_ = " << signed(mutex_data->message_image_information_.type_) << std::endl;
                     std::cout << "mutex_data->number_remaining_sub_messages_ = " << unsigned(mutex_data->number_remaining_sub_messages_) << std::endl;
                     std::cout << "image_vector->size() = " << image_vector->size() << std::endl;
-                    std::cout << "image_vector->at(0) = " << unsigned(image_vector->at(0)) << std::endl;
+                    if (image_vector->size() > 0)
+                    {
+                        std::cout << "image_vector->at(0) = " << unsigned(image_vector->at(0)) << std::endl;
+                    }
                 }
 
                 //Mark message buffer as full
