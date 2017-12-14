@@ -9,7 +9,7 @@
 #include <image_transport/image_transport.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
-sensor_msgs::Image airsim_image_left_msg airsim_image_right_msg;
+sensor_msgs::Image airsim_image_left_msg, airsim_image_right_msg;
 
 int main(int argc, char **argv)
 {
@@ -91,8 +91,9 @@ int main(int argc, char **argv)
                 &&  airsim_image_left_msg.header.seq > last_sequence_sent
             )
             {
-                left_stereoimage_chatter.publish(airsim_image_msg);
-                right_stereoimage_chatter.publish(airsim_image_msg);
+                ROS_INFO("Images forwarded");
+                left_stereoimage_chatter.publish(airsim_image_left_msg);
+                right_stereoimage_chatter.publish(airsim_image_right_msg);
             }
         }
         else if (-1 == received_return_value)
