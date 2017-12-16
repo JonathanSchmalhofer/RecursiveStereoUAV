@@ -38,7 +38,7 @@ add_library(lodepng
 #############
 
 install(TARGETS lodepng
-     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+     LIBRARY DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(DIRECTORY include/${PROJECT_NAME}/
