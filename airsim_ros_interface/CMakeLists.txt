@@ -103,6 +103,7 @@ include_directories(
     ${FLATBUFFERS_INCLUDES}
     ${Boost_INCLUDE_DIRS}
     ../js_messages/include/
+    ../externals/lodepng/include/
 )
 
 file(GLOB_RECURSE AIRSIM_ROS_INTERFACE_HEADERS
@@ -123,7 +124,7 @@ add_executable(${OUTPUT_LIBRARY_NAME}
 add_executable(airsim_rpc_client
     src/airsim_rpc_client.cpp
     src/StereoImageRpcClient.cpp
-    src/lodepng.cpp
+    ../externals/lodepng/src/lodepng.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
