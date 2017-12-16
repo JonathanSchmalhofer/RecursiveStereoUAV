@@ -23,8 +23,8 @@ int main(int argc, char **argv)
     ROS_INFO("Created airsim_to_ros");
 
     image_transport::ImageTransport image_transport(node_handle);
-    image_transport::Publisher left_stereoimage_chatter = image_transport.advertise("/AirSimLeftStereoImage", 1);
-    image_transport::Publisher right_stereoimage_chatter = image_transport.advertise("/AirSimRightStereoImage", 1);
+    image_transport::Publisher left_stereoimage_chatter = image_transport.advertise("/airsim/left/image_raw", 1);
+    image_transport::Publisher right_stereoimage_chatter = image_transport.advertise("/airsim/right/image_raw", 1);
 
     std::uint32_t last_sequence_sent = 0;
     while (ros::ok())
