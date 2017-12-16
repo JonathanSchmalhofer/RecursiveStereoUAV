@@ -16,6 +16,10 @@ roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_airsim_to_ros_library REQUIRED)
 
+find_package(lodepng REQUIRED)
+
+find_package(Boost REQUIRED COMPONENTS filesystem)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -31,6 +35,7 @@ catkin_package(
 ###########
 
 include_directories(
+    ${lodepng_INCLUDE_DIRS}
     ${js_airsim_to_ros_library_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
@@ -49,6 +54,7 @@ add_executable(airsim_to_ros_image_publisher_node
 )
 
 target_link_libraries(airsim_to_ros_image_publisher_node
+    ${lodepng_LIBRARIES}
     ${catkin_LIBRARIES}
 )
 
