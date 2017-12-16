@@ -35,10 +35,20 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(airsim_to_ros_node src/airsim_to_ros_node.cpp)
+add_executable(airsim_to_ros_node
+    src/airsim_to_ros_node.cpp
+)
 
 target_link_libraries(airsim_to_ros_node
     ${js_airsim_to_ros_library_LIBRARIES}
+    ${catkin_LIBRARIES}
+)
+
+add_executable(airsim_to_ros_image_publisher_node
+    src/airsim_to_ros_image_publisher_node.cpp
+)
+
+target_link_libraries(airsim_to_ros_image_publisher_node
     ${catkin_LIBRARIES}
 )
 
