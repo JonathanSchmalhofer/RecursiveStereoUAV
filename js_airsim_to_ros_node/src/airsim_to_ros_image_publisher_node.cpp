@@ -28,6 +28,7 @@ int main(int argc, char **argv)
         int8_t received_return_value = 0;
         if (1 == received_return_value)
         {
+/*
             switch (airsim_to_ros.GetImageType())
             {
             case 0: // Unknown
@@ -80,7 +81,7 @@ int main(int argc, char **argv)
             ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
             ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
             ROS_INFO("  size(Image.data) %d", airsim_to_ros.GetImageDataSize());
-            
+*/
             if (
                     airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
                 &&  airsim_image_left_msg.header.seq > last_sequence_sent
