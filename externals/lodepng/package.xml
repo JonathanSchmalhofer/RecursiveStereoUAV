@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <package>
     <name>lodepng</name>
-    <version>20170917</version>
+    <version>0.0.20170917</version>
     <description>The lodepng package</description>
     <maintainer email="lode.vandevenne@gmail.com">Lode Vandevenne</maintainer>
 
