@@ -14,14 +14,49 @@ bool camera_calibration_automatic_recording = false;
 bool initial_pose_set = false;
 msr::airlib::Pose initial_pose, new_pose, last_recorded_pose;
 
-bool significantDifferenceInPose(msr::airlib::Pose one, msr::airlib::Pose two)
+// Source for PoseToEulerAngle(): https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+static void PoseToEulerAngle(const msr::airlib::Pose& pose, double& roll, double& pitch, double& yaw)
+{
+	// roll (x-axis rotation)
+	double sinr = +2.0 * (pose.orientation.w() * pose.orientation.x() + pose.orientation.y() * pose.orientation.z());
+	double cosr = +1.0 - 2.0 * (pose.orientation.x() * pose.orientation.x() + pose.orientation.y() * pose.orientation.y());
+	roll = std::atan2(sinr, cosr);
+
+	// pitch (y-axis rotation)
+	double sinp = +2.0 * (pose.orientation.w() * pose.orientation.y() - pose.orientation.z() * pose.orientation.x());
+	if (std::fabs(sinp) >= 1)
+		pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+	else
+		pitch = std::asin(sinp);
+
+	// yaw (z-axis rotation)
+	double siny = +2.0 * (pose.orientation.w() * pose.orientation.z() + pose.orientation.x() * pose.orientation.y());
+	double cosy = +1.0 - 2.0 * (pose.orientation.y() * pose.orientation.y() + pose.orientation.z() * pose.orientation.z());  
+	yaw = std::atan2(siny, cosy);
+}
+
+bool significantDifferenceInPose(const msr::airlib::Pose one, const msr::airlib::Pose two)
 {
     bool significant_change = false;
-    double threshold = 2.0f;
-    double difference = std::sqrt(std::pow(one.position.x()-two.position.x(), 2) + std::pow(one.position.y()-two.position.y(), 2) + std::pow(one.position.z()-two.position.z(), 2));
-    if (difference>threshold)
+    
+    // Translation
+    double threshold_translation = 1.0f;
+    double difference_translation = std::sqrt(std::pow(one.position.x() - two.position.x(), 2) + std::pow(one.position.y() - two.position.y(), 2) + std::pow(one.position.z() - two.position.z(), 2));
+    if (difference_translation > threshold_translation)
     {
-        std::cout << "Significant change of " << difference << "\n";
+        std::cout << "Significant change of translation of " << difference_translation << "\n";
+        significant_change = true;
+    }
+    
+    // Rotation
+    double roll_one, pitch_one, yaw_one, roll_two, pitch_two, yaw_two;
+    double threshold_rotation = 5.0f / 180.0f * M_PI;
+    PoseToEulerAngle(one, roll_one, pitch_one, yaw_one);
+    PoseToEulerAngle(two, roll_two, pitch_two, yaw_two);
+    double difference_rotation = std::sqrt(std::pow(roll_one - roll_two, 2) + std::pow(pitch_one - pitch_two, 2) + std::pow(yaw_one - yaw_two, 2));
+    if (difference_rotation > threshold_rotation)
+    {
+        std::cout << "Significant change of Rotation of " << (difference_rotation * 180.0f / M_PI) << "\n";
         significant_change = true;
     }
     return significant_change;
