@@ -23,6 +23,7 @@ class StereoImageRpcClient
         bool HasCollided();
         void SetPositionAndOrientation(const msr::airlib::Pose& Pose);
         msr::airlib::Pose GetPositionAndOrientation();
+        msr::airlib::GeoPoint GetGnssGeoPoint();
     private:
         struct client_accessor;
         std::unique_ptr<client_accessor> pclient_accessor_;

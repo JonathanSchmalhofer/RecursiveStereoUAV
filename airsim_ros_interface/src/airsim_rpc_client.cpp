@@ -40,7 +40,7 @@ bool significantDifferenceInPose(const msr::airlib::Pose one, const msr::airlib:
     bool significant_change = false;
     
     // Translation
-    double threshold_translation = 1.0f;
+    double threshold_translation = 0.25f;
     double difference_translation = std::sqrt(std::pow(one.position.x() - two.position.x(), 2) + std::pow(one.position.y() - two.position.y(), 2) + std::pow(one.position.z() - two.position.z(), 2));
     if (difference_translation > threshold_translation)
     {
@@ -50,7 +50,7 @@ bool significantDifferenceInPose(const msr::airlib::Pose one, const msr::airlib:
     
     // Rotation
     double roll_one, pitch_one, yaw_one, roll_two, pitch_two, yaw_two;
-    double threshold_rotation = 5.0f / 180.0f * M_PI;
+    double threshold_rotation = 1.0f / 180.0f * M_PI;
     PoseToEulerAngle(one, roll_one, pitch_one, yaw_one);
     PoseToEulerAngle(two, roll_two, pitch_two, yaw_two);
     double difference_rotation = std::sqrt(std::pow(roll_one - roll_two, 2) + std::pow(pitch_one - pitch_two, 2) + std::pow(yaw_one - yaw_two, 2));

@@ -71,3 +71,9 @@ msr::airlib::Pose StereoImageRpcClient::GetPositionAndOrientation()
     msr::airlib::Pose current_position(pclient_accessor_->client_.getPosition(), pclient_accessor_->client_.getOrientation());
     return current_position;
 }
+
+msr::airlib::GeoPoint StereoImageRpcClient::GetGnssGeoPoint()
+{
+    msr::airlib::GeoPoint current_geo_point = pclient_accessor_->client_.getGpsLocation();
+    return current_geo_point;
+}
