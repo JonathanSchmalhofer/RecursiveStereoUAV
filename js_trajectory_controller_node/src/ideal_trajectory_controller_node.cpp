@@ -10,18 +10,24 @@
 #include <js_messages/Trajectory3D.h>
 #include <js_messages/Trajectory3DPointStampedRoot_generated.h>
 
+void Trajectory3dCallback(const js_messages::Trajectory3D::ConstPtr& trajectory3d_message)
+{
+    ROS_INFO("The sequence is: [%i]", trajectory3d_message->header.seq);
+}
+
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "ideal_trajectory_controller_node");
     ros::NodeHandle node_handle;
     
     js_trajectory_controller_node::Trajectory3DPointToAirSimClass ros_to_airsim("tcp://*:6677");
+    ros::Subscriber trajectory3d_subscriber = node_handle.subscribe("/trajectory_planning/trajectory3d", 1000, Trajectory3dCallback);
     
     ROS_INFO("Starting node");
 
     double z = 0.0f;
 
-    ros::Rate node_rate(0.1); // 0.1 hz
+    ros::Rate node_rate(10); // 10.0 hz
     while (ros::ok())
     {
  	    z -= 0.1f;
