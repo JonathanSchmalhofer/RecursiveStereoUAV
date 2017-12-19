@@ -1,3 +1,0 @@
-<launch>
-    <node name="ideal_trajectory_controller_node" pkg="js_trajectory_controller_node" type="ideal_trajectory_controller_node" output="screen"/>
-</launch>
