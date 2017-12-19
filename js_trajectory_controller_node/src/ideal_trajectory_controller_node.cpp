@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     ros::Rate node_rate(0.1); // 0.1 hz
     while (ros::ok())
     {
- 	z -= 0.1f;
+ 	    z -= 0.1f;
         ros_to_airsim.SetTrajectory3DPointTimeStampSec(0);
         ros_to_airsim.SetTrajectory3DPointTimeStampNsec(0);
         ros_to_airsim.SetTrajectory3DPointPosePositionX(0);
