@@ -79,7 +79,7 @@ int main(int argc, char **argv)
         right_image_messages.push_back(ros_image);
     }
     
-    ros::Rate r(5.0); // 5.0 hz
+    ros::Rate r(2.0); // 2.0 hz
     std::int32_t loop_counter = 0;
     std::int32_t loop_direction = +1;
     while (ros::ok())
