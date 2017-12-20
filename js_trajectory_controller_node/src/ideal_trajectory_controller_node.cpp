@@ -23,7 +23,7 @@ int main(int argc, char **argv)
     js_trajectory_controller_node::Trajectory3DPointToAirSimClass ros_to_airsim("tcp://*:6677");
     ros::Subscriber trajectory3d_subscriber = node_handle.subscribe("/trajectory_planning/trajectory3d", 1000, Trajectory3dCallback);
     
-    ROS_INFO("Starting node");
+    ROS_INFO("Starting trajectory controller node");
 
     double z = 0.0f;
 

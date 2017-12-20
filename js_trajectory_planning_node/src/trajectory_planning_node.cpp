@@ -15,7 +15,7 @@ int main(int argc, char **argv)
     
     ros::Publisher trajectory3d_publisher = node_handle.advertise<js_messages::Trajectory3D>("/trajectory_planning/trajectory3d", 1000);
     
-    ROS_INFO("Starting node");
+    ROS_INFO("Starting trajectory planning node");
 
     ros::Rate node_rate(2.0f); // 2.0 hz
     while (ros::ok())

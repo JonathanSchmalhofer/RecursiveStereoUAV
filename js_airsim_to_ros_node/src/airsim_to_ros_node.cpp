@@ -16,7 +16,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "airsim_to_ros_node");
     ros::NodeHandle node_handle;
     
-    ROS_INFO("Starting node");
+    ROS_INFO("Starting AirSim to ros node");
 
     js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://192.168.178.56:5676");
     
