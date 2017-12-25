@@ -20,6 +20,8 @@ find_package(lodepng REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
+find_package(OpenCV REQUIRED)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -56,6 +58,7 @@ add_executable(airsim_to_ros_image_publisher_node
 target_link_libraries(airsim_to_ros_image_publisher_node
     ${lodepng_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBRARIES}
 )
 
 #############

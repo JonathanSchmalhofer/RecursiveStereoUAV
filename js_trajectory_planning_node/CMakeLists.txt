@@ -40,6 +40,10 @@ add_executable(trajectory_planning_node
     src/trajectory_planning_node.cpp
 )
 
+add_library(rtrrtstar_class_library
+    src/rtrrtstar_class.cpp
+)
+
 target_link_libraries(trajectory_planning_node
     ${catkin_LIBRARIES}
 )
