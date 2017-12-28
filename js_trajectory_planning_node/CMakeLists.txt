@@ -9,11 +9,17 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
+    octomap_ros
+    octomap_msgs
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_messages REQUIRED)
+
+find_package(octomap REQUIRED)
+
+add_definitions(-DOCTOMAP_NODEBUGOUT)
 
 ###################################
 ## catkin specific configuration ##
@@ -23,6 +29,7 @@ catkin_package(
     INCLUDE_DIRS
     LIBRARIES trajectory_planning_node
     CATKIN_DEPENDS roscpp js_messages
+    DEPENDS octomap
 )
 
 ###########
@@ -34,6 +41,7 @@ include_directories(
     ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
+    ${OCTOMAP_INCLUDE_DIRS}
 )
 
 add_executable(trajectory_planning_node
@@ -46,6 +54,10 @@ add_library(rtrrtstar_class_library
 
 target_link_libraries(trajectory_planning_node
     ${catkin_LIBRARIES}
+)
+
+target_link_libraries(rtrrtstar_class_library
+    ${OCTOMAP_LIBRARIES}
 )
 
 add_dependencies(trajectory_planning_node
