@@ -7,34 +7,44 @@
 #ifndef JS_TRAJECTORY_PLANNING_NODE_NODE_STRUCT_H_
 #define JS_TRAJECTORY_PLANNING_NODE_NODE_STRUCT_H_
 
+#include <cstddef>      // NULL
+#include <list>         // std::list
+#include <limits>       // std::numeric_limits
+
 namespace js_trajectory_planning_node
 {
     
 struct Vector3d
 {
-    double x_ = 0;
-    double y_ = 0;
-    double z_ = 0;
+    double x_;
+    double y_;
+    double z_;
     
     Vector3d(double x = 0, double y = 0, double z = 0)
+        : x_(0), y_(0), z_(0)
     {
         x_ = x;
         y_ = y;
         z_ = z;
-    }
-}
+    };
+};
 
 struct Node
 {
-    bool active_ = true;
+    bool active_;
     Vector3d position_;
-    double cost_to_start_ = std::numeric_limits<double>::infinity();
+    double cost_to_start_;
     
-    Node *parent_of_parent_ = NULL;
-    Node *parent_ = NULL;
+    Node *parent_of_parent_;
+    Node *parent_;
     std::list<Node*> children_;
     
-    Nodes(Vector3d position, cost_to_start, Node *parent = NULL)
+    Node(Vector3d position = Vector3d(0, 0, 0), double cost_to_start = std::numeric_limits<double>::infinity(), Node *parent = NULL)
+        : active_(true),
+          position_(0, 0, 0),
+          cost_to_start_(std::numeric_limits<double>::infinity()),
+          parent_of_parent_(NULL),
+          parent_(NULL)
     {
         position_ = position;
         cost_to_start_ = cost_to_start;

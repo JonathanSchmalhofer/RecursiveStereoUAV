@@ -7,9 +7,7 @@
 #ifndef JS_TRAJECTORY_PLANNING_NODE_RTRRTSTAR_CLASS_H_
 #define JS_TRAJECTORY_PLANNING_NODE_RTRRTSTAR_CLASS_H_
 
-#include <octomap/octomap.h>
-#include <octomap_ros/OctomapROS.h>
-#include <octomap_ros/conversions.h>
+#include "planning_space_3d_struct.h"
 
 namespace js_trajectory_planning_node
 {
@@ -59,6 +57,15 @@ private:
     
     /// @brief Holds the count of expansion and rewiring attempts per loop cycle
     std::uint32_t counter_expansions_and_rewiring_;
+    
+    /// @brief Holds the current node at which the agent is located
+    Node x_agent;
+    
+    /// @brief Holds the current goal node
+    Node x_goal;
+    
+    /// @brief Holds the currently known (planning) space of all obstacles
+    PlanningSpace3d Xi_obs;
     
     const std::uint32_t kmax_number_expansions_and_rewiring = 300;
 };

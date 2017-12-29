@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
+    octomap
     octomap_ros
     octomap_msgs
 )
@@ -28,7 +29,7 @@ add_definitions(-DOCTOMAP_NODEBUGOUT)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES trajectory_planning_node
-    CATKIN_DEPENDS roscpp js_messages
+    CATKIN_DEPENDS roscpp js_messages octomap_ros
     DEPENDS octomap
 )
 
