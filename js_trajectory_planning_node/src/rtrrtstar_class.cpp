@@ -20,6 +20,7 @@ RTRRTStarClass::~RTRRTStarClass()
 
 void RTRRTStarClass::PerformPlanningCycleOnce()
 {
+    x_goal = Node(Vector3d(1,10,100));
     while(IsTimeLeftForExpansionAndRewiring())
     {
         ExpandAndRewireTree();
@@ -51,8 +52,8 @@ void RTRRTStarClass::UpdateXiFree()
 void RTRRTStarClass::ExpandAndRewireTree()
 {
     Node x_rand = SampleRandom();
-    // Todo: get closest node arg min dist(x,x_rand)
-    if(true) // Todo: check if line(x_closest,x_rand) is in freespace Xi_free
+    Node& x_closest = GetClosestNodeInTree(x_rand);
+    if(CheckIfCollisionFreeLineBetween(x_closest, x_rand))
     {
         FindNodesNear();
         if(true) // Todo: check line 6 Algorithm 2
@@ -197,12 +198,15 @@ Node RTRRTStarClass::Ellipsoid(Node x_a, Node x_b)
     std::vector<double> abs_direction = {std::abs(direction[0]), std::abs(direction[1]), std::abs(direction[2])};
     std::sort(abs_direction.begin(), abs_direction.end());
     
+    // Calculation of covariance, compare: http://pages.mtu.edu/~shene/COURSES/cs3621/NOTES/geometry/simple.html    
     double a = abs_direction[2];
     double b = abs_direction[1];
     double c = abs_direction[0];
     
+    // Todo: consider using c_best and c_min as explained in paper from Naderi et al
+    
     Eigen::Matrix< double, 3, 1> v;
-    v << a, a, b;
+    v << a, a, b; // only use two largest directions
     Eigen::Matrix3d covariance = v.array().matrix().asDiagonal();
 
     return Node(DrawWithinEllipsoid(covariance, x_center));
@@ -253,6 +257,27 @@ Node& RTRRTStarClass::GetClosestNodeInTree(Node x_in)
     }
     
     return closest_node;
+}
+
+bool RTRRTStarClass::CheckIfCollisionFreeLineBetween(Node x_a, Node x_b)
+{
+    if(Xi_obs.octomap_space_ == NULL)
+    {
+        return true;
+    }
+    else
+    {
+        octomap::point3d start(x_a.position_.x_,
+                                x_a.position_.y_,
+                                x_a.position_.z_);
+        octomap::point3d direction(x_b.position_.x_ - x_a.position_.x_,
+                                    x_b.position_.y_ - x_a.position_.y_,
+                                    x_b.position_.z_ - x_a.position_.z_);
+        octomap::point3d cell_hit_by_ray;
+        
+
+        return Xi_obs.octomap_space_->castRay(start, direction, cell_hit_by_ray);
+    }
 }
 
 double RTRRTStarClass::EuclidianDistance3d(Node a, Node b)

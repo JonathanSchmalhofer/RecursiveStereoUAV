@@ -95,6 +95,9 @@ private:
     /// @brief Uniform sampling along the line between x_in, which does not have to be part of the tree, and the node of the tree closest to it.
     Node& GetClosestNodeInTree(Node x_in);
     
+    /// @brief Check whether the line between x_a and x_b is collision free
+    bool CheckIfCollisionFreeLineBetween(Node x_a, Node x_b);
+    
     /// @brief Calculate euclidian distance in 3d between the nodes a and b
     double EuclidianDistance3d(Node a, Node b);
     
@@ -139,6 +142,8 @@ private:
     
     /// @brief Minimum extent in z-direction to be considered for uniform sampling in planning space
     const double kminimum_uniform_extent_z = 20;
+    
+    const std::uint32_t kmaximum_number_closest_neighbours;
 };
 }  // namespace js_trajectory_planning_node
 
