@@ -56,8 +56,10 @@ void RTRRTStarClass::ExpandAndRewireTree()
     if(CheckIfCollisionFreeLineBetween(x_closest, x_rand))
     {
         std::list<std::reference_wrapper<Node>> Xi_near = FindNodesNear3d(x_rand);
-        if(true) // Todo: check line 6 Algorithm 2
+        if(     Xi_near.size() < kmaximum_number_closest_neighbours
+          ||    EuclidianDistance3d(x_closest, x_rand) > kradius_closest_neighbours)
         {
+            //Todo: delete//ROS_INFO("AddNodeToTree");
             AddNodeToTree();
             // Todo: Push x_rand to the first of Q_r
         }
