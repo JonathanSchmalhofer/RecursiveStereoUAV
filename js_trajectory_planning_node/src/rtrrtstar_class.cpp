@@ -59,9 +59,10 @@ void RTRRTStarClass::ExpandAndRewireTree()
         if(     Xi_near.size() < kmaximum_number_closest_neighbours
           ||    EuclidianDistance3d(x_closest, x_rand) > kradius_closest_neighbours)
         {
+            AddNodeToTree(x_rand, x_closest, Xi_near);
             //Todo: delete//ROS_INFO("AddNodeToTree");
-            AddNodeToTree();
-            // Todo: Push x_rand to the first of Q_r
+            //Todo: delete//ROS_INFO("T.size() = %zd", T.size());
+            Q_r.push_front(x_rand);
         }
         else
         {
@@ -164,8 +165,23 @@ double RTRRTStarClass::GetVolumeOfSearchSpace3d()
     return (x_side * y_side * z_side);
 }
 
-void RTRRTStarClass::AddNodeToTree()
+void RTRRTStarClass::AddNodeToTree(Node& x_new, Node& x_closest, std::list<std::reference_wrapper<Node>> Xi_near)
 {
+    Node& x_min = x_closest;
+    double c_min = cost(x_closest) + EuclidianDistance3d(x_new, x_closest);
+    double c_new = 0;
+    for (auto& ref_x_near : Xi_near)
+    {
+        c_new = cost(ref_x_near.get()) + EuclidianDistance3d(x_new, ref_x_near.get());
+        if(     c_new < c_min
+           &&   CheckIfCollisionFreeLineBetween(ref_x_near.get(), x_new))
+        {
+            c_min = c_new;
+            x_min = ref_x_near.get();
+        }
+    }
+    x_new.cost_to_start_ = c_min;
+    T.push_back(x_new);
 }
 
 void RTRRTStarClass::PlanPathForKSteps()

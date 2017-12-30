@@ -46,7 +46,7 @@ private:
     void ExpandAndRewireTree();
     
     /// @brief Add node to tree
-    void AddNodeToTree();
+    void AddNodeToTree(Node& x_new, Node& x_closest, std::list<std::reference_wrapper<Node>> Xi_near);
     
     /// @brief Rewire random nodes
     void RewireRandomNodes();
