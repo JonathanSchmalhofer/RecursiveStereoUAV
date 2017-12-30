@@ -62,11 +62,11 @@ void RTRRTStarClass::ExpandAndRewireTree()
             AddNodeToTree(x_rand, x_closest, Xi_near);
             //Todo: delete//ROS_INFO("AddNodeToTree");
             //Todo: delete//ROS_INFO("T.size() = %zd", T.size());
-            Q_r.push_front(x_rand);
+            Q_r.push_front(std::ref(x_rand));
         }
         else
         {
-            // Todo: Push x_closest to the first of Q_r
+            Q_r.push_front(std::ref(x_closest));
         }
         RewireRandomNodes();
     }
@@ -76,6 +76,31 @@ void RTRRTStarClass::ExpandAndRewireTree()
 
 void RTRRTStarClass::RewireRandomNodes()
 {
+    while(!Q_r.empty()) // Todo: add another iterator limit
+    {
+        Node& x_r = Q_r.front().get();
+        Q_r.pop_front();
+        std::list<std::reference_wrapper<Node>> Xi_near = FindNodesNear3d(x_r);
+        double c_old = std::numeric_limits<double>::infinity();
+        double c_new = std::numeric_limits<double>::infinity();
+        for (auto& ref_x_near : Xi_near)
+        {
+            c_old = cost(ref_x_near.get());
+            c_new = cost(x_r) + EuclidianDistance3d(x_r, ref_x_near.get());
+            if(     c_new < c_old
+               &&   CheckIfCollisionFreeLineBetween(ref_x_near.get(), x_r))
+            {
+                /*
+                (*it)->prevParent = (*it)->parent;
+				(*it)->parent->children.remove(*it);
+				(*it)->parent = Xr;
+				(*it)->costToStart = newCost;
+				Xr->children.push_back(*it);
+                */
+                Q_r.push_back(std::ref(ref_x_near.get()));
+            }
+        }
+    }
 }
 
 void RTRRTStarClass::RewireFromTreeRoot()

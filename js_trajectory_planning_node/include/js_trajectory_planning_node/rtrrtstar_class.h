@@ -124,10 +124,10 @@ private:
     PlanningSpace3d Xi_obs;
     
     /// @brief Queue holding nodes for random rewiring
-    std::list<Node> Q_r;
+    std::list<std::reference_wrapper<Node>> Q_r;
     
     /// @brief Queue holding nodes for rewiring from the tree root
-    std::list<Node> Q_s;
+    std::list<std::reference_wrapper<Node>> Q_s;
     
     /// @brief The search tree
     std::list<Node> T;
