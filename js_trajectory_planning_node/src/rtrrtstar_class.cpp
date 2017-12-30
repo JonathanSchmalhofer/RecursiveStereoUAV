@@ -55,7 +55,7 @@ void RTRRTStarClass::ExpandAndRewireTree()
     Node& x_closest = GetClosestNodeInTree(x_rand);
     if(CheckIfCollisionFreeLineBetween(x_closest, x_rand))
     {
-        FindNodesNear();
+        std::list<std::reference_wrapper<Node>> Xi_near = FindNodesNear3d(x_rand);
         if(true) // Todo: check line 6 Algorithm 2
         {
             AddNodeToTree();
@@ -79,8 +79,60 @@ void RTRRTStarClass::RewireFromTreeRoot()
 {
 }
 
-void RTRRTStarClass::FindNodesNear()
+std::list<std::reference_wrapper<Node>> RTRRTStarClass::FindNodesNear3d(Node x_in)
 {
+    std::list<std::reference_wrapper<Node>> Xi_near;
+    
+    // Calculate epsilon for 3d
+    const double pi = std::acos(-1);
+    double numerator = 3.0f * GetVolumeOfSearchSpace3d() * kmaximum_number_closest_neighbours;
+    double denominator = 4.0f * pi * T.size();
+    double epsilon = std::pow(numerator/denominator, 1/3);
+    
+    if(epsilon < kradius_closest_neighbours)
+    {
+        epsilon = kradius_closest_neighbours;
+    }
+    
+    for (auto& tree_node : T)
+    {
+        if(Xi_near.size() >= kmaximum_number_closest_neighbours)
+        {
+            break;
+        }
+        if(EuclidianDistance3d(tree_node, x_in) < epsilon)
+        {
+            Xi_near.push_back(std::ref(tree_node));
+        }
+    }
+    return Xi_near;
+}
+
+double RTRRTStarClass::GetVolumeOfSearchSpace3d()
+{
+    octomap::point3d max_point;
+    octomap::point3d min_point;
+    
+    if(Xi_obs.octomap_space_ != NULL)
+    {
+        max_point = Xi_obs.octomap_space_->getBBXMax();
+        min_point = Xi_obs.octomap_space_->getBBXMin();
+    }
+    
+    double x_upper_bound = std::max(+0.5*kminimum_uniform_extent_x,static_cast<double>(max_point.x()));
+    double x_lower_bound = std::min(-0.5*kminimum_uniform_extent_x,static_cast<double>(min_point.x()));
+    
+    double y_upper_bound = std::max(+0.5*kminimum_uniform_extent_y,static_cast<double>(max_point.y()));
+    double y_lower_bound = std::min(-0.5*kminimum_uniform_extent_y,static_cast<double>(min_point.y()));
+    
+    double z_upper_bound = std::max(+0.5*kminimum_uniform_extent_z,static_cast<double>(max_point.z()));
+    double z_lower_bound = std::min(-0.5*kminimum_uniform_extent_z,static_cast<double>(min_point.z()));
+    
+    double x_side = x_upper_bound - x_lower_bound;
+    double y_side = y_upper_bound - y_lower_bound;
+    double z_side = z_upper_bound - z_lower_bound;
+    
+    return (x_side * y_side * z_side);
 }
 
 void RTRRTStarClass::AddNodeToTree()

@@ -11,6 +11,7 @@
 #include <random>
 #include <cmath>
 #include <algorithm>    // std::sort
+#include <functional>   // std::reference_wrapper
 #include <Eigen/Dense>
 
 namespace js_trajectory_planning_node
@@ -53,8 +54,11 @@ private:
     /// @brief Rewire from tree root
     void RewireFromTreeRoot();
     
-    /// @brierf Find nodes near to a specific node
-    void FindNodesNear();
+    /// @brief Find nodes near to a specific node (in 3d)
+    std::list<std::reference_wrapper<Node>> FindNodesNear3d(Node x_in);
+    
+    /// @brief Get the (current) volume of the search space (in paper: mue(Xi))
+    double GetVolumeOfSearchSpace3d();
     
     /// @brief Plan a path for k steps
     void PlanPathForKSteps();
@@ -143,7 +147,11 @@ private:
     /// @brief Minimum extent in z-direction to be considered for uniform sampling in planning space
     const double kminimum_uniform_extent_z = 20;
     
-    const std::uint32_t kmaximum_number_closest_neighbours;
+    /// @brief Maximum number of neighbours to be considered (k_max)
+    const std::uint32_t kmaximum_number_closest_neighbours = 10;
+    
+    /// @brief Maximum radius to find neighbours to be considered (r_s)
+    const double kradius_closest_neighbours = 1.0;
 };
 }  // namespace js_trajectory_planning_node
 
