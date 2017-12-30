@@ -110,6 +110,33 @@ std::list<std::reference_wrapper<Node>> RTRRTStarClass::FindNodesNear3d(Node x_i
     return Xi_near;
 }
 
+double RTRRTStarClass::cost(Node& x_in)
+{
+    bool blocked_node = false;
+    float cumulative_cost = 0;
+    Node& current_node = x_in;
+    while(current_node.parent_ != NULL)
+    {
+        if(current_node.parent_->cost_to_start_ >= std::numeric_limits<double>::infinity())
+        {
+            x_in.cost_to_start_ = std::numeric_limits<double>::infinity();
+            blocked_node = true;
+            break;
+        }
+        cumulative_cost += EuclidianDistance3d(current_node, *(current_node.parent_));
+        current_node = *(current_node.parent_);
+    }
+    if (blocked_node)
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+        x_in.cost_to_start_ = cumulative_cost;
+        return cumulative_cost;
+    }
+}
+
 double RTRRTStarClass::GetVolumeOfSearchSpace3d()
 {
     octomap::point3d max_point;

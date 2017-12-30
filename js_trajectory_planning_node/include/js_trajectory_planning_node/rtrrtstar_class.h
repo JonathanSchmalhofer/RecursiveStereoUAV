@@ -57,6 +57,9 @@ private:
     /// @brief Find nodes near to a specific node (in 3d)
     std::list<std::reference_wrapper<Node>> FindNodesNear3d(Node x_in);
     
+    /// @brief Calculate cost for node x_in (depending on all ancestors, but they will not be updated)
+    double cost(Node& x_in);
+    
     /// @brief Get the (current) volume of the search space (in paper: mue(Xi))
     double GetVolumeOfSearchSpace3d();
     
