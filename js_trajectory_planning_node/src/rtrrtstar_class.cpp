@@ -561,6 +561,7 @@ double RTRRTStarClass::NormalRandomNumber()
 
 NodeIt RTRRTStarClass::ChangeParent(NodeIt& child_node, const NodeIt& new_parent)
 {
+    /*
     tree<NodeData> child_subtree = T.move_out(child_node);
     ROS_INFO("ChangeParent - Check 1");
     child_subtree.debug_verify_consistency();
@@ -571,6 +572,16 @@ NodeIt RTRRTStarClass::ChangeParent(NodeIt& child_node, const NodeIt& new_parent
     child_node = T.move_in_as_nth_child(new_parent, 0, child_subtree);
     ROS_INFO("ChangeParent - Check 3");
     T.debug_verify_consistency();	
+    return child_node;
+    */
+    ROS_INFO("ChangeParent - Check 1");
+    T.debug_verify_consistency();
+    auto new_child = T.append_child(new_parent);
+    ROS_INFO("ChangeParent - Check 2");
+    T.debug_verify_consistency();
+    child_node = T.move_ontop(new_child, child_node);
+    ROS_INFO("ChangeParent - Check 3");
+    T.debug_verify_consistency();
     return child_node;
 }
 
