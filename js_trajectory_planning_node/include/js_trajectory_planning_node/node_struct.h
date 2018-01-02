@@ -20,13 +20,29 @@ struct Vector3d
     double y_;
     double z_;
     
-    Vector3d(double x = 0, double y = 0, double z = 0)
-        : x_(0), y_(0), z_(0)
+    Vector3d(double x = 0.0f, double y = 0.0f, double z = 0.0f)
+        : x_(0.0f), y_(0.0f), z_(0.0f)
     {
         x_ = x;
         y_ = y;
         z_ = z;
     };
+};
+
+struct NodeData
+{
+    bool active_;
+    Vector3d position_;
+    double cost_to_start_;    
+    
+    NodeData(Vector3d position = Vector3d(0.0f, 0.0f, 0.0f), double cost_to_start = std::numeric_limits<double>::infinity())
+        : active_(true),
+          position_(0.0f, 0.0f, 0.0f),
+          cost_to_start_(std::numeric_limits<double>::infinity())
+    {
+        position_ = position;
+        cost_to_start_ = cost_to_start;
+    }
 };
 
 struct Node
