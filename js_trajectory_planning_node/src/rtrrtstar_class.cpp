@@ -26,6 +26,7 @@ void RTRRTStarClass::Initialize()
     Q_s.clear();
     Q_r.clear();
     Xi_obs.node_space_.clear();
+    // Todo: clean up the methods for updating x_goal, x_agent and x_0
     UpdateXAgent(T.insert(T.begin(), NodeData(Vector3d(kminimum_uniform_extent_x, 0, 0))));
     UpdateXGoal(T.insert(T.begin(), NodeData(Vector3d(0, kminimum_uniform_extent_y, 0))));
     UpdateX0(T.insert(T.begin(), NodeData(Vector3d(0, 0, 0), 0)));
@@ -33,15 +34,15 @@ void RTRRTStarClass::Initialize()
 
 void RTRRTStarClass::PerformPlanningCycleOnce()
 {
+    /*
     ROS_INFO("====================================================");
     ROS_INFO("Current tree:");
     IndentedRosInfo(T);
     ROS_INFO("----------------------------------------------------");
-    
-    //x_goal = Node(Vector3d(1,10,100)); //Todo: remove this line, just for testing
+    */
     while(IsTimeLeftForExpansionAndRewiring())
     {
-        ROS_INFO("Expand and Rewire");
+        //ROS_INFO("Expand and Rewire");//Todo: delete
         ExpandAndRewireTree();
     }
     //ROS_INFO("And Now?");
@@ -50,6 +51,7 @@ void RTRRTStarClass::PerformPlanningCycleOnce()
     {
         ChangeTreeRootToNextImmediateNode();
     }
+    // Todo: add cleanup-method for tree T that removes/erases unused and unconnected nodes
     FinalizeLoopCycle();
 }
 
@@ -69,10 +71,6 @@ void RTRRTStarClass::UpdateX0(NodeIt x_in)
 }
 
 void RTRRTStarClass::UpdateXiObs()
-{
-}
-
-void RTRRTStarClass::UpdateXiFree()
 {
 }
 
@@ -124,8 +122,10 @@ void RTRRTStarClass::ExpandAndRewireTree()
     if(CheckIfCollisionFreeLineBetween(x_closest, x_rand))
     {
         std::list<NodeIt> Xi_near = FindNodesNear3d(x_rand);
-        if(     Xi_near.size() < kmaximum_number_closest_neighbours
-          ||    EuclidianDistance3d(x_closest, x_rand) > kradius_closest_neighbours)
+        // Todo: add helper function for if-condition
+        if(     (     Xi_near.size() < kmaximum_number_closest_neighbours
+                ||    EuclidianDistance3d(x_closest, x_rand) > kradius_closest_neighbours)
+          &&    T.size() < kmaximum_number_nodes_in_tree)
         {
             x_rand = AddNodeToTree(x_rand, x_closest, Xi_near);
             Q_r.push_front(x_rand);
@@ -134,11 +134,11 @@ void RTRRTStarClass::ExpandAndRewireTree()
         {
             Q_r.push_front(x_closest);
         }
-        ROS_INFO("RewireRandomNodes");
+        //ROS_INFO("RewireRandomNodes");//Todo: delete
         RewireRandomNodes();
         //ROS_INFO("Q_r.size() = %zd", Q_r.size());//Todo: delete
     }
-    ROS_INFO("RewireFromTreeRoot");
+    //ROS_INFO("RewireFromTreeRoot");//Todo: delete
     RewireFromTreeRoot();
     //ROS_INFO("Q_s.size() = %zd", Q_s.size());//Todo: delete
     ++counter_expansions_and_rewiring_;
@@ -312,7 +312,6 @@ bool RTRRTStarClass::IsTimeLeftForExpansionAndRewiring()
     }
     
     // Todo: add another iterator limit (e.g. check for time)
-    
     return is_time_left;
 }
 
@@ -325,7 +324,6 @@ bool RTRRTStarClass::IsTimeLeftForRewireRandomNodes()
     }
     
     // Todo: add another iterator limit (e.g. check for time)
-    
     return is_time_left;
 }
 
@@ -338,7 +336,6 @@ bool RTRRTStarClass::IsTimeLeftForRewireFromTreeRoot()
     }
     
     // Todo: add another iterator limit (e.g. check for time)
-    
     return is_time_left;
 }
 
@@ -435,7 +432,6 @@ NodeIt RTRRTStarClass::Uniform()
     double z_upper_bound = std::max(+0.5*kminimum_uniform_extent_z,static_cast<double>(max_point.z()));
     double z_lower_bound = std::min(-0.5*kminimum_uniform_extent_z,static_cast<double>(min_point.z()));
     double z_new = UniformRandomNumberBetween(z_lower_bound, z_upper_bound);
-
 
     return T.insert(T.begin(), NodeData(Vector3d(x_new, y_new, z_new)));
 }
@@ -561,30 +557,11 @@ double RTRRTStarClass::NormalRandomNumber()
 
 NodeIt RTRRTStarClass::ChangeParent(NodeIt& child_node, const NodeIt& new_parent)
 {
-    /*
-    tree<NodeData> child_subtree = T.move_out(child_node);
-    ROS_INFO("ChangeParent - Check 1");
-    child_subtree.debug_verify_consistency();
-    ROS_INFO("ChangeParent - Check 2");
-    T.debug_verify_consistency();
-    //Todo: Decide whether to append as first or last child?
-    // child_node = T.move_in_as_nth_child(new_parent, T.number_of_children(new_parent), child_subtree);
-    child_node = T.move_in_as_nth_child(new_parent, 0, child_subtree);
-    ROS_INFO("ChangeParent - Check 3");
-    T.debug_verify_consistency();	
-    return child_node;
-    */
-    ROS_INFO("ChangeParent - Check 1");
-    T.debug_verify_consistency();
     auto new_child = T.append_child(new_parent);
-    ROS_INFO("ChangeParent - Check 2");
-    T.debug_verify_consistency();
     child_node = T.move_ontop(new_child, child_node);
-    ROS_INFO("ChangeParent - Check 3");
-    T.debug_verify_consistency();
+    //Todo: Decide whether and/or how to perform the consistency check
+    //T.debug_verify_consistency();
     return child_node;
 }
-
-
 
 }  // namespace js_trajectory_planning_node

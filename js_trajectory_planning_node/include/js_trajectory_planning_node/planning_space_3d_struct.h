@@ -10,13 +10,16 @@
 #include "node_struct.h"
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
+#include "tree/tree.hh"
 
 namespace js_trajectory_planning_node
 {
 
+typedef tree<NodeData>::iterator NodeIt;
+
 struct PlanningSpace3d
 {
-    std::list<Node> node_space_;
+    std::list<NodeIt> node_space_;
     octomap::OcTree* octomap_space_;
     
     PlanningSpace3d()

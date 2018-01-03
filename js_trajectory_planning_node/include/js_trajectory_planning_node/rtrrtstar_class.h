@@ -13,13 +13,9 @@
 #include <algorithm>    // std::sort
 #include <functional>   // std::reference_wrapper
 #include <Eigen/Dense>
-#include "tree/tree.hh"
-#include "tree/tree_util.hh"
 
 namespace js_trajectory_planning_node
 {
-
-typedef tree<NodeData>::iterator NodeIt;
 
 class RTRRTStarClass
 {
@@ -47,11 +43,8 @@ public:
     
     /// @brief Update the obstacles (planning) space
     void UpdateXiObs();
-    
-    /// @brief Update the (planning) freespace
-    void UpdateXiFree();
 
-//private:
+private:
     /// @brief Save position of x_in into a string
     std::string ToString(const NodeIt& x_in);
     
@@ -190,8 +183,11 @@ public:
     /// @brief Minimum extent in z-direction to be considered for uniform sampling in planning space
     const double kminimum_uniform_extent_z = 20;
     
+    /// @brief Maximum number of nodes allowed in the tree T
+    const std::uint32_t kmaximum_number_nodes_in_tree = 5000;
+    
     /// @brief Maximum number of neighbours to be considered (k_max)
-    const std::uint32_t kmaximum_number_closest_neighbours = 10000;
+    const std::uint32_t kmaximum_number_closest_neighbours = 100;
     
     /// @brief Maximum radius to find neighbours to be considered (r_s)
     const double kradius_closest_neighbours = 10.0;
