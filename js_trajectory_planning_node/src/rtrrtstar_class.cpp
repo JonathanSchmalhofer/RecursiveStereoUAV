@@ -27,9 +27,15 @@ void RTRRTStarClass::Initialize()
     Q_r.clear();
     Xi_obs.node_space_.clear();
     // Todo: clean up the methods for updating x_goal, x_agent and x_0
-    UpdateXAgent(T.insert(T.begin(), NodeData(Vector3d(kminimum_uniform_extent_x, 0, 0))));
-    UpdateXGoal(T.insert(T.begin(), NodeData(Vector3d(0, kminimum_uniform_extent_y, 0))));
-    UpdateX0(T.insert(T.begin(), NodeData(Vector3d(0, 0, 0), 0)));
+    UpdateX0(T.insert(T.begin(), NodeData(Vector3d(0, 0, 0),
+                                          0,
+                                          true)));
+    UpdateXAgent(T.insert(T.begin(), NodeData(Vector3d(kminimum_uniform_extent_x, 0, 0),
+                                              kminimum_uniform_extent_x,
+                                              true)));
+    UpdateXGoal(T.insert(T.begin(), NodeData(Vector3d(0, kminimum_uniform_extent_y, 0),
+                                             kminimum_uniform_extent_y,
+                                             true)));
 }
 
 void RTRRTStarClass::PerformPlanningCycleOnce()
@@ -51,7 +57,7 @@ void RTRRTStarClass::PerformPlanningCycleOnce()
     {
         ChangeTreeRootToNextImmediateNode();
     }
-    // Todo: add cleanup-method for tree T that removes/erases unused and unconnected nodes
+    CleanupInactiveNodes();
     FinalizeLoopCycle();
 }
 
@@ -132,6 +138,7 @@ void RTRRTStarClass::ExpandAndRewireTree()
         }
         else
         {
+            (*x_closest).active_ = true;
             Q_r.push_front(x_closest);
         }
         //ROS_INFO("RewireRandomNodes");//Todo: delete
@@ -146,7 +153,7 @@ void RTRRTStarClass::ExpandAndRewireTree()
 
 void RTRRTStarClass::RewireRandomNodes()
 {
-    while(IsTimeLeftForRewireRandomNodes() && !Q_r.empty() ) // Todo: add another iterator limit (e.g. check for time)
+    while(IsTimeLeftForRewireRandomNodes() && !Q_r.empty() )
     {
         //ROS_INFO("Keep rewiring");
         NodeIt x_r = Q_r.front();
@@ -165,6 +172,7 @@ void RTRRTStarClass::RewireRandomNodes()
                 x_near = ChangeParent(x_near, x_r);
                 // update costs
                 (*x_near).cost_to_start_ = c_new;
+                (*x_near).active_ = true;
                 
                 Q_r.push_back(x_near);
             }
@@ -179,7 +187,7 @@ void RTRRTStarClass::RewireFromTreeRoot()
     {
         Q_s.push_back(x_0);
     }
-    while(IsTimeLeftForRewireFromTreeRoot() && !Q_s.empty() ) // Todo: add another iterator limit (e.g. check for time)
+    while(IsTimeLeftForRewireFromTreeRoot() && !Q_s.empty() )
     {
         ++counter_rewire_from_tree_root_;
     }
@@ -294,6 +302,8 @@ NodeIt RTRRTStarClass::AddNodeToTree(NodeIt& x_new, const NodeIt& x_closest, std
 
     // add edge from from x_new to x_min...
     (*x_new).cost_to_start_ = c_min;
+    (*x_new).active_ = true;
+    
     x_new = ChangeParent(x_new, x_min);
     
     return x_new;
@@ -301,6 +311,55 @@ NodeIt RTRRTStarClass::AddNodeToTree(NodeIt& x_new, const NodeIt& x_closest, std
 
 void RTRRTStarClass::PlanPathForKSteps()
 {
+}
+
+void RTRRTStarClass::CleanupInactiveNodes()
+{
+    if(T.empty())
+    {
+        return;
+    }
+    
+    NodeIt tree_node = T.begin();
+    while(IsTimeLeftForCleanupInactiveNodes() && !T.empty() && tree_node != T.end() )
+    {
+        if((*tree_node).active_ == false)
+        {
+            //ROS_INFO("Erased a node...");
+            T.erase(tree_node);
+            tree_node = T.begin(); // jump back to start
+            
+            // Brute Force Consistency-Maker
+            NodeIt it = T.begin();
+            while(it != T.end())
+            {
+                if(it.node->parent != 0)
+                {
+                    if(it.node->prev_sibling == 0 && it.node->parent != 0) 
+                        it.node->parent->first_child = it.node;
+                    else
+                        if(it.node->prev_sibling != 0)
+                            it.node->prev_sibling->next_sibling = it.node;
+                    if(it.node->next_sibling == 0 && it.node->parent != 0) 
+                        it.node->parent->last_child = it.node;
+                    else
+                        if(it.node->next_sibling != 0)
+                            it.node->next_sibling->prev_sibling = it.node;
+                }
+                ++it;
+                ++counter_cleanup_inactive_nodes_;
+            }
+            
+            //Todo: Decide whether and/or how to perform the consistency check
+            //T.debug_verify_consistency();
+            
+        }
+        else
+        {
+            ++tree_node;
+            ++counter_cleanup_inactive_nodes_;
+        }
+    }
 }
 
 bool RTRRTStarClass::IsTimeLeftForExpansionAndRewiring()
@@ -339,6 +398,18 @@ bool RTRRTStarClass::IsTimeLeftForRewireFromTreeRoot()
     return is_time_left;
 }
 
+bool RTRRTStarClass::IsTimeLeftForCleanupInactiveNodes()
+{
+    bool is_time_left = false;
+    if (counter_cleanup_inactive_nodes_ < kmax_number_cleanup_inactive_nodes)
+    {
+        is_time_left = true;
+    }
+    
+    // Todo: add another iterator limit (e.g. check for time)
+    return is_time_left;
+}
+
 bool RTRRTStarClass::IsAgentCloseToTreeRoot()
 {
     bool is_close = false;
@@ -355,6 +426,7 @@ void RTRRTStarClass::FinalizeLoopCycle()
     counter_expansions_and_rewiring_ = 0;
     counter_rewire_random_nodes_ = 0;
     counter_rewire_from_tree_root_ = 0;
+    counter_cleanup_inactive_nodes_ = 0;
 }
 
 NodeIt RTRRTStarClass::SampleRandom()

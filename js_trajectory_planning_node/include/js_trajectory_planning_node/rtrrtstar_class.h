@@ -78,6 +78,9 @@ private:
     /// @brief Plan a path for k steps
     void PlanPathForKSteps();
     
+    /// @brief Cleanup inactive nodes and delete them from T
+    void CleanupInactiveNodes();
+    
     /// @brief Determine whether there is time left for expansion and rewiring
     bool IsTimeLeftForExpansionAndRewiring();
     
@@ -86,6 +89,9 @@ private:
     
     /// @brief Determine whether there is time left for rewiring from the tree root
     bool IsTimeLeftForRewireFromTreeRoot();
+    
+    /// @brief Determine whether there is time left for cleaning up inactive nodes
+    bool IsTimeLeftForCleanupInactiveNodes();
     
     /// @brief Check whether the agent is close to or at the tree root
     bool IsAgentCloseToTreeRoot();
@@ -138,6 +144,9 @@ private:
     /// @brief Holds the count of rewiring from the tree root attempts per loop cycle
     std::uint32_t counter_rewire_from_tree_root_;
     
+    /// @brief Holds the count of how many inactive nodes have been deleted per loop cycle
+    std::uint32_t counter_cleanup_inactive_nodes_;
+    
     /// @brief Holds the current node at which the agent is located
     NodeIt x_agent;
     
@@ -167,6 +176,9 @@ private:
     
     /// @brief Maximum iterations to rewire from the tree root (per cycle step)
     const std::uint32_t kmax_number_rewire_from_tree_root = 5;
+    
+    /// @brief Maximum iterations to cleanup inactive nodes (per cycle step)
+    const std::uint32_t kmax_number_cleanup_inactive_nodes = 20;
     
     /// @brief User given constant for random sampling
     const double kalpha = 0.1;
