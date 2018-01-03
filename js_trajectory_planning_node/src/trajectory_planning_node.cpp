@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     
     ROS_INFO("Starting trajectory planning node");    
     
-    ros::Rate node_rate(200.0f); // 2.0 hz
+    ros::Rate node_rate(2.0f); // 2.0 hz
     while (ros::ok())
     {
         //ROS_INFO("Update step");
