@@ -10,7 +10,7 @@
 #include "planning_space_3d_struct.h"
 #include <random>
 #include <cmath>
-#include <algorithm>    // std::sort
+#include <algorithm>    // std::sort, std::find
 #include <functional>   // std::reference_wrapper
 #include <Eigen/Dense>
 

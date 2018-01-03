@@ -155,7 +155,6 @@ void RTRRTStarClass::RewireRandomNodes()
 {
     while(IsTimeLeftForRewireRandomNodes() && !Q_r.empty() )
     {
-        //ROS_INFO("Keep rewiring");
         NodeIt x_r = Q_r.front();
         Q_r.pop_front();
         std::list<NodeIt> Xi_near = FindNodesNear3d(x_r);
@@ -183,12 +182,43 @@ void RTRRTStarClass::RewireRandomNodes()
 
 void RTRRTStarClass::RewireFromTreeRoot()
 {
+    //ROS_INFO("RewireFromTreeRoot()");
     if(Q_s.empty())
     {
         Q_s.push_back(x_0);
     }
+    
+    std::list<NodeIt> nodes_popped_from_Q_s;
     while(IsTimeLeftForRewireFromTreeRoot() && !Q_s.empty() )
     {
+        NodeIt x_s = Q_s.front();
+        Q_s.pop_front();
+        nodes_popped_from_Q_s.push_back(x_s);
+        
+        std::list<NodeIt> Xi_near = FindNodesNear3d(x_s);
+        double c_old = std::numeric_limits<double>::infinity();
+        double c_new = std::numeric_limits<double>::infinity();
+        for (auto& x_near : Xi_near)
+        {
+            c_old = cost(x_near);
+            c_new = cost(x_s) + EuclidianDistance3d(x_s, x_near);
+            if(     c_new < c_old
+               &&   CheckIfCollisionFreeLineBetween(x_near, x_s))
+            {
+                // add edge from x_s to x_near and remove edge Parent(x_near) to x_near 
+                x_near = ChangeParent(x_near, x_s);
+                // update costs
+                (*x_near).cost_to_start_ = c_new;
+                (*x_near).active_ = true;
+            }
+            bool allready_popped_from_Q_s = std::find(nodes_popped_from_Q_s.begin(), nodes_popped_from_Q_s.end(), x_s) != nodes_popped_from_Q_s.end();
+            if (allready_popped_from_Q_s == false)
+            {
+                Q_s.push_back(x_s);
+                nodes_popped_from_Q_s.push_back(x_s);
+                ROS_INFO("New Node for Q_s");
+            }
+        }
         ++counter_rewire_from_tree_root_;
     }
 }
