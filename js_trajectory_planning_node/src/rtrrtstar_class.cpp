@@ -341,6 +341,34 @@ NodeIt RTRRTStarClass::AddNodeToTree(NodeIt& x_new, const NodeIt& x_closest, std
 
 void RTRRTStarClass::PlanPathForKSteps()
 {
+    if(TreeHasReachedXGoal())
+    {
+        
+    }
+    else
+    {
+        for(auto& x_i : planned_path_)
+        {
+            // only loop (x_1, x_2, ..., x_k), but
+            if(x_i == x_0)
+            {
+                continue;
+            }
+            
+        }
+        
+    }
+}
+
+bool RTRRTStarClass::TreeHasReachedXGoal()
+{
+    bool reached_x_goal = false;    
+    std::list<NodeIt> Xi_near = FindNodesNear3d(x_goal);
+    if(Xi_near.size() > 0)
+    {
+        reached_x_goal = true;
+    }
+    return reached_x_goal;
 }
 
 void RTRRTStarClass::CleanupInactiveNodes()

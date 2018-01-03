@@ -78,6 +78,9 @@ private:
     /// @brief Plan a path for k steps
     void PlanPathForKSteps();
     
+    /// @brief Method to check whether any node in tree T is within the neighbourhood of x_goal
+    bool TreeHasReachedXGoal();
+    
     /// @brief Cleanup inactive nodes and delete them from T
     void CleanupInactiveNodes();
     
@@ -168,6 +171,9 @@ private:
     /// @brief The search tree
     tree<NodeData> T;
     
+    /// @brief The planned path from x_0 to x_k, i.e. (x_1, x_2, ..., x_k) with k < kmaximum_path_steps
+    std::list<NodeIt> planned_path_;
+    
     /// @brief Maximum iterations to perform per cycle step
     const std::uint32_t kmax_number_expansions_and_rewiring = 5;
     
@@ -194,6 +200,9 @@ private:
     
     /// @brief Minimum extent in z-direction to be considered for uniform sampling in planning space
     const double kminimum_uniform_extent_z = 20;
+    
+    /// @brief Maximum number of nodes planned ahead from x_0 (k)
+    const std::uint32_t kmaximum_path_steps = 100;
     
     /// @brief Maximum number of nodes allowed in the tree T
     const std::uint32_t kmaximum_number_nodes_in_tree = 5000;
