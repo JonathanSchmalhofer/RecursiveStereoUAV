@@ -61,11 +61,24 @@ add_executable(trajectory_planning_node
     src/trajectory_planning_node.cpp
 )
 
+add_executable(trajectory_planning_rrt_2d_node
+    src/trajectory_planning_rrt_2d_node.cpp
+)
+
 add_library(rtrrtstar_class_library
     src/rtrrtstar_class.cpp
 )
 
+add_library(rrt_class_library
+    src/rrt_class.cpp
+)
+
 target_link_libraries(trajectory_planning_node
+    ${catkin_LIBRARIES}
+    rtrrtstar_class_library
+)
+
+target_link_libraries(trajectory_planning_rrt_2d_node
     ${catkin_LIBRARIES}
     rtrrtstar_class_library
 )
@@ -74,9 +87,18 @@ target_link_libraries(rtrrtstar_class_library
     ${OCTOMAP_LIBRARIES}
 )
 
+target_link_libraries(rrt_class_library
+    ${OCTOMAP_LIBRARIES}
+)
+
 add_dependencies(trajectory_planning_node
     js_messages_generate_messages_cpp
     rtrrtstar_class_library
+)
+
+add_dependencies(trajectory_planning_rrt_2d_node
+    js_messages_generate_messages_cpp
+    rrt_class_library
 )
 
 #############
