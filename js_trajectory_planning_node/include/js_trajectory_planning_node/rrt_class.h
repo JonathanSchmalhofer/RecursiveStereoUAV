@@ -7,7 +7,7 @@
 #ifndef JS_TRAJECTORY_PLANNING_RRT_2D_NODE_RRT_CLASS_H_
 #define JS_TRAJECTORY_PLANNING_RRT_2D_NODE_RRT_CLASS_H_
 
-#include "planning_space_3d_struct.h"
+#include "node_class.h"
 #include <random>
 #include <cmath>
 #include <algorithm>    // std::sort
