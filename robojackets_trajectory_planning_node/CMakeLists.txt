@@ -41,13 +41,6 @@ else()
   set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif()
 
-# Qt
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-find_package(Qt5Widgets REQUIRED)
-
-message(STATUS "Found Qt5: ${Qt5Widgets_DIR}")
-
 ###################################
 ## catkin specific configuration ##
 ###################################
