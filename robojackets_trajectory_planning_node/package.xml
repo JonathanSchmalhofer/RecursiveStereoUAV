@@ -5,9 +5,9 @@
     <description>The robojackets_trajectory_planning_node package</description>
     <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Bryan Schmalhofer</maintainer>
 
-    <license>MIT</license>
+    <license>???</license>
 
-    <author>Robojackets</author>
+    <author>RoboJackets</author>
 
     <buildtool_depend>catkin</buildtool_depend>
     <build_depend>roscpp</build_depend>

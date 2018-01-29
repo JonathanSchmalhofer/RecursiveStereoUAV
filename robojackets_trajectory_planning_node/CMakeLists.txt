@@ -5,12 +5,6 @@ add_compile_options(
     $<$<CXX_COMPILER_ID:GNU>:-std=c++14>
 )
 
-# note: the -fPIC flag is for building with Qt...
-#       it complains about position-independent code otherwise
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fPIC")
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # include cmake files in the 'cmake folder'
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
@@ -31,15 +25,19 @@ find_package(js_messages REQUIRED)
 
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND)
-  # Fallback to cmake_modules
-  find_package(cmake_modules REQUIRED)
-  find_package(Eigen REQUIRED)
-  set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
-  set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
-  # Possibly map additional variables to the EIGEN3_ prefix.
+    # Fallback to cmake_modules
+    find_package(cmake_modules REQUIRED)
+    find_package(Eigen REQUIRED)
+    set(EIGEN3_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+    set(EIGEN3_LIBRARIES ${EIGEN_LIBRARIES})  # Not strictly necessary as Eigen is head only
+    # Possibly map additional variables to the EIGEN3_ prefix.
 else()
-  set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
+    set(EIGEN3_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 endif()
+
+# wxWidgets
+find_package(wxWidgets REQUIRED net gl core base)
+include(${wxWidgets_USE_FILE})
 
 ###################################
 ## catkin specific configuration ##
@@ -47,7 +45,7 @@ endif()
 
 catkin_package(
     INCLUDE_DIRS
-    LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS}
+    LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES}
     CATKIN_DEPENDS roscpp js_messages
     DEPENDS 
 )
@@ -66,20 +64,16 @@ include_directories(
     "src/2dplane"
 )
 
-#qt5_add_resources(RESOURCES src/rrt-viewer/main.qrc)
-
 add_executable(rrt_node
     "src/2dplane/2dplane.cpp"
     "src/2dplane/GridStateSpace.cpp"
     "src/2dplane/ObstacleGrid.cpp"
     "src/rrt_node.cpp"
-    #${ui_SRC} ${RESOURCES}
 )
-
-#qt5_use_modules("rrt_node" Widgets Qml Quick)
 
 target_link_libraries(rrt_node
     ${catkin_LIBRARIES}
+    ${wxWidgets_LIBRARIES}
 )
 
 add_dependencies(rrt_node
