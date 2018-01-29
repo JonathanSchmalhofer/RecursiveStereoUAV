@@ -1,13 +1,6 @@
 #include <string>
 #include <ros/ros.h>
-/*
-#include <QQmlApplicationEngine>
-#include <QQuickView>
-#include <QtQuick>
-#include <QtWidgets>
-#include <QQuickPaintedItem>
-#include <iostream>
-*/
+
 #include <Eigen/Dense>
 #include <memory> // for make_unique
 #include "2dplane/GridStateSpace.hpp"
@@ -44,8 +37,14 @@ PlannerWrapper::PlannerWrapper()
     //  setup birrt
     _biRRT->setStartState(size / 10);
     _biRRT->setGoalState(size / 2);
-    _biRRT->setMaxStepSize(30);
-    _biRRT->setGoalMaxDist(12);
+    _biRRT->setMaxStepSize(100);
+    _biRRT->setStepSize(10);
+    _biRRT->setMaxIterations(1000);
+    _biRRT->setASCEnabled(true);
+    _biRRT->setGoalBias(0.2);
+    _biRRT->setWaypointBias(0.2);
+    _biRRT->setGoalMaxDist(5);
+    
 
     _startVel = Eigen::Vector2d(3, 0);
     _goalVel = Eigen::Vector2d(0, 3);
@@ -53,7 +52,7 @@ PlannerWrapper::PlannerWrapper()
 
 void PlannerWrapper::step()
 {
-    int numTimes = 50;
+    int numTimes = 5;
 
     for (int i = 0; i < numTimes; i++)
     {
@@ -148,18 +147,10 @@ void BasicDrawPane::render(wxDC&  dc)
     /// draw all lines
     for(const std::pair<Eigen::Vector2d, Eigen::Vector2d>& line : _lines)
     {
+        // draw a line
+        dc.SetPen( wxPen( wxColor(0,0,0), 1 ) ); // black line, 1 pixels thick
+        dc.DrawLine( line.first.x(), line.first.y(), line.second.x(), line.second.y() );
     }
-    
-    int p1_x = 200;
-    int p1_y = 100;
-    int p2_x = 220;
-    int p2_y = 108;
-    
-    dc.DrawCircle( wxPoint(p2_x,p2_y), r /* radius */ );
- 
-    // draw a line from p1 to p2
-    dc.SetPen( wxPen( wxColor(0,0,0), 1 ) ); // black line, 3 pixels thick
-    dc.DrawLine( p1_x, p1_y, p2_x, p2_y ); // draw line across the rectangle
 }
 
 void BasicDrawPane::SetPoints(std::vector<Eigen::Vector2d> points)
@@ -208,10 +199,11 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
     {
         _planner->step();
         ros::spinOnce();
-	ros::Duration(1).sleep();
+	    ros::Duration(1).sleep();
     }
 
     ExtractPointsAndLinesFromTreeForDrawPane();
+    drawPane->paintNow();
 
     if(IsMainLoopRunning())
     {
@@ -224,9 +216,25 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForDrawPane()
     std::vector<Eigen::Vector2d> points;
     std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines;
 
+    /// startTree
     for(const RRT::Node<Eigen::Vector2d>& node : _planner->_biRRT->startTree().allNodes())
     {
-	Eigen::Vector2d current(node.state().x(), node.state().y());
+	    Eigen::Vector2d current(node.state().x(), node.state().y());
+        points.push_back(current);
+        if(node.parent())
+        {
+	    Eigen::Vector2d parent(node.parent()->state().x(), node.parent()->state().y());
+            std::pair<Eigen::Vector2d, Eigen::Vector2d> line(current, parent);
+
+            points.push_back(parent);
+            lines.push_back(line);
+        }
+    }
+
+    /// goalTree
+    for(const RRT::Node<Eigen::Vector2d>& node : _planner->_biRRT->goalTree().allNodes())
+    {
+	    Eigen::Vector2d current(node.state().x(), node.state().y());
         points.push_back(current);
         if(node.parent())
         {
