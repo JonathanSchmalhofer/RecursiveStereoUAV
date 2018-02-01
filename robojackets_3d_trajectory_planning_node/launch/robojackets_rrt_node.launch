@@ -1,0 +1,3 @@
+<launch>
+    <node name="rrt_3d_node" pkg="robojackets_3d_trajectory_planning_node" type="rrt_3d_node" output="screen"/>
+</launch>
