@@ -1,35 +1,25 @@
-# Use phusion/baseimage if problems arise
-FROM jgkamat/locale:16.04
-MAINTAINER Jay Kamat jaygkamat@gmail.com
+FROM ubuntu:xenial
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-# This dockerimage will serve as a 'static' base for the robocup dockerimage to reduce build time
+ENV http_proxy 'http://proxy.muc:8080'
+ENV https_proxy 'http://proxy.muc:8080'
 
-# Setup apt to be happy with no console input
-ENV DEBIAN_FRONTEND noninteractive
+# setup keys
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 421C365BD9FF1F717815A3895523BAEEB01FA116
 
-# Use UTF-8
-# RUN locale-gen en_US.UTF-8 ## TODO UNCOMMENT WHEN LOCALES ARE FIXED IN CIRCLECI ##
-ENV LANG en_US.UTF-8
+# setup sources.list
+RUN echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list
 
-# setup apt tools and other goodies we want
-RUN apt-get update --fix-missing && apt-get -y install apt-utils wget curl htop iputils-ping vim-nox less debconf-utils w3m git software-properties-common sudo scons screen && apt-get clean
+# install ros Desktop-Full Install
+RUN apt-get update
+RUN apt-get install -y ros-kinetic-desktop-full
 
-# set up user <this is for running soccer later on>
-# Replace 1000 with your user / group id
-RUN export uid=1000 gid=1000 && \
-    mkdir -p /home/developer && \
-    echo "developer:x:${uid}:${gid}:Developer,,,:/home/developer:/bin/bash" >> /etc/passwd && \
-    echo "developer:x:${uid}:" >> /etc/group && \
-    echo "developer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/developer && \
-    chmod 0440 /etc/sudoers.d/developer && \
-    chown ${uid}:${gid} -R /home/developer && mkdir -p /etc/udev/rules.d/
+# environment setup
+RUN echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc
+RUN source ~/.bashrc
 
-USER developer
-ENV HOME /home/developer
+# setup entrypoint
+COPY ./ros_entrypoint.sh /
 
-# do everything in root's home
-RUN mkdir -p /home/developer/project
-WORKDIR /home/developer/project
-
-# This image is not meant to be run directly, it has not been compiled yet!
-# In addition, it does not contain any source code, only dependencies
+ENTRYPOINT ["/ros_entrypoint.sh"]
+CMD ["bash"]
