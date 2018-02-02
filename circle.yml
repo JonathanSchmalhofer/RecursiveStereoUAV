@@ -34,5 +34,8 @@ jobs:
                 name: Build using catkin
                 command: |
                     source /opt/ros/kinetic/setup.bash && \
+                    rosdep update && \
+                    rosdep install std_msgs && \
+                    rosdep install roscpp && \
                     cd ~/master_ws && \
                     catkin build -c
