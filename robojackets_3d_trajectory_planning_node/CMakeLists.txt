@@ -39,6 +39,18 @@ endif()
 find_package(wxWidgets REQUIRED net gl core base)
 include(${wxWidgets_USE_FILE})
 
+if(wxWidgets_VERSION LESS 2.9)
+    message(FATAL_ERROR "wxWidgets is not a high enough version!")
+else()
+    message("wxWidgets Version ${wxWidgets_VERSION}")
+    message("wxWidgets Major version ${wxMAJOR_VERSION}")
+    message("release number ${wxRELEASE_NUMBER}")
+    message("check version ${wxCHECK_VERSION}")
+    message("wxWidgets version ${WX_WIDGETS_VERSION}")
+    message("wxWidgets major version ${WX_MAJOR_VERSION}")
+    message("wxWidgets version string ${WX_VERSION_STRING}")
+endif()
+
 # OpenGL and GLUT
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
