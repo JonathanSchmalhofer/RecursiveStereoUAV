@@ -10,13 +10,15 @@ jobs:
                 command: |
                     apt-get update && \
                     apt-get install -y python-catkin-tools && \
-                    apt-get install -y ros-kinetic-desktop && \
+                    apt-get install -y ros-kinetic-desktop-full && \
                     rosdep update && \
                     echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc && \
                     source ~/.bashrc && \
                     source /opt/ros/kinetic/setup.bash && \
                     apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential && \
                     apt-get install -y ros-kinetic-octomap* && \
+                    apt-get install -y python-rospkg && \
+                    apt-get update && \
                     apt-get install -y qt5-default libeigen3-dev g++ ninja-build cmake clang-format-3.6 ccache libflann-dev qtdeclarative5-dev qtdeclarative5-qtquick2-plugin qml-module-qtquick-{controls,dialogs} libboost-all-dev
             - run:
                 name: Prepare workspace for checkout
