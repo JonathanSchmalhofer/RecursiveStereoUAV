@@ -10,10 +10,14 @@ jobs:
                 command: |
                     apt-get update && apt-get install -y python-catkin-tools
             - run:
-                name: Prepare, checkout and build
+                name: Prepare workspace for checkout
                 command: |
-                    mkdir -p ~/master_ws/src && \
-                    cd ~/master_ws/src && \
-                    git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git && \
-                    cd ~/master_sw && \
-                    catkin build -c
+                    mkdir -p ~/master_ws/src && cd ~/master_ws/src
+            - run:
+                name: Checkout RecursiveStereoUAV
+                command: |
+                    cd ~/master_ws/src && git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git
+            - run:
+                name: Build using catkin
+                command: |
+                    cd ~/master_ws && catkin build -c
