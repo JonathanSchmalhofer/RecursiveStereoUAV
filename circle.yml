@@ -12,7 +12,7 @@ jobs:
             - run:
                 name: Prepare workspace for checkout
                 command: |
-                    mkdir -p ~/master_ws/src && cd ~/master_ws/src
+                    mkdir -p ~/master_ws/src && cd ~/master_ws/src && git clone https://github.com/ros/catkin.git
             - run:
                 name: Checkout RecursiveStereoUAV
                 command: |
