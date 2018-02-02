@@ -6,6 +6,10 @@ jobs:
         steps:
             - setup_remote_docker
             - run:
+                name: Install missing tools
+                command: |
+                    sudo apt-get update; sudo apt-get install python-catkin-tools
+            - run:
                 name: Prepare workspace for checkout
                 command: |
                     mkdir -p master_ws/src && cd master_ws/src
