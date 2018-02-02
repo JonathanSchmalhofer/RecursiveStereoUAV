@@ -9,7 +9,8 @@ jobs:
                 name: Prepare workspace for checkout
                 command: |
                     mkdir -p master_ws/src && cd master_ws/src
-            - checkout master_ws/src
+            - checkout
+                path: master_ws/src
             - run:
                 name: Build using catkin
                 command: |
