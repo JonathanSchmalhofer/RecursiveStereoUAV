@@ -41,7 +41,7 @@ jobs:
                     mkdir -p ~/wxWidgets-3.1.0/gtk-build && \
                     apt-get install -y libgtk-3-dev build-essential checkinstall && \
                     cd ~/wxWidgets-3.1.0/gtk-build && \
-                    ../configure --disable-shared --enable-unicode --with-opengl && \
+                    ~/wxWidgets-3.1.0/configure --disable-shared --enable-unicode --with-opengl && \
                     make && \
                     make install
             - run:
