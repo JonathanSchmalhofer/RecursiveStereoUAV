@@ -10,8 +10,11 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 421C365BD9
 # setup sources.list
 RUN echo "deb http://packages.ros.org/ros/ubuntu xenial main" > /etc/apt/sources.list.d/ros-latest.list
 
-# install ros Desktop-Full Install
+# install additional tools
 RUN apt-get update
+RUN apt-get install -y git
+
+# install ros Desktop-Full Install
 RUN apt-get install -y ros-kinetic-desktop-full
 
 # environment setup
