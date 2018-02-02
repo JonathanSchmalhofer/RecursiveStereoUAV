@@ -12,6 +12,7 @@ jobs:
                     apt-get install -y python-catkin-tools && \
                     apt-get install -y ros-kinetic-desktop && \
                     apt-get install -y ros-kinetic-octomap* && \
+                    rosdep install -y robot_state_publisher urdf xacro controller_manager geometry_msgs joy ros_control ros_controllers sensor_msgs std_msgs gazebo_msgs gazebo_plugins gazebo_ros gazebo_ros_control joy && \
                     apt-get install -y qt5-default libeigen3-dev g++ ninja-build cmake clang-format-3.6 ccache libflann-dev qtdeclarative5-dev qtdeclarative5-qtquick2-plugin qml-module-qtquick-{controls,dialogs} libboost-all-dev
             - run:
                 name: Prepare workspace for checkout
