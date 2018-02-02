@@ -3,4 +3,4 @@ Obstacle Detection and Avoidance for Autonomous Unmanned Aerial Vehicles Using R
 
 | Build server  | Status |
 |---------------|--------|
-| Travis | [![Build Status](https://api.travis-ci.org/JonathanSchmalhofer/RecursiveStereoUAV.svg)](https://api.travis-ci.org/JonathanSchmalhofer/RecursiveStereoUAV) |
+| CircleCI | [![BuildStatus CircleCI](https://circleci.com/gh/JonathanSchmalhofer/RecursiveStereoUAV.svg?style=svg)](https://circleci.com/gh/JonathanSchmalhofer/RecursiveStereoUAV) |
