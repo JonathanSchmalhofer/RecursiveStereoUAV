@@ -16,6 +16,7 @@ namespace js_trajectory_planning_node
 {
 
 typedef tree<NodeData>::iterator NodeIt;
+typedef tree<NodeData>::children_iterator NodeItChild;
 
 struct PlanningSpace3d
 {

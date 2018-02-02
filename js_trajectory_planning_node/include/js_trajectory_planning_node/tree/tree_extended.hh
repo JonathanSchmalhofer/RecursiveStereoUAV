@@ -277,6 +277,9 @@ class tree {
 				tree_node *top_node;
       };
 
+        /// Return iterator to the beginning of the tree.
+	    inline pre_order_iterator   root() const;
+        
 		/// Return iterator to the beginning of the tree.
 		inline pre_order_iterator   begin() const;
 		/// Return iterator to the end of the tree.
@@ -699,6 +702,13 @@ iter tree<T, tree_node_allocator>::erase(iter it)
    alloc_.deallocate(cur,1);
 	return ret;
 	}
+
+template <class T, class tree_node_allocator>
+typename tree<T, tree_node_allocator>::pre_order_iterator tree<T, tree_node_allocator>::root() const
+    {
+        return pre_order_iterator(head->next_sibling);
+    }
+
 
 template <class T, class tree_node_allocator>
 typename tree<T, tree_node_allocator>::pre_order_iterator tree<T, tree_node_allocator>::begin() const

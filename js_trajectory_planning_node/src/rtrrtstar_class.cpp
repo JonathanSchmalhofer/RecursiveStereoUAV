@@ -18,40 +18,77 @@ RTRRTStarClass::RTRRTStarClass()
 RTRRTStarClass::~RTRRTStarClass()
 {
     Initialize();
+    if(Xi_obs.octomap_space_ != NULL)
+    {
+        delete Xi_obs.octomap_space_;
+    }
 }
 
 void RTRRTStarClass::Initialize()
 {
     T.clear();
+    allready_visited_nodes_.clear();
+    planned_path_.clear();
     Q_s.clear();
     Q_r.clear();
     Xi_obs.node_space_.clear();
+    if(Xi_obs.octomap_space_ != NULL)
+    {
+        delete Xi_obs.octomap_space_;
+    }
+    Xi_obs.octomap_space_ = new octomap::OcTree(kresolution_octomap);
+    
+    // add test wall
+    ROS_INFO("Make Octomap great again");
+    double x_wall, y_wall, z_wall;
+    y_wall = 40;
+    for(x_wall = -0.3*kminimum_uniform_extent_x; x_wall <= 0.3*kminimum_uniform_extent_x; x_wall+=0.5*kresolution_octomap)
+    {
+        for(z_wall = -0.3*kminimum_uniform_extent_z; z_wall <= 0.3*kminimum_uniform_extent_z; z_wall+=0.5* kresolution_octomap)
+        {
+            octomap::point3d start(x_wall, y_wall-5, z_wall);
+            octomap::point3d end(x_wall, y_wall, z_wall);
+            
+            //ROS_INFO("%f, %f, %f", x_wall, y_wall, z_wall);
+        
+            Xi_obs.octomap_space_->insertRay(start, end);
+        }
+    }
+    ROS_INFO("Trump was here");
+    /*
+    NodeIt x_test_a = T.insert(T.begin(), NodeData(Vector3d(0, 85, 0),
+                                          0,
+                                          true));
+    NodeIt x_test_b = T.insert(T.begin(), NodeData(Vector3d(0, 95, 0),
+                                          0,
+                                          true));
+    
+    if(!CheckIfCollisionFreeLineBetween(x_test_a, x_test_b))
+    {
+        ROS_INFO("COLLISION");
+    }*/
+    
+    octomap::point3d max_point;
+    octomap::point3d min_point;
+    
     // Todo: clean up the methods for updating x_goal, x_agent and x_0
     UpdateX0(T.insert(T.begin(), NodeData(Vector3d(0, 0, 0),
                                           0,
                                           true)));
-    UpdateXAgent(T.insert(T.begin(), NodeData(Vector3d(kminimum_uniform_extent_x, 0, 0),
+    UpdateXAgent(T.insert(T.begin(), NodeData(Vector3d(0.5*kminimum_uniform_extent_x, 0, 0),
                                               kminimum_uniform_extent_x,
                                               true)));
-    UpdateXGoal(T.insert(T.begin(), NodeData(Vector3d(0, kminimum_uniform_extent_y, 0),
+    UpdateXGoal(T.insert(T.begin(), NodeData(Vector3d(0, 0.5*kminimum_uniform_extent_y, 0),
                                              kminimum_uniform_extent_y,
                                              true)));
 }
 
 void RTRRTStarClass::PerformPlanningCycleOnce()
 {
-    /*
-    ROS_INFO("====================================================");
-    ROS_INFO("Current tree:");
-    IndentedRosInfo(T);
-    ROS_INFO("----------------------------------------------------");
-    */
     while(IsTimeLeftForExpansionAndRewiring())
     {
-        //ROS_INFO("Expand and Rewire");//Todo: delete
         ExpandAndRewireTree();
     }
-    //ROS_INFO("And Now?");
     PlanPathForKSteps();
     if(IsAgentCloseToTreeRoot())
     {
@@ -69,6 +106,7 @@ void RTRRTStarClass::UpdateXAgent(NodeIt x_in)
 void RTRRTStarClass::UpdateXGoal(NodeIt x_in)
 {
     x_goal = x_in;
+    allready_visited_nodes_.clear();
 }
 
 void RTRRTStarClass::UpdateX0(NodeIt x_in)
@@ -270,6 +308,11 @@ double RTRRTStarClass::cost(const NodeIt& x_in)
             blocked_node = true;
             break;
         }
+        if(false == CheckIfCollisionFreeLineBetween(current_node, parent_node))
+        {
+            blocked_node = true;
+            break;
+        }
         cumulative_cost += EuclidianDistance3d(current_node, parent_node);
         current_node = parent_node;
         parent_node = T.parent(current_node);
@@ -282,6 +325,21 @@ double RTRRTStarClass::cost(const NodeIt& x_in)
     {
         return cumulative_cost;
     }
+}
+
+double RTRRTStarClass::Heuristic(const NodeIt& x_in)
+{
+    double return_value = 0.0f;
+    bool allready_visited = std::find(allready_visited_nodes_.begin(), allready_visited_nodes_.end(), x_in) != allready_visited_nodes_.end();
+    if (allready_visited)
+    {
+        return_value = std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+        return_value = EuclidianDistance3d(x_in, x_goal);
+    }
+    return return_value;
 }
 
 double RTRRTStarClass::GetVolumeOfSearchSpace3d()
@@ -341,22 +399,117 @@ NodeIt RTRRTStarClass::AddNodeToTree(NodeIt& x_new, const NodeIt& x_closest, std
 
 void RTRRTStarClass::PlanPathForKSteps()
 {
+    // in case planned path is empty so far
+    if (planned_path_.size() <= 0)
+    {
+	    planned_path_.push_back(x_0);
+    }
+    
     if(TreeHasReachedXGoal())
     {
+        ROS_INFO("-----------------------------------------------------------");
+        ROS_INFO("Goal Reached");
         
+        std::list<NodeIt> updated_planned_path_;
+        
+        // the goal path starts at the goal and will reverse to the start goal
+        updated_planned_path_.push_back(x_goal);
+        
+        NodeIt x_i = x_goal;
+        while(x_i.node->parent != 0 && x_i != x_0)
+        {
+            x_i = x_i.node->parent;
+            updated_planned_path_.push_front(x_i);
+        }
+        planned_path_ = updated_planned_path_;
+        NodeListRosInfo(planned_path_);
     }
     else
     {
-        for(auto& x_i : planned_path_)
+        std::list<NodeIt> updated_planned_path_;
+
+        // path always starts at the root node
+        updated_planned_path_.push_back(x_0);
+        
+        std::uint32_t path_planning_steps = 0;
+        NodeIt x_i = x_0;
+        while(      T.number_of_children(x_i) > 0
+              &&    T.size() < kmaximum_path_steps
+              &&    path_planning_steps < kmaximum_path_steps)
         {
-            // only loop (x_1, x_2, ..., x_k), but
-            if(x_i == x_0)
+            NodeItChild x_c = T.begin_children_iterator(x_i);
+            NodeIt x_ipp = x_i;
+            double c_min = std::numeric_limits<double>::infinity();
+            double f_c = std::numeric_limits<double>::infinity();
+            
+            // Iterate over all children x_c of current node x_i
+            while(x_c != T.end_children_iterator(x_i))  // Iter
             {
-                continue;
+                f_c = cost(x_c) + Heuristic(x_c);
+                if(f_c < c_min)
+                {
+                    c_min = f_c;
+                    x_ipp = static_cast<NodeIt>(x_c); // next candidate whos children will be iterated
+                }
+                ++x_c;
+                ++path_planning_steps;
             }
             
+            updated_planned_path_.push_back(x_ipp);
+            
+            if(T.number_of_children(x_ipp) == 0 || cost(x_ipp) == std::numeric_limits<double>::infinity())
+            {
+                allready_visited_nodes_.push_back(x_ipp);
+                break;
+            }
+            x_i = x_ipp;
         }
         
+        // Update best path
+        if(     EuclidianDistance3d(updated_planned_path_.back(), x_goal)
+           <    EuclidianDistance3d(planned_path_.back(), x_goal))
+        {
+            planned_path_ = updated_planned_path_;
+            ROS_INFO("-----------------------------------------------------------");
+            ROS_INFO("New better path:");
+            NodeListRosInfo(planned_path_);
+        }
+        
+        
+        /*
+        
+        if (!goalDefined)
+			return;
+		Nodes* curr_node = SMP::root;
+		while (!curr_node->children.empty())
+		{
+			std::list<Nodes*>::iterator it = curr_node->children.begin();
+			Nodes* tempNode = curr_node->children.front();
+			float cost_ = cost(tempNode);
+			float minCost = cost_ + getHeuristic(*it);
+			while (it != curr_node->children.end()) {
+				cost_ = cost(*it);
+				float cost_new = cost_ + getHeuristic(*it);
+				if (cost_new < minCost) {
+					minCost = cost_new;
+					tempNode = *it;
+				}
+				it++;
+			}
+			updatedPath.push_back(tempNode);
+			if (tempNode->children.empty() || cost(tempNode) == inf)
+			{
+				visited_set.insert(tempNode);
+				break;
+			}
+			curr_node = tempNode;
+		}
+		if (currPath.size() == 0)
+			currPath.push_back(SMP::root);
+
+		if (updatedPath.back()->location.distance(SMP::goal) < currPath.back()->location.distance(SMP::goal))
+			currPath = updatedPath;
+        */
     }
 }
 
@@ -366,7 +519,16 @@ bool RTRRTStarClass::TreeHasReachedXGoal()
     std::list<NodeIt> Xi_near = FindNodesNear3d(x_goal);
     if(Xi_near.size() > 0)
     {
-        reached_x_goal = true;
+        NodeIt x_closest = GetClosestNodeInTree(x_goal);
+        if(CheckIfCollisionFreeLineBetween(x_closest, x_goal))
+        {
+            x_goal = ChangeParent(x_goal, x_closest);
+            // update costs
+            (*x_goal).cost_to_start_ = cost(x_closest) + EuclidianDistance3d(x_goal, x_closest);
+            (*x_goal).active_ = true;
+            Q_r.push_back(x_goal);
+            reached_x_goal = true;
+        }
     }
     return reached_x_goal;
 }
@@ -659,8 +821,11 @@ bool RTRRTStarClass::CheckIfCollisionFreeLineBetween(const NodeIt& x_a, const No
                                    (*x_b).position_.z_ - (*x_a).position_.z_);
         octomap::point3d cell_hit_by_ray;
         
-        ROS_INFO("Casting ray");
-        return Xi_obs.octomap_space_->castRay(start, direction, cell_hit_by_ray);
+        //ROS_INFO("Casting Ray from (%f,%f,%f) to (%f,%f,%f)", start.x(), start.y(), start.z(), direction.x(), direction.y(), direction.z());
+        bool ignore_unknown_cells = true;
+        double max_range = EuclidianDistance3d(x_a, x_b);
+        bool collision_occured = Xi_obs.octomap_space_->castRay(start, direction, cell_hit_by_ray, ignore_unknown_cells, max_range);
+        return (!collision_occured);
     }
 }
 
@@ -687,6 +852,11 @@ double RTRRTStarClass::NormalRandomNumber()
 
 NodeIt RTRRTStarClass::ChangeParent(NodeIt& child_node, const NodeIt& new_parent)
 {
+    // Todo: delete
+    if(child_node == x_goal)
+    {
+        ROS_INFO("###############  x_goal was found and got a parent in the tree");
+    }
     auto new_child = T.append_child(new_parent);
     child_node = T.move_ontop(new_child, child_node);
     //Todo: Decide whether and/or how to perform the consistency check

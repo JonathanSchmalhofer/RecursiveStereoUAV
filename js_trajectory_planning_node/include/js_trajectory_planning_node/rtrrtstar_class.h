@@ -71,6 +71,9 @@ private:
 
     /// @brief Calculate cost for node x_in (depending on all ancestors, but they will not be updated)
     double cost(const NodeIt& x_in);
+
+    /// @brief Calculate heuristic H(x_in) for node x_in
+    double Heuristic(const NodeIt& x_in);
     
     /// @brief Get the (current) volume of the search space (in paper: mue(Xi))
     double GetVolumeOfSearchSpace3d();
@@ -174,6 +177,9 @@ private:
     /// @brief The planned path from x_0 to x_k, i.e. (x_1, x_2, ..., x_k) with k < kmaximum_path_steps
     std::list<NodeIt> planned_path_;
     
+    /// @brief All nodes that have allready been considered during path planning since the last change of x_goal
+    std::list<NodeIt> allready_visited_nodes_;
+    
     /// @brief Maximum iterations to perform per cycle step
     const std::uint32_t kmax_number_expansions_and_rewiring = 5;
     
@@ -187,7 +193,7 @@ private:
     const std::uint32_t kmax_number_cleanup_inactive_nodes = 20;
     
     /// @brief User given constant for random sampling
-    const double kalpha = 0.1;
+    const double kalpha = 0.4;
     
     /// @brief User given constant for random sampling for dividing between uniform sampling and sampling within a ellpsoid
     const double kbeta = 1.4;
@@ -202,7 +208,7 @@ private:
     const double kminimum_uniform_extent_z = 20;
     
     /// @brief Maximum number of nodes planned ahead from x_0 (k)
-    const std::uint32_t kmaximum_path_steps = 100;
+    const std::uint32_t kmaximum_path_steps = 50;
     
     /// @brief Maximum number of nodes allowed in the tree T
     const std::uint32_t kmaximum_number_nodes_in_tree = 5000;
@@ -211,7 +217,10 @@ private:
     const std::uint32_t kmaximum_number_closest_neighbours = 100;
     
     /// @brief Maximum radius to find neighbours to be considered (r_s)
-    const double kradius_closest_neighbours = 10.0;
+    const double kradius_closest_neighbours = 2.0;
+    
+    /// @brief Resolution of octomap
+    const double kresolution_octomap = 1;
 };
 }  // namespace js_trajectory_planning_node
 
