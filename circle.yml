@@ -33,5 +33,6 @@ jobs:
             - run:
                 name: Build using catkin
                 command: |
+                    source /opt/ros/kinetic/setup.bash && \
                     cd ~/master_ws && \
                     catkin build -c
