@@ -12,8 +12,8 @@ jobs:
             - run:
                 name: Prepare, checkout and build
                 command: |
-                    mkdir -p ~/master_ws/src \
-                    cd ~/master_ws/src \
-                    git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git \
-                    cd ~/master_sw \
+                    mkdir -p ~/master_ws/src && \
+                    cd ~/master_ws/src && \
+                    git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git && \
+                    cd ~/master_sw && \
                     catkin build -c
