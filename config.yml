@@ -1,0 +1,7 @@
+version: 2
+jobs:
+    build:
+        docker:
+            - image: jonathanschmalhofer/recursivestereo:20180202_alpha_v0
+        steps:
+            - checkout
