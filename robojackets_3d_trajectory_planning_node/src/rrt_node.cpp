@@ -185,8 +185,8 @@ public:
     // the given canvas.
     TestGLContext& GetContext(wxGLCanvas *canvas);
     // virtual wxApp methods
-    virtual bool OnInit() wxOVERRIDE;
-    virtual int OnExit() wxOVERRIDE;
+    virtual bool OnInit();
+    virtual int OnExit();
     
     void DoUpdate(wxIdleEvent &event);
  
