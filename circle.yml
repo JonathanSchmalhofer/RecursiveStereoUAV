@@ -8,16 +8,23 @@ jobs:
             - run:
                 name: Install missing tools
                 command: |
-                    apt-get update && apt-get install -y python-catkin-tools
+                    apt-get update && \
+                    apt-get install -y python-catkin-tools && \
+                    apt install -y ros-core-dev && \
+                    apt-get -y install qt5-default libeigen3-dev g++ ninja-build cmake clang-format-3.6 ccache libflann-dev qtdeclarative5-dev qtdeclarative5-qtquick2-plugin qml-module-qtquick-{controls,dialogs} libboost-all-dev
             - run:
                 name: Prepare workspace for checkout
                 command: |
-                    mkdir -p ~/master_ws/src && cd ~/master_ws/src && git clone https://github.com/ros/catkin.git
+                    mkdir -p ~/master_ws/src && \
+                    cd ~/master_ws/src && \
+                    git clone https://github.com/ros/catkin.git
             - run:
                 name: Checkout RecursiveStereoUAV
                 command: |
-                    cd ~/master_ws/src && git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git
+                    cd ~/master_ws/src && \
+                    git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git
             - run:
                 name: Build using catkin
                 command: |
-                    cd ~/master_ws && catkin build -c
+                    cd ~/master_ws && \
+                    catkin build -c
