@@ -4,12 +4,15 @@ jobs:
         docker:
             - image: jonathanschmalhofer/recursivestereo:20180202_alpha_v0
         steps:
+            - setup_remote_docker
             - run:
                 name: Prepare workspace for checkout
                 command: |
                     mkdir -p master_ws/src && cd master_ws/src
-            - checkout
-            - setup_remote_docker
+            - run:
+                name: Checkout RecursiveStereoUAV
+                command: |
+                    git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git
             - run:
                 name: Build using catkin
                 command: |
