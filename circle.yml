@@ -36,6 +36,7 @@ jobs:
                     mkdir -p ~/wxWidgets && \
                     cd ~/wxWidgets && \
                     apt-get install -y wget && \
+                    apt-get install -y tar && \
                     wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.0/wxWidgets-3.1.0.tar.bz2 -P ~/wxWidgets && \
                     tar -xf ~/wxWidgets/wxWidgets-3.1.0.tar.bz2 -C ~/wxWidgets && \
                     cd ~/wxWidgets/wxWidgets-3.1.0 && \ 
