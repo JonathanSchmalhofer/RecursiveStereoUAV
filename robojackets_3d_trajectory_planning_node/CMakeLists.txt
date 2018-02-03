@@ -41,14 +41,6 @@ include(${wxWidgets_USE_FILE})
 
 if(wxWidgets_VERSION LESS 2.9)
     message(FATAL_ERROR "wxWidgets is not a high enough version!")
-else()
-    message("wxWidgets Version ${wxWidgets_VERSION}")
-    message("wxWidgets Major version ${wxMAJOR_VERSION}")
-    message("release number ${wxRELEASE_NUMBER}")
-    message("check version ${wxCHECK_VERSION}")
-    message("wxWidgets version ${WX_WIDGETS_VERSION}")
-    message("wxWidgets major version ${WX_MAJOR_VERSION}")
-    message("wxWidgets version string ${WX_VERSION_STRING}")
 endif()
 
 # OpenGL and GLUT
@@ -86,6 +78,8 @@ add_executable(rrt_3d_node
     "src/2dplane/2dplane.cpp"
     "src/2dplane/GridStateSpace.cpp"
     "src/2dplane/ObstacleGrid.cpp"
+    "src/wxApplication.cpp"
+    "src/PlannerWrapper.cpp"
     "src/rrt_node.cpp"
 )
 
