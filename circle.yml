@@ -51,4 +51,4 @@ jobs:
                     rosdep install std_msgs && \
                     rosdep install roscpp && \
                     cd ~/master_ws && \
-                    catkin build js_airsim_to_ros_node
+                    catkin build -c
