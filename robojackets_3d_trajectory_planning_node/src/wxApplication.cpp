@@ -216,7 +216,7 @@ RRTFrame::RRTFrame()
     canvas_ = new RRTGLCanvas(this, NULL);
 
 
-    SetClientSize(400, 400);
+    SetClientSize(800, 800);
     Show();
 
     // test IsDisplaySupported() function:
@@ -296,7 +296,7 @@ void RRTGLContext::DrawNow()
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -20.0f);
+    glTranslatef(0.0f, 0.0f, -3.0f);
     glRotatef(xangle, 1.0f, 0.0f, 0.0f);
     glRotatef(yangle, 0.0f, 1.0f, 0.0f);
     
