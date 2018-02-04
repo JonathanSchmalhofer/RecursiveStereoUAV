@@ -32,13 +32,13 @@ void PlannerWrapper::step()
         birrt_->grow();
     }
 
-    ROS_INFO("#%d with size() = %d", birrt_->iterationCount(), birrt_->getPath().size());
+    //ROS_INFO("#%d with size() = %d", birrt_->iterationCount(), birrt_->getPath().size());
 
     // store solution
     previous_solution_.clear();
     if (birrt_->startSolutionNode() != nullptr)
     {
-        ROS_INFO("   Found a solution");
+        //ROS_INFO("   Found a solution");
         previous_solution_ = birrt_->getPath();
         RRT::SmoothPath(previous_solution_, *statespace_);
     }
