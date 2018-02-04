@@ -59,13 +59,13 @@ void PlannerWrapper::step()
         birrt_->grow();
     }
 
-    ROS_INFO("#%d with size() = %d", birrt_->iterationCount(), birrt_->getPath().size());
+    //ROS_INFO("#%d with size() = %d", birrt_->iterationCount(), birrt_->getPath().size());
 
     // store solution
     previous_solution_.clear();
     if (birrt_->startSolutionNode() != nullptr)
     {
-        ROS_INFO("   Found a solution");
+        //ROS_INFO("   Found a solution");
         previous_solution_ = birrt_->getPath();
         RRT::SmoothPath(previous_solution_, *statespace_);
     }
@@ -288,7 +288,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "rrt_node");
     ros::NodeHandle node_handle;
     
-    ROS_INFO("Starting RRT node with wxWidget visualization");
+    //ROS_INFO("Starting RRT node with wxWidget visualization");
 
     wxEntryStart( argc, argv );
     wxTheApp->CallOnInit();
