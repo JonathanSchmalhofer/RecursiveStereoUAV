@@ -144,11 +144,26 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
     // viewport settings.
     : wxGLCanvas(parent, wxID_ANY, attribList,
                  wxDefaultPosition, wxDefaultSize,
-                 wxFULL_REPAINT_ON_RESIZE)
+                 wxFULL_REPAINT_ON_RESIZE),
+      view_rotation_angle_x_(0),
+      view_rotation_angle_y_(0),
+      view_rotation_angle_z_(0),
+      view_translation_x_(0),
+      view_translation_y_(0),
+      view_translation_z_(0)
 {
+    ResetView();
 }
 
-
+void RRTGLCanvas::ResetView()
+{
+    view_rotation_angle_x_ = 0;
+    view_rotation_angle_y_ = 0;
+    view_rotation_angle_z_ = 0;
+    view_translation_x_ = 0;
+    view_translation_y_ = 0;
+    view_translation_z_ = 0;
+}
 
 void RRTGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {    

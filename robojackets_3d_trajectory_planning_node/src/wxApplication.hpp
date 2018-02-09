@@ -66,12 +66,31 @@ class RRTGLCanvas : public wxGLCanvas
 {
 public:
     RRTGLCanvas(wxWindow *parent, int *attribList = NULL);
-    
+
     void ClearTrees();
     void AddTree(TreeToDraw tree);
     void DrawNow();
+    void ResetView();
 
 private:
+    /// @brief Rotation angle around x axis for view.
+    double view_rotation_angle_x_;
+
+    /// @brief Rotation angle around y axis for view.
+    double view_rotation_angle_y_;
+
+    /// @brief Rotation angle around z axis for view.
+    double view_rotation_angle_z_;
+
+    /// @brief Translation along x axis for view.
+    double view_translation_x_;
+
+    /// @brief Translation along y axis for view.
+    double view_translation_y_;
+
+    /// @brief Translation along z axis for view.
+    double view_translation_z_;
+
     std::vector<Eigen::Vector2d> points_;
     std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;    
     std::vector<TreeToDraw> trees_;
@@ -86,12 +105,12 @@ class RRTFrame : public wxFrame
 {
 public:
     RRTFrame();
-    
+
     RRTGLCanvas* GetCanvas();
-    
+
 private:
     RRTGLCanvas* canvas_;
-    
+
     void OnClose(wxCommandEvent& event);
 
     wxDECLARE_EVENT_TABLE();
@@ -104,27 +123,26 @@ class wxApplicationNode
 {
 public:
     wxApplicationNode() { context_ = NULL;}
-    
+
     // Returns the shared context used by all frames and sets it as current for
     // the given canvas.
     RRTGLContext& GetContext(wxGLCanvas *canvas);
-    
+
     // virtual wxApp methods
     virtual bool OnInit();
     virtual int OnExit();
-    
+
     void DoUpdate(wxIdleEvent &event);
-    
+
     RRTFrame* GetFrame();
- 
+
 private:
     void ExtractPointsAndLinesFromTreeForCanvas();
 
-    //wxFrame *frame;
     PlannerWrapper *planner_;
     // the GL context we use for all our mono rendering windows
     RRTGLContext *context_;
     RRTFrame *frame_;
- 
+
     wxDECLARE_EVENT_TABLE();
 };
