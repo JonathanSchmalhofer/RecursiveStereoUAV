@@ -5,6 +5,7 @@ wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTGLCanvas, wxGLCanvas)
     EVT_PAINT(RRTGLCanvas::OnPaint)
+    EVT_KEY_DOWN(RRTGLCanvas::OnKeyDown)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, RRTFrame::OnClose)
@@ -163,6 +164,19 @@ void RRTGLCanvas::ResetView()
     view_translation_x_ = 0;
     view_translation_y_ = 0;
     view_translation_z_ = 0;
+
+    DrawNow();
+    Refresh(false);
+}
+
+void RRTGLCanvas::Spin(double angle_x, double angle_y, double angle_z)
+{
+    view_rotation_angle_x_ += angle_x;
+    view_rotation_angle_y_ += angle_y;
+    view_rotation_angle_z_ += angle_z;
+
+    DrawNow();
+    Refresh(false);
 }
 
 void RRTGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
@@ -209,6 +223,43 @@ void RRTGLCanvas::DrawNow()
         canvas.DrawNow();
     }
     SwapBuffers();
+}
+
+void RRTGLCanvas::OnKeyDown(wxKeyEvent& event)
+{
+    switch ( event.GetKeyCode() )
+    {
+        case WXK_LEFT: // move left
+            break;
+
+        case WXK_RIGHT: // move right
+            break;
+
+        case WXK_UP: // move up
+            break;
+
+        case WXK_DOWN: // move down
+            break;
+
+        case WXK_NUMPAD4: // roll counter-clockwise
+            break;
+
+        case WXK_NUMPAD6: // roll clockwise
+            break;
+
+        case WXK_NUMPAD8: // tilt downwards
+            break;
+
+        case WXK_NUMPAD2: // tilt upwards
+            break;
+
+        case WXK_SPACE: // reset
+            break;
+
+        default:
+            ResetView();
+            return;
+    }
 }
 
 void RRTGLCanvas::ClearTrees()
@@ -280,17 +331,19 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
 }
 
 void RRTGLContext::DrawNow()
-{    
-    
-    float xangle = 0;
-    float yangle = 0;
+{
+    float view_rotation_angle_x_ = 0;
+    float view_rotation_angle_y_ = 0;
+    float view_rotation_angle_z_ = 0;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -3.0f);
-    glRotatef(xangle, 1.0f, 0.0f, 0.0f);
-    glRotatef(yangle, 0.0f, 1.0f, 0.0f);
+    glTranslatef(0.0f, 0.0f, -2.0f);
+    glRotatef(view_rotation_angle_x_, 1.0f, 0.0f, 0.0f);
+    glRotatef(view_rotation_angle_y_, 0.0f, 1.0f, 0.0f);
+    glRotatef(view_rotation_angle_z_, 0.0f, 0.0f, 1.0f);
     
     
     /*

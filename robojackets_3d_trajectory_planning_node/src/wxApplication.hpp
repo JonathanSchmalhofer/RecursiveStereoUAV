@@ -71,6 +71,7 @@ public:
     void AddTree(TreeToDraw tree);
     void DrawNow();
     void ResetView();
+    void Spin(double angle_x, double angle_y, double angle_z);
 
 private:
     /// @brief Rotation angle around x axis for view.
@@ -96,6 +97,7 @@ private:
     std::vector<TreeToDraw> trees_;
 
     void OnPaint(wxPaintEvent& event);
+    void OnKeyDown(wxKeyEvent& event);
 
     wxDECLARE_EVENT_TABLE();
 };
