@@ -261,29 +261,6 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     glLoadIdentity();
     glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
 
-    // create the textures to use for cube sides: they will be reused by all
-    // canvases (which is probably not critical in the case of simple textures
-    // we use here but could be really important for a real application where
-    // each texture could take many megabytes)
-    glGenTextures(WXSIZEOF(textures_), textures_);
-
-    for ( unsigned i = 0; i < WXSIZEOF(textures_); i++ )
-    {
-        glBindTexture(GL_TEXTURE_2D, textures_[i]);
-
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        const wxImage img(DrawDice(256, i + 1));
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.GetWidth(), img.GetHeight(),
-                     0, GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
-    }
-
     CheckGLError();
 }
 
@@ -338,65 +315,6 @@ void RRTGLContext::DrawNow()
       glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
       glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
     glEnd();//end drawing of lines
-    
-    /*
-
-    // draw six faces of a cube of size 1 centered at (0, 0, 0)
-    glBindTexture(GL_TEXTURE_2D, textures_[0]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f, 1.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[1]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[2]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[3]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[4]);
-    glBegin(GL_QUADS);
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[5]);
-    glBegin(GL_QUADS);
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glEnd();
-    
-    */
 
     glFlush();
 

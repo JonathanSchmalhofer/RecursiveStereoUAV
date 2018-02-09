@@ -44,8 +44,6 @@ public:
     void DrawNow();
 
 private:
-    // textures for the cube faces
-    GLuint textures_[6];
 };
 
 
