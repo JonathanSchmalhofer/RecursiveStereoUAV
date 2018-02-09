@@ -27,9 +27,6 @@
 
 static void CheckGLError();
 
-// function to draw the texture for cube faces
-static wxImage DrawDice(int size, unsigned num);
-
 wxString glGetwxString(GLenum name);
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -43,7 +40,60 @@ public:
     // render the cube showing it at given angles
     void DrawNow();
 
+    /// @brief Set the angle around x-axis the view shall be rotated about.
+    void SetAngleX(double angle_x);
+
+    /// @brief Get the angle around x-axis the view shall be rotated about.
+    double GetAngleX();
+
+    /// @brief Get the angle around y-axis the view shall be rotated about.
+    double GetAngleY();
+
+    /// @brief Get the angle around z-axis the view shall be rotated about.
+    double GetAngleZ();
+
+    /// @brief Get the translation along x-axis the view shall be moved.
+    double GetTranslationX();
+
+    /// @brief Get the translation along y-axis the view shall be moved.
+    double GetTranslationY();
+
+    /// @brief Get the translation along z-axis the view shall be moved.
+    double GetTranslationZ();
+
+    /// @brief Set the angle around y-axis the view shall be rotated about.
+    void SetAngleY(double angle_y);
+
+    /// @brief Set the angle around z-axis the view shall be rotated about.
+    void SetAngleZ(double angle_z);
+
+    /// @brief Set the translation along x-axis the view shall be moved.
+    void SetTranslationX(double translation_x);
+
+    /// @brief Set the translation along y-axis the view shall be moved.
+    void SetTranslationY(double translation_y);
+
+    /// @brief Set the translation along z-axis the view shall be moved.
+    void SetTranslationZ(double translation_z);
+
 private:
+    /// @brief Rotation angle around x axis for view.
+    double view_rotation_angle_x_;
+
+    /// @brief Rotation angle around y axis for view.
+    double view_rotation_angle_y_;
+
+    /// @brief Rotation angle around z axis for view.
+    double view_rotation_angle_z_;
+
+    /// @brief Translation along x axis for view.
+    double view_translation_x_;
+
+    /// @brief Translation along y axis for view.
+    double view_translation_y_;
+
+    /// @brief Translation along z axis for view.
+    double view_translation_z_;
 };
 
 
@@ -72,6 +122,43 @@ public:
     void DrawNow();
     void ResetView();
     void Spin(double angle_x, double angle_y, double angle_z);
+    void Translate(double translate_x, double translate_y, double translate_z);
+
+    /// @brief Get the angle around x-axis the view shall be rotated about.
+    double GetAngleX();
+
+    /// @brief Get the angle around y-axis the view shall be rotated about.
+    double GetAngleY();
+
+    /// @brief Get the angle around z-axis the view shall be rotated about.
+    double GetAngleZ();
+
+    /// @brief Get the translation along x-axis the view shall be moved.
+    double GetTranslationX();
+
+    /// @brief Get the translation along y-axis the view shall be moved.
+    double GetTranslationY();
+
+    /// @brief Get the translation along z-axis the view shall be moved.
+    double GetTranslationZ();
+
+    /// @brief Set the angle around x-axis the view shall be rotated about.
+    void SetAngleX(double angle_x);
+
+    /// @brief Set the angle around y-axis the view shall be rotated about.
+    void SetAngleY(double angle_y);
+
+    /// @brief Set the angle around z-axis the view shall be rotated about.
+    void SetAngleZ(double angle_z);
+
+    /// @brief Set the translation along x-axis the view shall be moved.
+    void SetTranslationX(double translation_x);
+
+    /// @brief Set the translation along y-axis the view shall be moved.
+    void SetTranslationY(double translation_y);
+
+    /// @brief Set the translation along z-axis the view shall be moved.
+    void SetTranslationZ(double translation_z);
 
 private:
     /// @brief Rotation angle around x axis for view.
