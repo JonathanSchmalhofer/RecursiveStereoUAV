@@ -25,6 +25,12 @@
 // helper functions
 // ----------------------------------------------------------------------------
 
+const int khalf_width = 400;
+const int khalf_height = 400;
+
+const double kdelta_angle = 5; // [deg]
+const double kdelta_translation = 10; // [-]
+
 static void CheckGLError();
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -122,8 +128,6 @@ class RRTGLCanvas : public wxGLCanvas
 public:
     RRTGLCanvas(wxWindow *parent, int *attribList = NULL);
 
-    void ClearTrees();
-    void AddTree(TreeToDraw tree);
     void DrawNow();
     void ResetView();
     void Spin(double azimuth, double elevation);
@@ -188,10 +192,6 @@ private:
     /// @brief Look-at-point z coordinate.
     double view_look_at_point_z_;
 
-    std::vector<Eigen::Vector2d> points_;
-    std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;
-    std::vector<TreeToDraw> trees_;
-
     void OnPaint(wxPaintEvent& event);
     void OnKeyDown(wxKeyEvent& event);
 
@@ -235,7 +235,6 @@ public:
     RRTFrame* GetFrame();
 
 private:
-    void ExtractPointsAndLinesFromTreeForCanvas();
     void ExtractPointsAndLinesFromTreeForContext();
 
     PlannerWrapper *planner_;

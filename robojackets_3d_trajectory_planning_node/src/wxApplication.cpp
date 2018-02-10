@@ -74,7 +74,6 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
 	    ros::Duration(1).sleep();
     }
 
-    ExtractPointsAndLinesFromTreeForCanvas();
     ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();
 
@@ -82,59 +81,6 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
     {
         event.RequestMore();
     }
-}
-
-void wxApplicationNode::ExtractPointsAndLinesFromTreeForCanvas()
-{
-    GetFrame()->GetCanvas()->ClearTrees();
-
-    /// startTree
-    TreeToDraw* start_tree = new TreeToDraw();
-    wxColor start_tree_color(255,0,0);
-    for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->startTree().allNodes())
-    {
-	    Point current_node_point(node.state().x(), node.state().y());
-        PointWithColor current_colored_node_point(current_node_point, start_tree_color);
-        start_tree->colored_points_.push_back(current_colored_node_point);
-
-        if(node.parent())
-        {
-	        Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
-            PointWithColor parent_colored_node_point(parent_node_point, start_tree_color);
-            Line line(current_node_point, parent_node_point);
-            LineWithColor colored_line(line, start_tree_color);
-            
-            start_tree->colored_points_.push_back(parent_colored_node_point);
-            start_tree->colored_lines_.push_back(colored_line);
-        }
-    }
-
-    GetFrame()->GetCanvas()->AddTree(*start_tree);
-    delete start_tree;
-    
-    /// goalTree
-    TreeToDraw* goal_tree = new TreeToDraw();
-    wxColor goal_tree_color(0,0,255);
-    for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->goalTree().allNodes())
-    {
-	    Point current_node_point(node.state().x(), node.state().y());
-        PointWithColor current_colored_node_point(current_node_point, goal_tree_color);
-        goal_tree->colored_points_.push_back(current_colored_node_point);
-
-        if(node.parent())
-        {
-	        Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
-            PointWithColor parent_colored_node_point(parent_node_point, goal_tree_color);
-            Line line(current_node_point, parent_node_point);
-            LineWithColor colored_line(line, goal_tree_color);
-            
-            goal_tree->colored_points_.push_back(parent_colored_node_point);
-            goal_tree->colored_lines_.push_back(colored_line);
-        }
-    }
-
-    GetFrame()->GetCanvas()->AddTree(*goal_tree);
-    delete goal_tree;
 }
 
 void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
@@ -207,9 +153,9 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
                  wxFULL_REPAINT_ON_RESIZE),
       view_azimuth_(0),
       view_elevation_(0),
-      radius_(100),
-      view_look_at_point_x_(0),
-      view_look_at_point_y_(0),
+      radius_(khalf_width+khalf_height),
+      view_look_at_point_x_(khalf_width),
+      view_look_at_point_y_(khalf_height),
       view_look_at_point_z_(0)
 {
 }
@@ -278,9 +224,9 @@ void RRTGLCanvas::ResetView()
 {
     SetAzimuth(0);
     SetElevation(0);
-    SetRadius(5);
-    SetLookAtPointX(0);
-    SetLookAtPointY(0);
+    SetRadius(khalf_width+khalf_height);
+    SetLookAtPointX(khalf_width);
+    SetLookAtPointY(khalf_height);
     SetLookAtPointZ(0);
 
     DrawNow();
@@ -350,8 +296,8 @@ void RRTGLCanvas::DrawNow()
 
 void RRTGLCanvas::OnKeyDown(wxKeyEvent& event)
 {
-    double delta_angle = 5.0;
-    double delta_translation = 0.2;
+    double delta_angle = kdelta_angle;
+    double delta_translation = kdelta_translation;
     switch ( event.GetKeyCode() )
     {
         case WXK_LEFT: // move look-at-point along x
@@ -403,16 +349,6 @@ void RRTGLCanvas::OnKeyDown(wxKeyEvent& event)
     }
 }
 
-void RRTGLCanvas::ClearTrees()
-{
-    trees_.clear();
-}
-
-void RRTGLCanvas::AddTree(TreeToDraw tree)
-{
-    trees_.push_back(tree);
-}
-
 // ----------------------------------------------------------------------------
 // RRTFrame: main application window
 // ----------------------------------------------------------------------------
@@ -423,7 +359,7 @@ RRTFrame::RRTFrame()
     canvas_ = new RRTGLCanvas(this, NULL);
 
 
-    SetClientSize(800, 800);
+    SetClientSize(2*khalf_width, 2*khalf_height);
     Show();
 
     // test IsDisplaySupported() function:
@@ -451,46 +387,22 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     : wxGLContext(canvas),
       view_azimuth_(0),
       view_elevation_(0),
-      radius_(100),
-      view_look_at_point_x_(0),
-      view_look_at_point_y_(0),
+      radius_(khalf_width+khalf_height),
+      view_look_at_point_x_(khalf_width),
+      view_look_at_point_y_(khalf_height),
       view_look_at_point_z_(0)
-{    
+{
     SetCurrent(*canvas);
-    
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(70,(double)800/800,1,1000);
+    gluPerspective(90,(double)khalf_width/khalf_height,1,5*(khalf_width+khalf_height));
 
     CheckGLError();
 }
 
 void RRTGLContext::DrawNow()
 {
-    /*
-    //  node drawing radius
-    const double r = 3;
-    for(const TreeToDraw& tree : trees_)
-    {
-        /// draw all points
-        for(const PointWithColor& colored_point : tree.colored_points_)
-        {
-            // circles
-            dc.SetPen( wxPen( colored_point.second, 2 ) ); // 2-pixels thick outline
-
-            // draw a circle around
-            dc.DrawCircle( wxPoint(colored_point.first.x(),colored_point.first.y()), r );
-        }
-
-        /// draw all lines
-        for(const LineWithColor& colored_line : tree.colored_lines_)
-        {
-            // draw a line
-            dc.SetPen( wxPen( colored_line.second, 1 ) ); // 1 pixels thick
-            dc.DrawLine( colored_line.first.first.x(), colored_line.first.first.y(), colored_line.first.second.x(), colored_line.first.second.y() );
-        }
-    }*/
-    
     glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -510,45 +422,46 @@ void RRTGLContext::DrawNow()
     double camera_position_y = radius * -sin((GetElevation())*(M_PI/180));
     double camera_position_z = -radius * cos((GetAzimuth())*(M_PI/180)) * cos((GetElevation())*(M_PI/180));
 
+    camera_position_x += GetLookAtPointX();
+    camera_position_y += GetLookAtPointY();
+    camera_position_z += GetLookAtPointZ();
+
     // Set the camera position and lookat point
     gluLookAt(camera_position_x, camera_position_y,camera_position_z,   // Camera position
               GetLookAtPointX(), GetLookAtPointY(), GetLookAtPointZ(),    // Look at point
               0.0, 1.0, 0.0);   // Up vector
 
-    glColor3f(0.0f,0.0f,1.0f); //blue color
-
     glPointSize(5.0f);//set point size to 5 pixels
 
     for(const TreeToDraw& tree : trees_)
     {
-        /// draw all points
-        for(const PointWithColor& colored_point : tree.colored_points_)
-        {
-            // circles
-            //dc.SetPen( wxPen( colored_point.second, 2 ) ); // 2-pixels thick outline
+        glColor3f(0.0f,0.0f,1.0f); //blue color as default
 
-            // draw a circle around
-            //dc.DrawCircle( wxPoint(colored_point.first.x(),colored_point.first.y()), r );
-        }
+        glBegin(GL_POINTS); //starts drawing of points
+            /// draw all points
+            for(const PointWithColor& colored_point : tree.colored_points_)
+            {
+                glColor3f(colored_point.second.Red()/255,
+                          colored_point.second.Green()/255,
+                          colored_point.second.Blue()/255);
+                glVertex3f(colored_point.first.x(),colored_point.first.y(),0.0f);
+            }
+        glEnd(); //end drawing of points
 
-        /// draw all lines
-        for(const LineWithColor& colored_line : tree.colored_lines_)
-        {
-            // draw a line
-            //dc.SetPen( wxPen( colored_line.second, 1 ) ); // 1 pixels thick
-            //dc.DrawLine( colored_line.first.first.x(), colored_line.first.first.y(), colored_line.first.second.x(), colored_line.first.second.y() );
-        }
+        glColor3f(0.0f,0.0f,1.0f); //blue color as default
+
+        glBegin(GL_LINES); //starts drawing of lines
+            /// draw all lines
+            for(const LineWithColor& colored_line : tree.colored_lines_)
+            {
+                glColor3f(colored_line.second.Red()/255,
+                          colored_line.second.Green()/255,
+                          colored_line.second.Blue()/255);
+                glVertex3f(colored_line.first.first.x(), colored_line.first.first.y(),0.0f);
+                glVertex3f(colored_line.first.second.x(), colored_line.first.second.y(),0.0f);
+            }
+        glEnd(); //end drawing of lines
     }
-
-    glBegin(GL_POINTS); //starts drawing of points
-        glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
-        glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
-    glEnd();//end drawing of points
-
-    glBegin(GL_LINES); //starts drawing of lines
-        glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
-        glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
-    glEnd();//end drawing of lines
 
     glDisable(GL_POINT_SMOOTH);
     glBlendFunc(GL_NONE, GL_NONE);
