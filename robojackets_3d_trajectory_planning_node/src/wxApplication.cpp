@@ -153,7 +153,7 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
                  wxFULL_REPAINT_ON_RESIZE),
       view_azimuth_(0),
       view_elevation_(0),
-      radius_(khalf_width+khalf_height),
+      radius_(0.5*(khalf_width+khalf_height)),
       view_look_at_point_x_(khalf_width),
       view_look_at_point_y_(khalf_height),
       view_look_at_point_z_(0)
@@ -224,7 +224,7 @@ void RRTGLCanvas::ResetView()
 {
     SetAzimuth(0);
     SetElevation(0);
-    SetRadius(khalf_width+khalf_height);
+    SetRadius(0.5*(khalf_width+khalf_height));
     SetLookAtPointX(khalf_width);
     SetLookAtPointY(khalf_height);
     SetLookAtPointZ(0);
@@ -387,7 +387,7 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     : wxGLContext(canvas),
       view_azimuth_(0),
       view_elevation_(0),
-      radius_(khalf_width+khalf_height),
+      radius_(0.5*(khalf_width+khalf_height)),
       view_look_at_point_x_(khalf_width),
       view_look_at_point_y_(khalf_height),
       view_look_at_point_z_(0)
