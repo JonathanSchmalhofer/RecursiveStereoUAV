@@ -68,6 +68,8 @@ add_executable(rrt_node
     "src/2dplane/2dplane.cpp"
     "src/2dplane/GridStateSpace.cpp"
     "src/2dplane/ObstacleGrid.cpp"
+    "src/wxApplication.cpp"
+    "src/PlannerWrapper.cpp"
     "src/rrt_node.cpp"
 )
 
