@@ -5,6 +5,7 @@ wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTGLCanvas, wxGLCanvas)
     EVT_PAINT(RRTGLCanvas::OnPaint)
+    EVT_KEY_DOWN(RRTGLCanvas::OnKeyDown)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTFrame, wxFrame)
     EVT_MENU(wxID_CLOSE, RRTFrame::OnClose)
@@ -144,11 +145,108 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
     // viewport settings.
     : wxGLCanvas(parent, wxID_ANY, attribList,
                  wxDefaultPosition, wxDefaultSize,
-                 wxFULL_REPAINT_ON_RESIZE)
+                 wxFULL_REPAINT_ON_RESIZE),
+      view_rotation_angle_x_(0),
+      view_rotation_angle_y_(0),
+      view_rotation_angle_z_(0),
+      view_translation_x_(0),
+      view_translation_y_(0),
+      view_translation_z_(-2)
 {
 }
 
+double RRTGLCanvas::GetAngleX()
+{
+    return view_rotation_angle_x_;
+}
 
+double RRTGLCanvas::GetAngleY()
+{
+    return view_rotation_angle_y_;
+}
+
+double RRTGLCanvas::GetAngleZ()
+{
+    return view_rotation_angle_z_;
+}
+
+double RRTGLCanvas::GetTranslationX()
+{
+    return view_translation_x_;
+}
+
+double RRTGLCanvas::GetTranslationY()
+{
+    return view_translation_y_;
+}
+
+double RRTGLCanvas::GetTranslationZ()
+{
+    return view_translation_z_;
+}
+
+void RRTGLCanvas::SetAngleX(double angle_x)
+{
+    view_rotation_angle_x_ = angle_x;
+}
+
+void RRTGLCanvas::SetAngleY(double angle_y)
+{
+    view_rotation_angle_y_ = angle_y;
+}
+
+void RRTGLCanvas::SetAngleZ(double angle_z)
+{
+    view_rotation_angle_z_ = angle_z;
+}
+
+void RRTGLCanvas::SetTranslationX(double translation_x)
+{
+    view_translation_x_ = translation_x;
+}
+
+void RRTGLCanvas::SetTranslationY(double translation_y)
+{
+    view_translation_y_ = translation_y;
+}
+
+void RRTGLCanvas::SetTranslationZ(double translation_z)
+{
+    view_translation_z_ = translation_z;
+}
+
+void RRTGLCanvas::ResetView()
+{
+    SetAngleX(0);
+    SetAngleY(0);
+    SetAngleZ(0);
+    SetTranslationX(0);
+    SetTranslationY(0);
+    SetTranslationZ(0);
+
+    DrawNow();
+    Refresh(false);
+}
+
+void RRTGLCanvas::Spin(double angle_x, double angle_y, double angle_z)
+{
+    SetAngleX(angle_x + GetAngleX());
+    SetAngleY(angle_y + GetAngleY());
+    SetAngleZ(angle_z + GetAngleZ());
+
+    DrawNow();
+    Refresh(false);
+}
+
+void RRTGLCanvas::Translate(double translate_x, double translate_y, double translate_z)
+{
+    SetTranslationX(translate_x + GetTranslationX());
+    SetTranslationY(translate_y + GetTranslationY());
+    SetTranslationZ(translate_z + GetTranslationZ());
+
+    DrawNow();
+    Refresh(false);
+}
 
 void RRTGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
 {    
@@ -168,32 +266,67 @@ void RRTGLCanvas::DrawNow()
     // is wrong when next another canvas is repainted.
     const wxSize ClientSize = GetClientSize();
 
-    RRTGLContext& canvas = wxGetApp().GetContext(this);
+    RRTGLContext& context_canvas = wxGetApp().GetContext(this);
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
-    // Render the graphics and swap the buffers.
-    GLboolean quadStereoSupported;
-    glGetBooleanv( GL_STEREO, &quadStereoSupported);
-    if ( quadStereoSupported )
-    {
-        glDrawBuffer( GL_BACK_LEFT );
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glFrustum(-0.47f, 0.53f, -0.5f, 0.5f, 1.0f, 3.0f);
-        canvas.DrawNow();
-        CheckGLError();
-        glDrawBuffer( GL_BACK_RIGHT );
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
-        glFrustum(-0.53f, 0.47f, -0.5f, 0.5f, 1.0f, 3.0f);
-        canvas.DrawNow();
-        CheckGLError();
-    }
-    else
-    {
-        canvas.DrawNow();
-    }
+    // Update angles and translation before drawing
+    context_canvas.SetAngleX(GetAngleX());
+    context_canvas.SetAngleY(GetAngleY());
+    context_canvas.SetAngleZ(GetAngleZ());
+    context_canvas.SetTranslationX(GetTranslationX());
+    context_canvas.SetTranslationY(GetTranslationY());
+    context_canvas.SetTranslationZ(GetTranslationZ());
+    context_canvas.DrawNow();
+
+    // Then draw
     SwapBuffers();
+}
+
+void RRTGLCanvas::OnKeyDown(wxKeyEvent& event)
+{
+    double delta_angle = 5.0;
+    double delta_translation = 1.0;
+    switch ( event.GetKeyCode() )
+    {
+        case WXK_LEFT: // move left
+            Translate(0.0f, +delta_translation, 0.0f);
+            break;
+
+        case WXK_RIGHT: // move right
+            Translate(0.0f, -delta_translation, 0.0f);
+            break;
+
+        case WXK_UP: // move forward
+            Translate(0.0f, 0.0f, +delta_translation);
+            break;
+
+        case WXK_DOWN: // move back
+            Translate(0.0f, 0.0f, -delta_translation);
+            break;
+
+        case WXK_NUMPAD4: // roll counter-clockwise
+            Spin(0.0f, 0.0f, -delta_angle);
+            break;
+
+        case WXK_NUMPAD6: // roll clockwise
+            Spin(0.0f, 0.0f, +delta_angle);
+            break;
+
+        case WXK_NUMPAD8: // tilt downwards
+            Spin(0.0f, -delta_angle, 0.0f);
+            break;
+
+        case WXK_NUMPAD2: // tilt upwards
+            Spin(0.0f, +delta_angle, 0.0f);
+            break;
+
+        case WXK_SPACE: // reset
+            ResetView();
+            break;
+
+        default:
+            return;
+    }
 }
 
 void RRTGLCanvas::ClearTrees()
@@ -241,7 +374,13 @@ void RRTFrame::OnClose(wxCommandEvent& WXUNUSED(event))
 // ----------------------------------------------------------------------------
 
 RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
-    : wxGLContext(canvas)
+    : wxGLContext(canvas),
+      view_rotation_angle_x_(0),
+      view_rotation_angle_y_(0),
+      view_rotation_angle_z_(0),
+      view_translation_x_(0),
+      view_translation_y_(0),
+      view_translation_z_(0)
 {    
     SetCurrent(*canvas);
 
@@ -261,44 +400,19 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     glLoadIdentity();
     glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
 
-    // create the textures to use for cube sides: they will be reused by all
-    // canvases (which is probably not critical in the case of simple textures
-    // we use here but could be really important for a real application where
-    // each texture could take many megabytes)
-    glGenTextures(WXSIZEOF(textures_), textures_);
-
-    for ( unsigned i = 0; i < WXSIZEOF(textures_); i++ )
-    {
-        glBindTexture(GL_TEXTURE_2D, textures_[i]);
-
-        glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-        const wxImage img(DrawDice(256, i + 1));
-
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, img.GetWidth(), img.GetHeight(),
-                     0, GL_RGB, GL_UNSIGNED_BYTE, img.GetData());
-    }
-
     CheckGLError();
 }
 
 void RRTGLContext::DrawNow()
-{    
-    
-    float xangle = 0;
-    float yangle = 0;
+{
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glTranslatef(0.0f, 0.0f, -3.0f);
-    glRotatef(xangle, 1.0f, 0.0f, 0.0f);
-    glRotatef(yangle, 0.0f, 1.0f, 0.0f);
+    glTranslatef(GetTranslationX(), GetTranslationY(), GetTranslationZ());
+    glRotatef(GetAngleX(), 1.0f, 0.0f, 0.0f);
+    glRotatef(GetAngleY(), 0.0f, 1.0f, 0.0f);
+    glRotatef(GetAngleZ(), 0.0f, 0.0f, 1.0f);
     
     
     /*
@@ -330,77 +444,78 @@ void RRTGLContext::DrawNow()
     glPointSize(20.0f);//set point size to 20 pixels
     
     glBegin(GL_POINTS); //starts drawing of points
-      glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
-      glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
+        glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
+        glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
     glEnd();//end drawing of points
     
     glBegin(GL_LINES); //starts drawing of lines
-      glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
-      glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
+        glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
+        glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
     glEnd();//end drawing of lines
-    
-    /*
-
-    // draw six faces of a cube of size 1 centered at (0, 0, 0)
-    glBindTexture(GL_TEXTURE_2D, textures_[0]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f, 1.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[1]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 0.0f,-1.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[2]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f, 1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f, 0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[3]);
-    glBegin(GL_QUADS);
-        glNormal3f( 0.0f,-1.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f,-0.5f, 0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[4]);
-    glBegin(GL_QUADS);
-        glNormal3f( 1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f( 0.5f, 0.5f, 0.5f);
-        glTexCoord2f(1, 0); glVertex3f( 0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f( 0.5f,-0.5f,-0.5f);
-        glTexCoord2f(0, 1); glVertex3f( 0.5f, 0.5f,-0.5f);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, textures_[5]);
-    glBegin(GL_QUADS);
-        glNormal3f(-1.0f, 0.0f, 0.0f);
-        glTexCoord2f(0, 0); glVertex3f(-0.5f,-0.5f,-0.5f);
-        glTexCoord2f(1, 0); glVertex3f(-0.5f,-0.5f, 0.5f);
-        glTexCoord2f(1, 1); glVertex3f(-0.5f, 0.5f, 0.5f);
-        glTexCoord2f(0, 1); glVertex3f(-0.5f, 0.5f,-0.5f);
-    glEnd();
-    
-    */
 
     glFlush();
 
     CheckGLError();
+}
+
+double RRTGLContext::GetAngleX()
+{
+    return view_rotation_angle_x_;
+}
+
+double RRTGLContext::GetAngleY()
+{
+    return view_rotation_angle_y_;
+}
+
+double RRTGLContext::GetAngleZ()
+{
+    return view_rotation_angle_z_;
+}
+
+double RRTGLContext::GetTranslationX()
+{
+    return view_translation_x_;
+}
+
+double RRTGLContext::GetTranslationY()
+{
+    return view_translation_y_;
+}
+
+double RRTGLContext::GetTranslationZ()
+{
+    return view_translation_z_;
+}
+
+void RRTGLContext::SetAngleX(double angle_x)
+{
+    view_rotation_angle_x_ = angle_x;
+}
+
+void RRTGLContext::SetAngleY(double angle_y)
+{
+    view_rotation_angle_y_ = angle_y;
+}
+
+void RRTGLContext::SetAngleZ(double angle_z)
+{
+    view_rotation_angle_z_ = angle_z;
+}
+
+void RRTGLContext::SetTranslationX(double translation_x)
+{
+    view_translation_x_ = translation_x;
+}
+
+void RRTGLContext::SetTranslationY(double translation_y)
+{
+    view_translation_y_ = translation_y;
+}
+
+void RRTGLContext::SetTranslationZ(double translation_z)
+{
+    view_translation_z_ = translation_z;
 }
 
 // ----------------------------------------------------------------------------
@@ -430,66 +545,4 @@ static void CheckGLError()
 
         wxLogError(wxT("OpenGL error %d"), err);
     }
-}
-
-// function to draw the texture for cube faces
-static wxImage DrawDice(int size, unsigned num)
-{
-    wxASSERT_MSG( num >= 1 && num <= 6, wxT("invalid dice index") );
-
-    const int dot = size/16;        // radius of a single dot
-    const int gap = 5*size/32;      // gap between dots
-
-    wxBitmap bmp(size, size);
-    wxMemoryDC dc;
-    dc.SelectObject(bmp);
-    dc.SetBackground(*wxWHITE_BRUSH);
-    dc.Clear();
-    dc.SetBrush(*wxBLACK_BRUSH);
-
-    // the upper left and lower right points
-    if ( num != 1 )
-    {
-        dc.DrawCircle(gap + dot, gap + dot, dot);
-        dc.DrawCircle(size - gap - dot, size - gap - dot, dot);
-    }
-
-    // draw the central point for odd dices
-    if ( num % 2 )
-    {
-        dc.DrawCircle(size/2, size/2, dot);
-    }
-
-    // the upper right and lower left points
-    if ( num > 3 )
-    {
-        dc.DrawCircle(size - gap - dot, gap + dot, dot);
-        dc.DrawCircle(gap + dot, size - gap - dot, dot);
-    }
-
-    // finally those 2 are only for the last dice
-    if ( num == 6 )
-    {
-        dc.DrawCircle(gap + dot, size/2, dot);
-        dc.DrawCircle(size - gap - dot, size/2, dot);
-    }
-
-    dc.SelectObject(wxNullBitmap);
-
-    return bmp.ConvertToImage();
-}
-
-wxString glGetwxString(GLenum name)
-{    
-    const GLubyte *v = glGetString(name);
-    if ( v == 0 )
-    {
-        // The error is not important. It is GL_INVALID_ENUM.
-        // We just want to clear the error stack.
-        glGetError();
-
-        return wxString();
-    }
-
-    return wxString((const char*)v);
 }
