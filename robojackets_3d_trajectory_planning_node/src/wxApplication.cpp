@@ -1,4 +1,6 @@
 #include "wxApplication.hpp"
+#include <string>
+#include <ros/ros.h>
 
 wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
     EVT_IDLE(wxApplicationNode::DoUpdate)
@@ -24,7 +26,7 @@ IMPLEMENT_WX_THEME_SUPPORT;
 bool wxApplicationNode::OnInit()
 {
     planner_ = new PlannerWrapper();
-    
+
     if ( !wxApp::OnInit() )
         return false;
 
@@ -73,6 +75,7 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
     }
 
     ExtractPointsAndLinesFromTreeForCanvas();
+    ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();
 
     if(IsMainLoopRunning())
@@ -134,6 +137,62 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForCanvas()
     delete goal_tree;
 }
 
+void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
+{
+    if(NULL != context_)
+    {
+        context_->ClearTrees();
+
+        /// startTree
+        TreeToDraw* start_tree = new TreeToDraw();
+        wxColor start_tree_color(255,0,0);
+        for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->startTree().allNodes())
+        {
+            Point current_node_point(node.state().x(), node.state().y());
+            PointWithColor current_colored_node_point(current_node_point, start_tree_color);
+            start_tree->colored_points_.push_back(current_colored_node_point);
+
+            if(node.parent())
+            {
+                Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
+                PointWithColor parent_colored_node_point(parent_node_point, start_tree_color);
+                Line line(current_node_point, parent_node_point);
+                LineWithColor colored_line(line, start_tree_color);
+
+                start_tree->colored_points_.push_back(parent_colored_node_point);
+                start_tree->colored_lines_.push_back(colored_line);
+            }
+        }
+
+        context_->AddTree(*start_tree);
+        delete start_tree;
+
+        /// goalTree
+        TreeToDraw* goal_tree = new TreeToDraw();
+        wxColor goal_tree_color(0,0,255);
+        for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->goalTree().allNodes())
+        {
+            Point current_node_point(node.state().x(), node.state().y());
+            PointWithColor current_colored_node_point(current_node_point, goal_tree_color);
+            goal_tree->colored_points_.push_back(current_colored_node_point);
+
+            if(node.parent())
+            {
+                Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
+                PointWithColor parent_colored_node_point(parent_node_point, goal_tree_color);
+                Line line(current_node_point, parent_node_point);
+                LineWithColor colored_line(line, goal_tree_color);
+
+                goal_tree->colored_points_.push_back(parent_colored_node_point);
+                goal_tree->colored_lines_.push_back(colored_line);
+            }
+        }
+
+        context_->AddTree(*goal_tree);
+        delete goal_tree;
+    }
+}
+
 // ----------------------------------------------------------------------------
 // RRTGLCanvas
 // ----------------------------------------------------------------------------
@@ -146,93 +205,92 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
     : wxGLCanvas(parent, wxID_ANY, attribList,
                  wxDefaultPosition, wxDefaultSize,
                  wxFULL_REPAINT_ON_RESIZE),
-      view_rotation_angle_x_(0),
-      view_rotation_angle_y_(0),
-      view_rotation_angle_z_(0),
-      view_translation_x_(0),
-      view_translation_y_(0),
-      view_translation_z_(-2)
+      view_azimuth_(0),
+      view_elevation_(0),
+      radius_(100),
+      view_look_at_point_x_(0),
+      view_look_at_point_y_(0),
+      view_look_at_point_z_(0)
 {
 }
 
-double RRTGLCanvas::GetAngleX()
+double RRTGLCanvas::GetAzimuth()
 {
-    return view_rotation_angle_x_;
+    return view_azimuth_;
 }
 
-double RRTGLCanvas::GetAngleY()
+double RRTGLCanvas::GetElevation()
 {
-    return view_rotation_angle_y_;
+    return view_elevation_;
 }
 
-double RRTGLCanvas::GetAngleZ()
+double RRTGLCanvas::GetRadius()
 {
-    return view_rotation_angle_z_;
+    return radius_;
 }
 
-double RRTGLCanvas::GetTranslationX()
+double RRTGLCanvas::GetLookAtPointX()
 {
-    return view_translation_x_;
+    return view_look_at_point_x_;
 }
 
-double RRTGLCanvas::GetTranslationY()
+double RRTGLCanvas::GetLookAtPointY()
 {
-    return view_translation_y_;
+    return view_look_at_point_y_;
 }
 
-double RRTGLCanvas::GetTranslationZ()
+double RRTGLCanvas::GetLookAtPointZ()
 {
-    return view_translation_z_;
+    return view_look_at_point_z_;
 }
 
-void RRTGLCanvas::SetAngleX(double angle_x)
+void RRTGLCanvas::SetAzimuth(double azimuth)
 {
-    view_rotation_angle_x_ = angle_x;
+    view_azimuth_ = azimuth;
 }
 
-void RRTGLCanvas::SetAngleY(double angle_y)
+void RRTGLCanvas::SetElevation(double elevation)
 {
-    view_rotation_angle_y_ = angle_y;
+    view_elevation_ = elevation;
 }
 
-void RRTGLCanvas::SetAngleZ(double angle_z)
+void RRTGLCanvas::SetRadius(double radius)
 {
-    view_rotation_angle_z_ = angle_z;
+    radius_ = radius;
 }
 
-void RRTGLCanvas::SetTranslationX(double translation_x)
+void RRTGLCanvas::SetLookAtPointX(double look_at_x)
 {
-    view_translation_x_ = translation_x;
+    view_look_at_point_x_ = look_at_x;
 }
 
-void RRTGLCanvas::SetTranslationY(double translation_y)
+void RRTGLCanvas::SetLookAtPointY(double look_at_y)
 {
-    view_translation_y_ = translation_y;
+    view_look_at_point_y_ = look_at_y;
 }
 
-void RRTGLCanvas::SetTranslationZ(double translation_z)
+void RRTGLCanvas::SetLookAtPointZ(double look_at_z)
 {
-    view_translation_z_ = translation_z;
+    view_look_at_point_z_ = look_at_z;
 }
 
 void RRTGLCanvas::ResetView()
 {
-    SetAngleX(0);
-    SetAngleY(0);
-    SetAngleZ(0);
-    SetTranslationX(0);
-    SetTranslationY(0);
-    SetTranslationZ(0);
+    SetAzimuth(0);
+    SetElevation(0);
+    SetRadius(5);
+    SetLookAtPointX(0);
+    SetLookAtPointY(0);
+    SetLookAtPointZ(0);
 
     DrawNow();
     Refresh(false);
 }
 
-void RRTGLCanvas::Spin(double angle_x, double angle_y, double angle_z)
+void RRTGLCanvas::Spin(double azimuth, double elevation)
 {
-    SetAngleX(angle_x + GetAngleX());
-    SetAngleY(angle_y + GetAngleY());
-    SetAngleZ(angle_z + GetAngleZ());
+    SetAzimuth(azimuth + GetAzimuth());
+    SetElevation(elevation + GetElevation());
 
     DrawNow();
     Refresh(false);
@@ -240,9 +298,17 @@ void RRTGLCanvas::Spin(double angle_x, double angle_y, double angle_z)
 
 void RRTGLCanvas::Translate(double translate_x, double translate_y, double translate_z)
 {
-    SetTranslationX(translate_x + GetTranslationX());
-    SetTranslationY(translate_y + GetTranslationY());
-    SetTranslationZ(translate_z + GetTranslationZ());
+    SetLookAtPointX(translate_x + GetLookAtPointX());
+    SetLookAtPointY(translate_y + GetLookAtPointY());
+    SetLookAtPointZ(translate_z + GetLookAtPointZ());
+
+    DrawNow();
+    Refresh(false);
+}
+
+void RRTGLCanvas::ChangeRadius(double delta_radius)
+{
+    SetRadius(delta_radius + GetRadius());
 
     DrawNow();
     Refresh(false);
@@ -270,12 +336,12 @@ void RRTGLCanvas::DrawNow()
     glViewport(0, 0, ClientSize.x, ClientSize.y);
 
     // Update angles and translation before drawing
-    context_canvas.SetAngleX(GetAngleX());
-    context_canvas.SetAngleY(GetAngleY());
-    context_canvas.SetAngleZ(GetAngleZ());
-    context_canvas.SetTranslationX(GetTranslationX());
-    context_canvas.SetTranslationY(GetTranslationY());
-    context_canvas.SetTranslationZ(GetTranslationZ());
+    context_canvas.SetAzimuth(GetAzimuth());
+    context_canvas.SetElevation(GetElevation());
+    context_canvas.SetRadius(GetRadius());
+    context_canvas.SetLookAtPointX(GetLookAtPointX());
+    context_canvas.SetLookAtPointY(GetLookAtPointY());
+    context_canvas.SetLookAtPointZ(GetLookAtPointZ());
     context_canvas.DrawNow();
 
     // Then draw
@@ -285,39 +351,47 @@ void RRTGLCanvas::DrawNow()
 void RRTGLCanvas::OnKeyDown(wxKeyEvent& event)
 {
     double delta_angle = 5.0;
-    double delta_translation = 1.0;
+    double delta_translation = 0.2;
     switch ( event.GetKeyCode() )
     {
-        case WXK_LEFT: // move left
+        case WXK_LEFT: // move look-at-point along x
+            Translate(+delta_translation, 0.0f, 0.0f);
+            break;
+
+        case WXK_RIGHT: // move look-at-point along x
+            Translate(-delta_translation, 0.0f, 0.0f);
+            break;
+
+        case WXK_UP: // move look-at-point along y
             Translate(0.0f, +delta_translation, 0.0f);
             break;
 
-        case WXK_RIGHT: // move right
+        case WXK_DOWN: // move look-at-point along y
             Translate(0.0f, -delta_translation, 0.0f);
             break;
 
-        case WXK_UP: // move forward
-            Translate(0.0f, 0.0f, +delta_translation);
+        case WXK_F1: // decrease azimuth
+            Spin(-delta_angle, 0.0f);
             break;
 
-        case WXK_DOWN: // move back
-            Translate(0.0f, 0.0f, -delta_translation);
+        case WXK_F2: // increase azimuth
+            Spin(+delta_angle, 0.0f);
             break;
 
-        case WXK_NUMPAD4: // roll counter-clockwise
-            Spin(0.0f, 0.0f, -delta_angle);
+        case WXK_F3: // decrease elevation
+            Spin(0.0f, -delta_angle);
             break;
 
-        case WXK_NUMPAD6: // roll clockwise
-            Spin(0.0f, 0.0f, +delta_angle);
+        case WXK_F4: // increase elevation
+            Spin(0.0f, +delta_angle);
             break;
 
-        case WXK_NUMPAD8: // tilt downwards
-            Spin(0.0f, -delta_angle, 0.0f);
+        case WXK_F5: // increase radius
+            ChangeRadius(+delta_translation);
             break;
 
-        case WXK_NUMPAD2: // tilt upwards
-            Spin(0.0f, +delta_angle, 0.0f);
+        case WXK_F6: // decrease radius
+            ChangeRadius(-delta_translation);
             break;
 
         case WXK_SPACE: // reset
@@ -375,46 +449,24 @@ void RRTFrame::OnClose(wxCommandEvent& WXUNUSED(event))
 
 RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     : wxGLContext(canvas),
-      view_rotation_angle_x_(0),
-      view_rotation_angle_y_(0),
-      view_rotation_angle_z_(0),
-      view_translation_x_(0),
-      view_translation_y_(0),
-      view_translation_z_(0)
+      view_azimuth_(0),
+      view_elevation_(0),
+      radius_(100),
+      view_look_at_point_x_(0),
+      view_look_at_point_y_(0),
+      view_look_at_point_z_(0)
 {    
     SetCurrent(*canvas);
-
-    // set up the parameters we want to use
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glEnable(GL_TEXTURE_2D);
-
-    // add slightly more light, the default lighting is rather dark
-    GLfloat ambient[] = { 0.5, 0.5, 0.5, 0.5 };
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-
-    // set viewing projection
+    
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    glFrustum(-0.5f, 0.5f, -0.5f, 0.5f, 1.0f, 3.0f);
+    gluPerspective(70,(double)800/800,1,1000);
 
     CheckGLError();
 }
 
 void RRTGLContext::DrawNow()
 {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glTranslatef(GetTranslationX(), GetTranslationY(), GetTranslationZ());
-    glRotatef(GetAngleX(), 1.0f, 0.0f, 0.0f);
-    glRotatef(GetAngleY(), 0.0f, 1.0f, 0.0f);
-    glRotatef(GetAngleZ(), 0.0f, 0.0f, 1.0f);
-    
-    
     /*
     //  node drawing radius
     const double r = 3;
@@ -439,83 +491,144 @@ void RRTGLContext::DrawNow()
         }
     }*/
     
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+    glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_POINT_SMOOTH);
+    glHint(GL_POINT_SMOOTH_HINT, GL_NICEST);
+    
+    double radius = GetRadius(); // Straight line distance between the camera and look at point
+
+    // Calculate the camera position using the radius and angles
+    double camera_position_x = radius * -sin(GetAzimuth()*(M_PI/180)) * cos((GetElevation())*(M_PI/180));
+    double camera_position_y = radius * -sin((GetElevation())*(M_PI/180));
+    double camera_position_z = -radius * cos((GetAzimuth())*(M_PI/180)) * cos((GetElevation())*(M_PI/180));
+
+    // Set the camera position and lookat point
+    gluLookAt(camera_position_x, camera_position_y,camera_position_z,   // Camera position
+              GetLookAtPointX(), GetLookAtPointY(), GetLookAtPointZ(),    // Look at point
+              0.0, 1.0, 0.0);   // Up vector
+
     glColor3f(0.0f,0.0f,1.0f); //blue color
-    
-    glPointSize(20.0f);//set point size to 20 pixels
-    
+
+    glPointSize(5.0f);//set point size to 5 pixels
+
+    for(const TreeToDraw& tree : trees_)
+    {
+        /// draw all points
+        for(const PointWithColor& colored_point : tree.colored_points_)
+        {
+            // circles
+            //dc.SetPen( wxPen( colored_point.second, 2 ) ); // 2-pixels thick outline
+
+            // draw a circle around
+            //dc.DrawCircle( wxPoint(colored_point.first.x(),colored_point.first.y()), r );
+        }
+
+        /// draw all lines
+        for(const LineWithColor& colored_line : tree.colored_lines_)
+        {
+            // draw a line
+            //dc.SetPen( wxPen( colored_line.second, 1 ) ); // 1 pixels thick
+            //dc.DrawLine( colored_line.first.first.x(), colored_line.first.first.y(), colored_line.first.second.x(), colored_line.first.second.y() );
+        }
+    }
+
     glBegin(GL_POINTS); //starts drawing of points
         glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
         glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
     glEnd();//end drawing of points
-    
+
     glBegin(GL_LINES); //starts drawing of lines
         glVertex3f(1.0f,1.0f,0.0f);//upper-right corner
         glVertex3f(-1.0f,-1.0f,0.0f);//lower-left corner
     glEnd();//end drawing of lines
 
+    glDisable(GL_POINT_SMOOTH);
+    glBlendFunc(GL_NONE, GL_NONE);
+    glDisable(GL_BLEND);
+
     glFlush();
+
+    glPopAttrib();
 
     CheckGLError();
 }
 
-double RRTGLContext::GetAngleX()
+void RRTGLContext::ClearTrees()
 {
-    return view_rotation_angle_x_;
+    trees_.clear();
 }
 
-double RRTGLContext::GetAngleY()
+void RRTGLContext::AddTree(TreeToDraw tree)
 {
-    return view_rotation_angle_y_;
+    trees_.push_back(tree);
 }
 
-double RRTGLContext::GetAngleZ()
+double RRTGLContext::GetAzimuth()
 {
-    return view_rotation_angle_z_;
+    return view_azimuth_;
 }
 
-double RRTGLContext::GetTranslationX()
+double RRTGLContext::GetElevation()
 {
-    return view_translation_x_;
+    return view_elevation_;
 }
 
-double RRTGLContext::GetTranslationY()
+double RRTGLContext::GetRadius()
 {
-    return view_translation_y_;
+    return radius_;
 }
 
-double RRTGLContext::GetTranslationZ()
+double RRTGLContext::GetLookAtPointX()
 {
-    return view_translation_z_;
+    return view_look_at_point_x_;
 }
 
-void RRTGLContext::SetAngleX(double angle_x)
+double RRTGLContext::GetLookAtPointY()
 {
-    view_rotation_angle_x_ = angle_x;
+    return view_look_at_point_y_;
 }
 
-void RRTGLContext::SetAngleY(double angle_y)
+double RRTGLContext::GetLookAtPointZ()
 {
-    view_rotation_angle_y_ = angle_y;
+    return view_look_at_point_z_;
 }
 
-void RRTGLContext::SetAngleZ(double angle_z)
+void RRTGLContext::SetAzimuth(double azimuth)
 {
-    view_rotation_angle_z_ = angle_z;
+    view_azimuth_ = azimuth;
 }
 
-void RRTGLContext::SetTranslationX(double translation_x)
+void RRTGLContext::SetElevation(double elevation)
 {
-    view_translation_x_ = translation_x;
+    view_elevation_ = elevation;
 }
 
-void RRTGLContext::SetTranslationY(double translation_y)
+void RRTGLContext::SetRadius(double radius)
 {
-    view_translation_y_ = translation_y;
+    radius_ = radius;
 }
 
-void RRTGLContext::SetTranslationZ(double translation_z)
+void RRTGLContext::SetLookAtPointX(double look_at_x)
 {
-    view_translation_z_ = translation_z;
+    view_look_at_point_x_ = look_at_x;
+}
+
+void RRTGLContext::SetLookAtPointY(double look_at_y)
+{
+    view_look_at_point_y_ = look_at_y;
+}
+
+void RRTGLContext::SetLookAtPointZ(double look_at_z)
+{
+    view_look_at_point_z_ = look_at_z;
 }
 
 // ----------------------------------------------------------------------------

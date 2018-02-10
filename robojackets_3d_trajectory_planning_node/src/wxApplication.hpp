@@ -27,76 +27,6 @@
 
 static void CheckGLError();
 
-wxString glGetwxString(GLenum name);
-
-////////////////////////////////////////////////////////////////////////////////////
-
-// the rendering context used by all GL canvases
-class RRTGLContext : public wxGLContext
-{
-public:
-    RRTGLContext(wxGLCanvas *canvas);
-
-    // render the cube showing it at given angles
-    void DrawNow();
-
-    /// @brief Set the angle around x-axis the view shall be rotated about.
-    void SetAngleX(double angle_x);
-
-    /// @brief Get the angle around x-axis the view shall be rotated about.
-    double GetAngleX();
-
-    /// @brief Get the angle around y-axis the view shall be rotated about.
-    double GetAngleY();
-
-    /// @brief Get the angle around z-axis the view shall be rotated about.
-    double GetAngleZ();
-
-    /// @brief Get the translation along x-axis the view shall be moved.
-    double GetTranslationX();
-
-    /// @brief Get the translation along y-axis the view shall be moved.
-    double GetTranslationY();
-
-    /// @brief Get the translation along z-axis the view shall be moved.
-    double GetTranslationZ();
-
-    /// @brief Set the angle around y-axis the view shall be rotated about.
-    void SetAngleY(double angle_y);
-
-    /// @brief Set the angle around z-axis the view shall be rotated about.
-    void SetAngleZ(double angle_z);
-
-    /// @brief Set the translation along x-axis the view shall be moved.
-    void SetTranslationX(double translation_x);
-
-    /// @brief Set the translation along y-axis the view shall be moved.
-    void SetTranslationY(double translation_y);
-
-    /// @brief Set the translation along z-axis the view shall be moved.
-    void SetTranslationZ(double translation_z);
-
-private:
-    /// @brief Rotation angle around x axis for view.
-    double view_rotation_angle_x_;
-
-    /// @brief Rotation angle around y axis for view.
-    double view_rotation_angle_y_;
-
-    /// @brief Rotation angle around z axis for view.
-    double view_rotation_angle_z_;
-
-    /// @brief Translation along x axis for view.
-    double view_translation_x_;
-
-    /// @brief Translation along y axis for view.
-    double view_translation_y_;
-
-    /// @brief Translation along z axis for view.
-    double view_translation_z_;
-};
-
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 typedef Eigen::Vector2d           Point;
@@ -112,6 +42,81 @@ public:
     std::vector<LineWithColor> colored_lines_;
 };
 
+// the rendering context used by all GL canvases
+class RRTGLContext : public wxGLContext
+{
+public:
+    RRTGLContext(wxGLCanvas *canvas);
+
+    void ClearTrees();
+    void AddTree(TreeToDraw tree);
+
+    // render the cube showing it at given angles
+    void DrawNow();
+
+    /// @brief Get azimuth angle.
+    double GetAzimuth();
+
+    /// @brief Get elevation angle.
+    double GetElevation();
+
+    /// @brief Get radius.
+    double GetRadius();
+
+    /// @brief Get the look-at-point x coordinate.
+    double GetLookAtPointX();
+
+    /// @brief Get the look-at-point y coordinate.
+    double GetLookAtPointY();
+
+    /// @brief Get the look-at-point z coordinate.
+    double GetLookAtPointZ();
+
+    /// @brief Set azimuth angle.
+    void SetAzimuth(double azimuth);
+
+    /// @brief Set elevation angle.
+    void SetElevation(double elevation);
+
+    /// @brief Set radius.
+    void SetRadius(double radius);
+
+    /// @brief Set the look-at-point x coordinate.
+    void SetLookAtPointX(double look_at_x);
+
+    /// @brief Set the look-at-point y coordinate.
+    void SetLookAtPointY(double look_at_y);
+
+    /// @brief Set the look-at-point z coordinate.
+    void SetLookAtPointZ(double look_at_z);
+
+private:
+    std::vector<Eigen::Vector2d> points_;
+    std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;
+    std::vector<TreeToDraw> trees_;
+
+    /// @brief Azimuth angle.
+    double view_azimuth_;
+
+    /// @brief Elevation angle.
+    double view_elevation_;
+
+    /// @brief Radius.
+    double radius_;
+
+    /// @brief Look-at-point x coordinate.
+    double view_look_at_point_x_;
+
+    /// @brief Look-at-point y coordinate.
+    double view_look_at_point_y_;
+
+    /// @brief Look-at-point z coordinate.
+    double view_look_at_point_z_;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////////
+
 class RRTGLCanvas : public wxGLCanvas
 {
 public:
@@ -121,66 +126,70 @@ public:
     void AddTree(TreeToDraw tree);
     void DrawNow();
     void ResetView();
-    void Spin(double angle_x, double angle_y, double angle_z);
+    void Spin(double azimuth, double elevation);
     void Translate(double translate_x, double translate_y, double translate_z);
+    void ChangeRadius(double delta_radius);
 
-    /// @brief Get the angle around x-axis the view shall be rotated about.
-    double GetAngleX();
+    /// @brief Get tree.
+    std::vector<TreeToDraw> GetTree();
 
-    /// @brief Get the angle around y-axis the view shall be rotated about.
-    double GetAngleY();
+    /// @brief Get azimuth angle.
+    double GetAzimuth();
 
-    /// @brief Get the angle around z-axis the view shall be rotated about.
-    double GetAngleZ();
+    /// @brief Get elevation angle.
+    double GetElevation();
 
-    /// @brief Get the translation along x-axis the view shall be moved.
-    double GetTranslationX();
+    /// @brief Get radius.
+    double GetRadius();
 
-    /// @brief Get the translation along y-axis the view shall be moved.
-    double GetTranslationY();
+    /// @brief Get the look-at-point x coordinate.
+    double GetLookAtPointX();
 
-    /// @brief Get the translation along z-axis the view shall be moved.
-    double GetTranslationZ();
+    /// @brief Get the look-at-point y coordinate.
+    double GetLookAtPointY();
 
-    /// @brief Set the angle around x-axis the view shall be rotated about.
-    void SetAngleX(double angle_x);
+    /// @brief Get the look-at-point z coordinate.
+    double GetLookAtPointZ();
 
-    /// @brief Set the angle around y-axis the view shall be rotated about.
-    void SetAngleY(double angle_y);
+    /// @brief Set azimuth angle.
+    void SetAzimuth(double azimuth);
 
-    /// @brief Set the angle around z-axis the view shall be rotated about.
-    void SetAngleZ(double angle_z);
+    /// @brief Set elevation angle.
+    void SetElevation(double elevation);
 
-    /// @brief Set the translation along x-axis the view shall be moved.
-    void SetTranslationX(double translation_x);
+    /// @brief Set radius.
+    void SetRadius(double radius);
 
-    /// @brief Set the translation along y-axis the view shall be moved.
-    void SetTranslationY(double translation_y);
+    /// @brief Set the look-at-point x coordinate.
+    void SetLookAtPointX(double look_at_x);
 
-    /// @brief Set the translation along z-axis the view shall be moved.
-    void SetTranslationZ(double translation_z);
+    /// @brief Set the look-at-point y coordinate.
+    void SetLookAtPointY(double look_at_y);
+
+    /// @brief Set the look-at-point z coordinate.
+    void SetLookAtPointZ(double look_at_z);
 
 private:
-    /// @brief Rotation angle around x axis for view.
-    double view_rotation_angle_x_;
+    /// @brief Azimuth angle.
+    double view_azimuth_;
 
-    /// @brief Rotation angle around y axis for view.
-    double view_rotation_angle_y_;
+    /// @brief Elevation angle.
+    double view_elevation_;
 
-    /// @brief Rotation angle around z axis for view.
-    double view_rotation_angle_z_;
+    /// @brief Radius.
+    double radius_;
 
-    /// @brief Translation along x axis for view.
-    double view_translation_x_;
+    /// @brief Look-at-point x coordinate.
+    double view_look_at_point_x_;
 
-    /// @brief Translation along y axis for view.
-    double view_translation_y_;
+    /// @brief Look-at-point y coordinate.
+    double view_look_at_point_y_;
 
-    /// @brief Translation along z axis for view.
-    double view_translation_z_;
+    /// @brief Look-at-point z coordinate.
+    double view_look_at_point_z_;
 
     std::vector<Eigen::Vector2d> points_;
-    std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;    
+    std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;
     std::vector<TreeToDraw> trees_;
 
     void OnPaint(wxPaintEvent& event);
@@ -227,6 +236,7 @@ public:
 
 private:
     void ExtractPointsAndLinesFromTreeForCanvas();
+    void ExtractPointsAndLinesFromTreeForContext();
 
     PlannerWrapper *planner_;
     // the GL context we use for all our mono rendering windows
