@@ -13,9 +13,12 @@ namespace RRT {
 GridStateSpace::GridStateSpace(double width, double height, double depth, int discretizedWidth,
                                int discretizedHeight, int discretizedDepth)
     : SpaceStateSpace(width, height, depth),
-      _obstacleGrid(width, height, depth, discretizedWidth, discretizedHeight, discretizedDepth) {}
+      _obstacleGrid(width, height, depth, discretizedWidth, discretizedHeight, discretizedDepth)
+{
+}
 
-bool GridStateSpace::stateValid(const Vector3d& pt) const {
+bool GridStateSpace::stateValid(const Vector3d& pt) const
+{
     return SpaceStateSpace::stateValid(pt) &&
            !_obstacleGrid.obstacleAt(_obstacleGrid.gridSquareForLocation(pt));
 }
@@ -23,7 +26,8 @@ bool GridStateSpace::stateValid(const Vector3d& pt) const {
 Vector3d GridStateSpace::intermediateState(const Vector3d& source,
                                            const Vector3d& target,
                                            double minStepSize,
-                                           double maxStepSize) const {
+                                           double maxStepSize) const
+{
     bool debug = false;
 
     Vector3d delta = target - source;
@@ -35,7 +39,8 @@ Vector3d GridStateSpace::intermediateState(const Vector3d& source,
         minStepSize;  // scale based on how far we are from obstacles
     if (stepSize > maxStepSize) stepSize = maxStepSize;
     if (stepSize < minStepSize) stepSize = minStepSize;
-    if (debug) {
+    if (debug)
+    {
         cout << "ASC intermediateState" << endl;
         cout << "  stepsize: " << minStepSize << endl;
         cout << "  nearest obs dist: " << dist << endl;
@@ -48,7 +53,8 @@ Vector3d GridStateSpace::intermediateState(const Vector3d& source,
 }
 
 bool GridStateSpace::transitionValid(const Vector3d& from,
-                                     const Vector3d& to) const {
+                                     const Vector3d& to) const
+{
     //  make sure we're within bounds
     if (!stateValid(to)) return false;
 
@@ -71,10 +77,14 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
     double gridSqDepth = depth() / _obstacleGrid.discretizedDepth();
 
     //  check all cubes from (x1, y1, z1) to (x2, y2, z2)
-    for (int x = x1; x <= x2; x++) {
-        for (int y = y1; y <= y2; y++) {
-            for (int z = z1; z <= z2; z++) {
-                if (_obstacleGrid.obstacleAt(x, y, z)) {
+    for (int x = x1; x <= x2; x++)
+    {
+        for (int y = y1; y <= y2; y++)
+        {
+            for (int z = z1; z <= z2; z++)
+            {
+                if (_obstacleGrid.obstacleAt(x, y, z))
+                {
                     //  there's an obstacle here, so check for intersection
 
                     //  the corners of this obstacle square
@@ -83,7 +93,8 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
                                       ulCorner.y() + gridSqHeight,
                                       ulCorner.z() + gridSqDepth);
 
-                    if (delta.x() != 0) {
+                    if (delta.x() != 0)
+                    {
                         /**
                          * Find slope and y-intercept of the line passing through
                          * @from and
@@ -127,12 +138,15 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
                         xInt = (brCorner.y() - b) / slope;
                         if (inRange<double>(xInt, ulCorner.x(), brCorner.x()))
                             return false;
-                    } else {
+                    }
+                    else
+                    {
                         //  vertical line - slope undefined
 
                         //  see if it's within the x-axis bounds of this obstacle
                         //  box
-                        if (inRange<double>(from.x(), ulCorner.x(), brCorner.x())) {
+                        if (inRange<double>(from.x(), ulCorner.x(), brCorner.x()))
+                        {
                             //  order by y-value
                             //  note: @lower has a smaller value of y, but will
                             //  appear higher
@@ -155,11 +169,11 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
             }
         }
     }
-
     return true;
 }
 
-const ObstacleGrid& GridStateSpace::obstacleGrid() const {
+const ObstacleGrid& GridStateSpace::obstacleGrid() const
+{
     return _obstacleGrid;
 }
 
