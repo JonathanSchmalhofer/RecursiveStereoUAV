@@ -3,9 +3,9 @@
 
 PlannerWrapper::PlannerWrapper()
 {
-    Eigen::Vector2d size(800, 600);
-    statespace_ = std::make_shared<RRT::GridStateSpace>(size.x(), size.y(), 40, 30);
-    birrt_ = std::make_unique<RRT::BiRRT<Eigen::Vector2d>>(statespace_, 2);
+    Eigen::Vector3d size(800, 800, 800);
+    statespace_ = std::make_shared<RRT::GridStateSpace>(size.x(), size.y(), size.z(), 40, 30, 30);
+    birrt_ = std::make_unique<RRT::BiRRT<Eigen::Vector3d>>(statespace_, 3);
 
     //  setup birrt
     birrt_->setStartState(size / 10);
@@ -19,8 +19,8 @@ PlannerWrapper::PlannerWrapper()
     birrt_->setGoalMaxDist(5);
     
 
-    start_velocity_ = Eigen::Vector2d(3, 0);
-    goal_velocity_ = Eigen::Vector2d(0, 3);
+    start_velocity_ = Eigen::Vector3d(3, 0, 0);
+    goal_velocity_ = Eigen::Vector3d(0, 3, 0);
 }
 
 void PlannerWrapper::step()
@@ -31,8 +31,6 @@ void PlannerWrapper::step()
     {
         birrt_->grow();
     }
-
-    //ROS_INFO("#%d with size() = %d", birrt_->iterationCount(), birrt_->getPath().size());
 
     // store solution
     previous_solution_.clear();

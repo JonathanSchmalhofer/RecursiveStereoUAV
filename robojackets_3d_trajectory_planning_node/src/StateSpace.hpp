@@ -19,7 +19,7 @@ public:
      *
      * @return A random state
      */
-    virtual Eigen::Vector2d randomState() const = 0;
+    virtual Eigen::Vector3d randomState() const = 0;
 
     /**
      * Finds a state in the direction of @target from @source.state().
@@ -27,7 +27,7 @@ public:
      * any validation on the state before returning, the tree will handle
      * that.
      */
-    virtual Eigen::Vector2d intermediateState(const Eigen::Vector2d& source, const Eigen::Vector2d& target,
+    virtual Eigen::Vector3d intermediateState(const Eigen::Vector3d& source, const Eigen::Vector3d& target,
                                 double stepSize) const = 0;
 
     /**
@@ -42,7 +42,7 @@ public:
      *
      * @return A state in the direction of @target from @source.state()
      */
-    virtual Eigen::Vector2d intermediateState(const Eigen::Vector2d& source, const Eigen::Vector2d& target,
+    virtual Eigen::Vector3d intermediateState(const Eigen::Vector3d& source, const Eigen::Vector3d& target,
                                 double minStepSize, double maxStepSize) const = 0;
 
     /**
@@ -53,7 +53,7 @@ public:
      *
      * @return The distance between the states
      */
-    virtual double distance(const Eigen::Vector2d& from, const Eigen::Vector2d& to) const = 0;
+    virtual double distance(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const = 0;
 
     /**
      * @brief Check if a state is within bounds and obstacle-free
@@ -61,7 +61,7 @@ public:
      * @param state The state to check
      * @return A boolean indicating validity
      */
-    virtual bool stateValid(const Eigen::Vector2d& state) const = 0;
+    virtual bool stateValid(const Eigen::Vector3d& state) const = 0;
 
     /**
      * @brief Check motion validity from one state to another
@@ -73,7 +73,7 @@ public:
      *
      * @return A boolean indicating validity
      */
-    virtual bool transitionValid(const Eigen::Vector2d& from, const Eigen::Vector2d& to) const = 0;
+    virtual bool transitionValid(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const = 0;
 
 protected:
     double _minStepSize;

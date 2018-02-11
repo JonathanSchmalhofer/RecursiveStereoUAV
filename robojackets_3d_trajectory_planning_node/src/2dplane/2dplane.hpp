@@ -6,7 +6,7 @@
 
 namespace RRT {
 
-const int dimensions = 2;
+const int dimensions = 3;
 
 /**
  * Hash function for Eigen::Vector2d
@@ -53,8 +53,8 @@ static size_t hash3d(Eigen::Vector3d state) {
  * You'll probably want to override the transitionValidator callback
  * if your 2d plane has any obstacles.
  */
-std::shared_ptr<RRT::Tree<Eigen::Vector2d>> TreeFor2dPlane(
+std::shared_ptr<RRT::Tree<Eigen::Vector3d>> TreeFor3dPlane(
     std::shared_ptr<StateSpace> stateSpace,
-    Eigen::Vector2d goal, double step);
+    Eigen::Vector3d goal, double step);
 
 }  // namespace RRT

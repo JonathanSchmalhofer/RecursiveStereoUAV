@@ -35,7 +35,7 @@ static void CheckGLError();
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-typedef Eigen::Vector2d           Point;
+typedef Eigen::Vector3d           Point;
 typedef std::pair<Point, Point>   Line;
 typedef std::pair<Point, wxColor> PointWithColor;
 typedef std::pair<Line, wxColor>  LineWithColor;
@@ -97,8 +97,8 @@ public:
     void SetLookAtPointZ(double look_at_z);
 
 private:
-    std::vector<Eigen::Vector2d> points_;
-    std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> lines_;
+    std::vector<Eigen::Vector3d> points_;
+    std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> lines_;
     std::vector<TreeToDraw> trees_;
 
     /// @brief Azimuth angle.

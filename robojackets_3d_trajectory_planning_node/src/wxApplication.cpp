@@ -92,15 +92,19 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
         /// startTree
         TreeToDraw* start_tree = new TreeToDraw();
         wxColor start_tree_color(255,0,0);
-        for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->startTree().allNodes())
+        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->startTree().allNodes())
         {
-            Point current_node_point(node.state().x(), node.state().y());
+            Point current_node_point(node.state().x(),
+                                     node.state().y(),
+                                     node.state().z());
             PointWithColor current_colored_node_point(current_node_point, start_tree_color);
             start_tree->colored_points_.push_back(current_colored_node_point);
 
             if(node.parent())
             {
-                Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
+                Point parent_node_point(node.parent()->state().x(),
+                                        node.parent()->state().y(),
+                                        node.parent()->state().z());
                 PointWithColor parent_colored_node_point(parent_node_point, start_tree_color);
                 Line line(current_node_point, parent_node_point);
                 LineWithColor colored_line(line, start_tree_color);
@@ -116,15 +120,19 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
         /// goalTree
         TreeToDraw* goal_tree = new TreeToDraw();
         wxColor goal_tree_color(0,0,255);
-        for(const RRT::Node<Eigen::Vector2d>& node : planner_->birrt_->goalTree().allNodes())
+        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->goalTree().allNodes())
         {
-            Point current_node_point(node.state().x(), node.state().y());
+            Point current_node_point(node.state().x(),
+                                     node.state().y(),
+                                     node.state().z());
             PointWithColor current_colored_node_point(current_node_point, goal_tree_color);
             goal_tree->colored_points_.push_back(current_colored_node_point);
 
             if(node.parent())
             {
-                Point parent_node_point(node.parent()->state().x(), node.parent()->state().y());
+                Point parent_node_point(node.parent()->state().x(),
+                                        node.parent()->state().y(),
+                                        node.parent()->state().z());
                 PointWithColor parent_colored_node_point(parent_node_point, goal_tree_color);
                 Line line(current_node_point, parent_node_point);
                 LineWithColor colored_line(line, goal_tree_color);
@@ -444,7 +452,9 @@ void RRTGLContext::DrawNow()
                 glColor3f(colored_point.second.Red()/255,
                           colored_point.second.Green()/255,
                           colored_point.second.Blue()/255);
-                glVertex3f(colored_point.first.x(),colored_point.first.y(),0.0f);
+                glVertex3f(colored_point.first.x(),
+                           colored_point.first.y(),
+                           colored_point.first.z());
             }
         glEnd(); //end drawing of points
 
@@ -457,8 +467,12 @@ void RRTGLContext::DrawNow()
                 glColor3f(colored_line.second.Red()/255,
                           colored_line.second.Green()/255,
                           colored_line.second.Blue()/255);
-                glVertex3f(colored_line.first.first.x(), colored_line.first.first.y(),0.0f);
-                glVertex3f(colored_line.first.second.x(), colored_line.first.second.y(),0.0f);
+                glVertex3f(colored_line.first.first.x(),
+                           colored_line.first.first.y(),
+                           colored_line.first.first.z());
+                glVertex3f(colored_line.first.second.x(),
+                           colored_line.first.second.y(),
+                           colored_line.first.second.z());
             }
         glEnd(); //end drawing of lines
     }

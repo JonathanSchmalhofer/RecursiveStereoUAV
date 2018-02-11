@@ -13,19 +13,19 @@ namespace RRT {
  */
 class GridStateSpace : public PlaneStateSpace {
 public:
-    GridStateSpace(double width, double height, int discretizedWidth,
-                   int discretizedHeight);
+    GridStateSpace(double width, double height, double depth, int discretizedWidth,
+                   int discretizedHeight, int discretizedDepth);
 
     /**
      * Returns a boolean indicating whether the given point is within bounds and
      * obstacle-free.
      */
-    bool stateValid(const Eigen::Vector2d& pt) const;
-    bool transitionValid(const Eigen::Vector2d& from,
-                         const Eigen::Vector2d& to) const;
+    bool stateValid(const Eigen::Vector3d& pt) const;
+    bool transitionValid(const Eigen::Vector3d& from,
+                         const Eigen::Vector3d& to) const;
 
-    Eigen::Vector2d intermediateState(const Eigen::Vector2d& source,
-                                      const Eigen::Vector2d& target,
+    Eigen::Vector3d intermediateState(const Eigen::Vector3d& source,
+                                      const Eigen::Vector3d& target,
                                       double minStepSize,
                                       double maxStepSize) const;
 

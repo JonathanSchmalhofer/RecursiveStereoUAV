@@ -12,7 +12,7 @@ namespace RRT {
  * @param states     The vector of T values to sample
  * @param maxSize Max length of the resulting vector
  */
-void DownSampleVector(std::vector<Eigen::Vector2d>& states, size_t maxSize) {
+void DownSampleVector(std::vector<Eigen::Vector3d>& states, size_t maxSize) {
     if (states.size() > maxSize) {
         int toDelete = states.size() - maxSize;
         double spacing = (double)states.size() / (double)toDelete;
@@ -33,7 +33,7 @@ void DownSampleVector(std::vector<Eigen::Vector2d>& states, size_t maxSize) {
  *        whether or not a straight connection exists between the two given
  * states
  */
-void SmoothPath(std::vector<Eigen::Vector2d>& pts, const StateSpace& stateSpace) {
+void SmoothPath(std::vector<Eigen::Vector3d>& pts, const StateSpace& stateSpace) {
     int span = 2;
     while (span < pts.size()) {
         bool changed = false;

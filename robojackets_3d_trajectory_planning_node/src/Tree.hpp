@@ -119,8 +119,9 @@ private:
  * but will generally be some sort of vector.
  */
 
-    
+
 static size_t hash2d(Eigen::Vector2d state); // forward declaration - see 2dplane.hpp    
+static size_t hash3d(Eigen::Vector3d state); // forward declaration - see 2dplane.hpp    
     
 template <typename T>
 class Tree {
@@ -130,7 +131,7 @@ public:
     Tree(std::shared_ptr<StateSpace> stateSpace, int dimensions)
         : _kdtree(flann::KDTreeSingleIndexParams()),
           _dimensions(dimensions),
-          _nodemap(20, RRT::hash2d) {
+          _nodemap(20, RRT::hash3d) {
         _stateSpace = stateSpace;
               
         //  default values
