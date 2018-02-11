@@ -66,7 +66,7 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
 }
 
 void wxApplicationNode::DoUpdate(wxIdleEvent &event)
-{    
+{
     if(ros::ok())
     {
         planner_->Step();
@@ -269,12 +269,12 @@ void RRTGLCanvas::ChangeRadius(double delta_radius)
 }
 
 void RRTGLCanvas::OnPaint(wxPaintEvent& WXUNUSED(event))
-{    
+{
     DrawNow();
 }
 
 void RRTGLCanvas::DrawNow()
-{    
+{
     // This is required even though dc is not used otherwise.
     wxPaintDC dc(this);
 
