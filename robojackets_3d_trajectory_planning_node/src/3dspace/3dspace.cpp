@@ -7,15 +7,17 @@ using namespace Eigen;
 using namespace RRT;
 using namespace std;
 
-shared_ptr<Tree<Vector3d>> RRT::TreeFor3dSpace(
-    shared_ptr<StateSpace> stateSpace, Vector3d goal,
-    double step) {
+shared_ptr<Tree<Vector3d>> RRT::GetTreeFor3dSpace(
+    shared_ptr<StateSpace> state_space,
+    Vector3d goal,
+    double step_size)
+{
     shared_ptr<Tree<Vector3d>> rrt =
-        make_shared<Tree<Vector3d>>(stateSpace, dimensions);
+        make_shared<Tree<Vector3d>>(state_space, dimensions);
 
-    rrt->setStepSize(step);
+    rrt->SetStepSize(step_size);
 
-    rrt->setGoalState(goal);
+    rrt->SetGoalState(goal);
 
     return rrt;
 }

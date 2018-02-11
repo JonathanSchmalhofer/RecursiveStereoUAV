@@ -4,35 +4,38 @@
 #include <Eigen/Dense>
 #include "state_space.h"
 
-namespace RRT {
+namespace RRT
+{
 
 /// @brief A 3d space with continuous states and no obstacles.
 class SpaceStateSpace
     : public StateSpace
 {
 public:
-    SpaceStateSpace(double width, double height, double depth)
-        : _width(width), _height(height), _depth(depth) {}
+    SpaceStateSpace(double width,
+                    double height,
+                    double depth)
+        : width_(width), height_(height), depth_(depth) {}
 
-    Eigen::Vector3d randomState() const
+    Eigen::Vector3d GetRandomState() const
     {
-        return Eigen::Vector3d(drand48() * width(),
-                               drand48() * height(),
-                               drand48() * depth());
+        return Eigen::Vector3d(drand48() * GetWidth(),
+                               drand48() * GetHeight(),
+                               drand48() * GetDepth());
     }
 
-    Eigen::Vector3d intermediateState(const Eigen::Vector3d& source,
-                                  const Eigen::Vector3d& target,
-                                  double stepSize) const
+    Eigen::Vector3d GetIntermediateState(const Eigen::Vector3d& source,
+                                         const Eigen::Vector3d& target,
+                                         double step_size) const
     {
         Eigen::Vector3d delta = target - source;
         delta = delta / delta.norm();  //  unit vector
 
-        Eigen::Vector3d val = source + delta * stepSize;
+        Eigen::Vector3d val = source + delta * step_size;
         return val;
     }
 
-    double distance(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const
+    double GetDistance(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const
     {
         Eigen::Vector3d delta = from - to;
         return sqrtf(powf(delta.x(), 2) + powf(delta.y(), 2) + powf(delta.z(), 2));
@@ -40,18 +43,18 @@ public:
 
 
     /// @brief Returns a boolean indicating whether the given point is within bounds.
-    bool stateValid(const Eigen::Vector3d& pt) const
+    bool IsStateValid(const Eigen::Vector3d& point) const
     {
-        return pt.x() >= 0 && pt.y() >= 0 && pt.z() >= 0 &&
-               pt.x() < width() && pt.y() < height() && pt.z() < depth();
+        return point.x() >= 0 && point.y() >= 0 && point.z() >= 0 &&
+               point.x() < GetWidth() && point.y() < GetHeight() && point.z() < GetDepth();
     }
 
-    double width() const { return _width; }
-    double height() const { return _height; }
-    double depth() const { return _depth; }
+    double GetWidth() const { return width_; }
+    double GetHeight() const { return height_; }
+    double GetDepth() const { return depth_; }
 
 private:
-    double _width, _height, _depth;
+    double width_, height_, depth_;
 };
 
 }  // namespace RRT

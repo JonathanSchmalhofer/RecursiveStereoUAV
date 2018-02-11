@@ -5,65 +5,68 @@
 using namespace Eigen;
 using namespace std;
 
-namespace RRT {
-
-ObstacleGrid::ObstacleGrid(double width, double height, double depth, int discretizedWidth,
-                           int discretizedHeight, int discretizedDepth)
+namespace RRT
 {
-    _width = width;
-    _height = height;
-    _depth = depth;
-    _discretizedWidth = discretizedWidth;
-    _discretizedHeight = discretizedHeight;
-    _discretizedDepth = discretizedDepth;
 
-    _obstacles =
-        (bool*)malloc(sizeof(bool) * discretizedWidth * discretizedHeight * discretizedDepth);
+ObstacleGrid::ObstacleGrid(double width,
+                           double height,
+                           double depth,
+                           int discretized_width,
+                           int discretized_height,
+                           int discretized_depth)
+{
+    width_ = width;
+    height_ = height;
+    depth_ = depth;
+    discretized_width_ = discretized_width;
+    discretized_height_ = discretized_height;
+    discretized_depth_ = discretized_depth;
 
-    clear();
+    obstacles_ =
+        (bool*)malloc(sizeof(bool) * discretized_width * discretized_height * discretized_depth);
+    Clear();
 }
 
 ObstacleGrid::~ObstacleGrid()
 {
-    free(_obstacles);
+    free(obstacles_);
 }
 
-Vector3i ObstacleGrid::gridSquareForLocation(const Vector3d& loc) const
+Vector3i ObstacleGrid::GetGridSquareForLocation(const Vector3d& loc) const
 {
-    return Vector3i(loc.x() / width() * discretizedWidth(),
-                    loc.y() / height() * discretizedHeight(),
-                    loc.z() / height() * discretizedDepth());
+    return Vector3i(loc.x() / GetWidth() * GetDiscretizedWidth(),
+                    loc.y() / GetHeight() * GetDiscretizedHeight(),
+                    loc.z() / GetDepth() * GetDiscretizedDepth());
 }
 
-double ObstacleGrid::nearestObstacleDist(const Vector3d& state,
-                                        double maxDist) const
+double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
+                                                  double max_distance) const
 {
     // x and y are the indices of the cell that state is located in
-    double x = (state.x() / (_width / _discretizedWidth));
-    double y = (state.y() / (_height / _discretizedHeight));
-    double z = (state.z() / (_depth / _discretizedDepth));
-    int xSearchRad = maxDist * _discretizedWidth / _width;
-    int ySearchRad = maxDist * _discretizedHeight / _height;
-    int zSearchRad = maxDist * _discretizedDepth / _depth;
+    double x = (state.x() / (width_ / discretized_width_));
+    double y = (state.y() / (height_ / discretized_height_));
+    double z = (state.z() / (depth_ / discretized_depth_));
+    int search_radius_x = max_distance * discretized_width_ / width_;
+    int search_radius_y = max_distance * discretized_height_ / height_;
+    int search_radius_z = max_distance * discretized_depth_ / depth_;
     // here we loop through the cells around (x,y,z) to find the minimum distance
-    // of
-    // the point to the nearest obstacle
-    for (int i = x - xSearchRad; i <= x + xSearchRad; i++)
+    // of the point to the nearest obstacle
+    for (int i = x - search_radius_x; i <= x + search_radius_x; i++)
     {
-        for (int j = y - ySearchRad; j <= y + ySearchRad; j++)
+        for (int j = y - search_radius_y; j <= y + search_radius_y; j++)
         {
-            for (int k = z - zSearchRad; k <= z + zSearchRad; k++)
+            for (int k = z - search_radius_z; k <= z + search_radius_z; k++)
             {
-                bool obs = obstacleAt(i, j, k);
+                bool obs = IsObstacleAt(i, j, k);
                 if (obs)
                 {
-                    double xDist = (x - i) * _width / _discretizedWidth;
-                    double yDist = (y - j) * _height / _discretizedHeight;
-                    double zDist = (z - k) * _depth / _discretizedDepth;
-                    double dist = sqrtf(powf(xDist, 2) + powf(yDist, 2) + powf(zDist, 2));
-                    if (dist < maxDist)
+                    double x_distance = (x - i) * width_ / discretized_width_;
+                    double y_distance = (y - j) * height_ / discretized_height_;
+                    double z_distance = (z - k) * depth_ / discretized_depth_;
+                    double dist = sqrtf(powf(x_distance, 2) + powf(y_distance, 2) + powf(z_distance, 2));
+                    if (dist < max_distance)
                     {
-                        maxDist = dist;
+                        max_distance = dist;
                     }
                 }
             }
@@ -71,60 +74,60 @@ double ObstacleGrid::nearestObstacleDist(const Vector3d& state,
     }
 
     // the boundaries of the grid count as obstacles
-    maxDist = std::min(maxDist, state.x());             // left boundary
-    maxDist = std::min(maxDist, width() - state.x());   // right boundary
-    maxDist = std::min(maxDist, state.y());             // top boundary
-    maxDist = std::min(maxDist, height() - state.y());  // bottom boundary
-    maxDist = std::min(maxDist, state.z());             // front boundary
-    maxDist = std::min(maxDist, depth() - state.z());   // back boundary
+    max_distance = std::min(max_distance, state.x());             // left boundary
+    max_distance = std::min(max_distance, GetWidth() - state.x());   // right boundary
+    max_distance = std::min(max_distance, state.y());             // top boundary
+    max_distance = std::min(max_distance, GetHeight() - state.y());  // bottom boundary
+    max_distance = std::min(max_distance, state.z());             // front boundary
+    max_distance = std::min(max_distance, GetDepth() - state.z());   // back boundary
 
-    return maxDist;
+    return max_distance;
 }
 
-void ObstacleGrid::clear()
+void ObstacleGrid::Clear()
 {
-    for (int x = 0; x < discretizedWidth(); x++)
+    for (int x = 0; x < GetDiscretizedWidth(); x++)
     {
-        for (int y = 0; y < discretizedHeight(); y++)
+        for (int y = 0; y < GetDiscretizedHeight(); y++)
         {
-            for (int z = 0; z < discretizedDepth(); z++)
+            for (int z = 0; z < GetDiscretizedDepth(); z++)
             {
-                obstacleAt(x, y, z) = false;
+                IsObstacleAt(x, y, z) = false;
             }
         }
     }
 }
 
-bool& ObstacleGrid::obstacleAt(int x, int y, int z)
+bool& ObstacleGrid::IsObstacleAt(int x, int y, int z)
 {
-    return _obstacles[x + _discretizedWidth * y + _discretizedDepth * z];
+    return obstacles_[x + discretized_width_ * y + discretized_depth_ * z];
 }
 
-bool ObstacleGrid::obstacleAt(int x, int y, int z) const
+bool ObstacleGrid::IsObstacleAt(int x, int y, int z) const
 {
-    return _obstacles[x + _discretizedWidth * y + _discretizedDepth * z];
+    return obstacles_[x + discretized_width_ * y + discretized_depth_ * z];
 }
 
-bool& ObstacleGrid::obstacleAt(const Vector3i& gridLoc)
+bool& ObstacleGrid::IsObstacleAt(const Vector3i& grid_location)
 {
-    return obstacleAt(gridLoc.x(), gridLoc.y(), gridLoc.z());
+    return IsObstacleAt(grid_location.x(), grid_location.y(), grid_location.z());
 }
 
-bool ObstacleGrid::obstacleAt(const Vector3i& gridLoc) const
+bool ObstacleGrid::IsObstacleAt(const Vector3i& grid_location) const
 {
-    return obstacleAt(gridLoc.x(), gridLoc.y(), gridLoc.z());
+    return IsObstacleAt(grid_location.x(), grid_location.y(), grid_location.z());
 }
 
-int ObstacleGrid::discretizedWidth() const { return _discretizedWidth; }
+int ObstacleGrid::GetDiscretizedWidth() const { return discretized_width_; }
 
-int ObstacleGrid::discretizedHeight() const { return _discretizedHeight; }
+int ObstacleGrid::GetDiscretizedHeight() const { return discretized_height_; }
 
-int ObstacleGrid::discretizedDepth() const { return _discretizedDepth; }
+int ObstacleGrid::GetDiscretizedDepth() const { return discretized_depth_; }
 
-double ObstacleGrid::width() const { return _width; }
+double ObstacleGrid::GetWidth() const { return width_; }
 
-double ObstacleGrid::height() const { return _height; }
+double ObstacleGrid::GetHeight() const { return height_; }
 
-double ObstacleGrid::depth() const { return _depth; }
+double ObstacleGrid::GetDepth() const { return depth_; }
 
 }  // namespace RRT

@@ -3,10 +3,12 @@
 
 #include <Eigen/Dense>
 
-namespace RRT {
+namespace RRT
+{
 
 template <typename T>
-bool inRange(T n, T min, T max) {
+bool IsInRange(T n, T min, T max)
+{
     return (n >= min) && (n <= max);
 }
 

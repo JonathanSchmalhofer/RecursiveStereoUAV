@@ -8,73 +8,78 @@ using namespace std;
 
 #include <iostream>
 
-namespace RRT {
+namespace RRT
+{
 
-GridStateSpace::GridStateSpace(double width, double height, double depth, int discretizedWidth,
-                               int discretizedHeight, int discretizedDepth)
+GridStateSpace::GridStateSpace(double width,
+                               double height,
+                               double depth,
+                               int discretized_width,
+                               int discretized_height,
+                               int discretized_depth)
     : SpaceStateSpace(width, height, depth),
-      _obstacleGrid(width, height, depth, discretizedWidth, discretizedHeight, discretizedDepth)
+      obstacle_grid_(width, height, depth, discretized_width, discretized_height, discretized_depth)
 {
 }
 
-bool GridStateSpace::stateValid(const Vector3d& pt) const
+bool GridStateSpace::IsStateValid(const Vector3d& point) const
 {
-    return SpaceStateSpace::stateValid(pt) &&
-           !_obstacleGrid.obstacleAt(_obstacleGrid.gridSquareForLocation(pt));
+    return SpaceStateSpace::IsStateValid(point) &&
+           !obstacle_grid_.IsObstacleAt(obstacle_grid_.GetGridSquareForLocation(point));
 }
 
-Vector3d GridStateSpace::intermediateState(const Vector3d& source,
-                                           const Vector3d& target,
-                                           double minStepSize,
-                                           double maxStepSize) const
+Vector3d GridStateSpace::GetIntermediateState(const Vector3d& source,
+                                              const Vector3d& target,
+                                              double min_step_size,
+                                              double max_step_size) const
 {
     bool debug = false;
 
     Vector3d delta = target - source;
     delta = delta / delta.norm();  //  unit vector
-    double dist = _obstacleGrid.nearestObstacleDist(source, maxStepSize * 2);
+    double dist = obstacle_grid_.GetDistanceToNearestObstacle(source, max_step_size * 2);
 
-    double stepSize =
-        (dist / maxStepSize) *
-        minStepSize;  // scale based on how far we are from obstacles
-    if (stepSize > maxStepSize) stepSize = maxStepSize;
-    if (stepSize < minStepSize) stepSize = minStepSize;
+    double step_size =
+        (dist / max_step_size) *
+        min_step_size;  // scale based on how far we are from obstacles
+    if (step_size > max_step_size) step_size = max_step_size;
+    if (step_size < min_step_size) step_size = min_step_size;
     if (debug)
     {
-        cout << "ASC intermediateState" << endl;
-        cout << "  stepsize: " << minStepSize << endl;
+        cout << "ASC intermediate state" << endl;
+        cout << "  stepsize: " << min_step_size << endl;
         cout << "  nearest obs dist: " << dist << endl;
-        cout << "  maximum stepsize: " << maxStepSize << endl;
-        cout << "  new step: " << stepSize << endl;
+        cout << "  maximum stepsize: " << max_step_size << endl;
+        cout << "  new step: " << step_size << endl;
     }
 
-    Vector3d val = source + delta * stepSize;
+    Vector3d val = source + delta * step_size;
     return val;
 }
 
-bool GridStateSpace::transitionValid(const Vector3d& from,
-                                     const Vector3d& to) const
+bool GridStateSpace::IsTransitionValid(const Vector3d& from,
+                                       const Vector3d& to) const
 {
     //  make sure we're within bounds
-    if (!stateValid(to)) return false;
+    if (!IsStateValid(to)) return false;
 
     Vector3d delta = to - from;
 
     //  get the corners of this segment in integer coordinates.  This limits our
     //  intersection test to only the boxes in that square
-    Vector3i discreteFrom = _obstacleGrid.gridSquareForLocation(from);
-    Vector3i discreteTo = _obstacleGrid.gridSquareForLocation(to);
-    int x1 = discreteFrom.x(), y1 = discreteFrom.y(), z1 = discreteFrom.z();
-    int x2 = discreteTo.x(), y2 = discreteTo.y(), z2 = discreteTo.z();
+    Vector3i discrete_from = obstacle_grid_.GetGridSquareForLocation(from);
+    Vector3i discrete_to = obstacle_grid_.GetGridSquareForLocation(to);
+    int x1 = discrete_from.x(), y1 = discrete_from.y(), z1 = discrete_from.z();
+    int x2 = discrete_to.x(), y2 = discrete_to.y(), z2 = discrete_to.z();
 
     //  order ascending
     if (x1 > x2) swap<int>(x1, x2);
     if (y1 > y2) swap<int>(y1, y2);
     if (z1 > z2) swap<int>(z1, z2);
 
-    double gridSqWidth = width() / _obstacleGrid.discretizedWidth();
-    double gridSqHeight = height() / _obstacleGrid.discretizedHeight();
-    double gridSqDepth = depth() / _obstacleGrid.discretizedDepth();
+    double grid_square_width = GetWidth() / obstacle_grid_.GetDiscretizedWidth();
+    double grid_square_height = GetHeight() / obstacle_grid_.GetDiscretizedHeight();
+    double grid_square_depth = GetDepth() / obstacle_grid_.GetDiscretizedDepth();
 
     //  check all cubes from (x1, y1, z1) to (x2, y2, z2)
     for (int x = x1; x <= x2; x++)
@@ -83,15 +88,15 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
         {
             for (int z = z1; z <= z2; z++)
             {
-                if (_obstacleGrid.obstacleAt(x, y, z))
+                if (obstacle_grid_.IsObstacleAt(x, y, z))
                 {
                     //  there's an obstacle here, so check for intersection
 
                     //  the corners of this obstacle square
-                    Vector3d ulCorner(x * gridSqWidth, y * gridSqHeight, z * gridSqDepth);
-                    Vector3d brCorner(ulCorner.x() + gridSqWidth,
-                                      ulCorner.y() + gridSqHeight,
-                                      ulCorner.z() + gridSqDepth);
+                    Vector3d upper_left_corner(x * grid_square_width, y * grid_square_height, z * grid_square_depth);
+                    Vector3d boundary_corner(upper_left_corner.x() + grid_square_width,
+                                      upper_left_corner.y() + grid_square_height,
+                                      upper_left_corner.z() + grid_square_depth);
 
                     if (delta.x() != 0)
                     {
@@ -115,11 +120,11 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
                          * the vertical
                          * segment, it's an intersection.
                          */
-                        double yInt = slope * ulCorner.x() + b;
-                        if (inRange<double>(yInt, ulCorner.y(), brCorner.y()))
+                        double y_intersection = slope * upper_left_corner.x() + b;
+                        if (IsInRange<double>(y_intersection, upper_left_corner.y(), boundary_corner.y()))
                             return false;
-                        yInt = slope * brCorner.x() + b;
-                        if (inRange<double>(yInt, ulCorner.y(), brCorner.y()))
+                        y_intersection = slope * boundary_corner.x() + b;
+                        if (IsInRange<double>(y_intersection, upper_left_corner.y(), boundary_corner.y()))
                             return false;
 
                         /*
@@ -132,11 +137,11 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
                          * box?
                          */
                         if (slope == 0) return false;
-                        double xInt = (ulCorner.y() - b) / slope;
-                        if (inRange<double>(xInt, ulCorner.x(), brCorner.x()))
+                        double x_intersection = (upper_left_corner.y() - b) / slope;
+                        if (IsInRange<double>(x_intersection, upper_left_corner.x(), boundary_corner.x()))
                             return false;
-                        xInt = (brCorner.y() - b) / slope;
-                        if (inRange<double>(xInt, ulCorner.x(), brCorner.x()))
+                        x_intersection = (boundary_corner.y() - b) / slope;
+                        if (IsInRange<double>(x_intersection, upper_left_corner.x(), boundary_corner.x()))
                             return false;
                     }
                     else
@@ -145,7 +150,7 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
 
                         //  see if it's within the x-axis bounds of this obstacle
                         //  box
-                        if (inRange<double>(from.x(), ulCorner.x(), brCorner.x()))
+                        if (IsInRange<double>(from.x(), upper_left_corner.x(), boundary_corner.x()))
                         {
                             //  order by y-value
                             //  note: @lower has a smaller value of y, but will
@@ -157,11 +162,11 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
                                 swap<Vector3d>(lower, higher);
 
                             //  check for intersection based on y-values
-                            if (lower.y() < ulCorner.y() &&
-                                higher.y() > ulCorner.y())
+                            if (lower.y() < upper_left_corner.y() &&
+                                higher.y() > upper_left_corner.y())
                                 return false;
-                            if (lower.y() < brCorner.y() &&
-                                higher.y() > brCorner.y())
+                            if (lower.y() < boundary_corner.y() &&
+                                higher.y() > boundary_corner.y())
                                 return false;
                         }
                     }
@@ -172,11 +177,14 @@ bool GridStateSpace::transitionValid(const Vector3d& from,
     return true;
 }
 
-const ObstacleGrid& GridStateSpace::obstacleGrid() const
+const ObstacleGrid& GridStateSpace::GetObstacleGrid() const
 {
-    return _obstacleGrid;
+    return obstacle_grid_;
 }
 
-ObstacleGrid& GridStateSpace::obstacleGrid() { return _obstacleGrid; }
+ObstacleGrid& GridStateSpace::GetObstacleGrid()
+{
+    return obstacle_grid_;
+}
 
 }  // namespace RRT

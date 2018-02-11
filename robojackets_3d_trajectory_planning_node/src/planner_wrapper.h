@@ -15,7 +15,7 @@ class PlannerWrapper
 {
 public:
     PlannerWrapper();
-    void step();
+    void Step();
 
     std::shared_ptr<RRT::GridStateSpace> statespace_;
     std::unique_ptr<RRT::BiRRT<Eigen::Vector3d>> birrt_;

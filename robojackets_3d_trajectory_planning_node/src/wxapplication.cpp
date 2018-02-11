@@ -50,7 +50,7 @@ RRTFrame* wxApplicationNode::GetFrame()
 RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
 {
     
-    RRTGLContext *glContext;
+    RRTGLContext *rrt_gl_context;
     
     if ( !context_ )
     {
@@ -58,18 +58,18 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
         // subsequently created windows will all share the same context.
         context_ = new RRTGLContext(canvas);
     }
-    glContext = context_;
+    rrt_gl_context = context_;
 
-    glContext->SetCurrent(*canvas);
+    rrt_gl_context->SetCurrent(*canvas);
 
-    return *glContext;
+    return *rrt_gl_context;
 }
 
 void wxApplicationNode::DoUpdate(wxIdleEvent &event)
 {    
     if(ros::ok())
     {
-        planner_->step();
+        planner_->Step();
         ros::spinOnce();
 	    ros::Duration(1).sleep();
     }
@@ -89,22 +89,22 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
     {
         context_->ClearTrees();
 
-        /// startTree
+        /// StartTree
         TreeToDraw* start_tree = new TreeToDraw();
         wxColor start_tree_color(255,0,0);
-        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->startTree().allNodes())
+        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->GetStartTree().GetAllNodes())
         {
-            Point current_node_point(node.state().x(),
-                                     node.state().y(),
-                                     node.state().z());
+            Point current_node_point(node.GetState().x(),
+                                     node.GetState().y(),
+                                     node.GetState().z());
             PointWithColor current_colored_node_point(current_node_point, start_tree_color);
             start_tree->colored_points_.push_back(current_colored_node_point);
 
-            if(node.parent())
+            if(node.GetParent())
             {
-                Point parent_node_point(node.parent()->state().x(),
-                                        node.parent()->state().y(),
-                                        node.parent()->state().z());
+                Point parent_node_point(node.GetParent()->GetState().x(),
+                                        node.GetParent()->GetState().y(),
+                                        node.GetParent()->GetState().z());
                 PointWithColor parent_colored_node_point(parent_node_point, start_tree_color);
                 Line line(current_node_point, parent_node_point);
                 LineWithColor colored_line(line, start_tree_color);
@@ -117,22 +117,22 @@ void wxApplicationNode::ExtractPointsAndLinesFromTreeForContext()
         context_->AddTree(*start_tree);
         delete start_tree;
 
-        /// goalTree
+        /// GoalTree
         TreeToDraw* goal_tree = new TreeToDraw();
         wxColor goal_tree_color(0,0,255);
-        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->goalTree().allNodes())
+        for(const RRT::Node<Eigen::Vector3d>& node : planner_->birrt_->GetGoalTree().GetAllNodes())
         {
-            Point current_node_point(node.state().x(),
-                                     node.state().y(),
-                                     node.state().z());
+            Point current_node_point(node.GetState().x(),
+                                     node.GetState().y(),
+                                     node.GetState().z());
             PointWithColor current_colored_node_point(current_node_point, goal_tree_color);
             goal_tree->colored_points_.push_back(current_colored_node_point);
 
-            if(node.parent())
+            if(node.GetParent())
             {
-                Point parent_node_point(node.parent()->state().x(),
-                                        node.parent()->state().y(),
-                                        node.parent()->state().z());
+                Point parent_node_point(node.GetParent()->GetState().x(),
+                                        node.GetParent()->GetState().y(),
+                                        node.GetParent()->GetState().z());
                 PointWithColor parent_colored_node_point(parent_node_point, goal_tree_color);
                 Line line(current_node_point, parent_node_point);
                 LineWithColor colored_line(line, goal_tree_color);
@@ -164,7 +164,7 @@ RRTGLCanvas::RRTGLCanvas(wxWindow *parent, int *attribList)
       radius_(0.5*(khalf_width+khalf_height)),
       view_look_at_point_x_(khalf_width),
       view_look_at_point_y_(khalf_height),
-      view_look_at_point_z_(0)
+      view_look_at_point_z_(khalf_depth)
 {
 }
 
@@ -235,7 +235,7 @@ void RRTGLCanvas::ResetView()
     SetRadius(0.5*(khalf_width+khalf_height));
     SetLookAtPointX(khalf_width);
     SetLookAtPointY(khalf_height);
-    SetLookAtPointZ(0);
+    SetLookAtPointZ(khalf_depth);
 
     DrawNow();
     Refresh(false);
@@ -398,7 +398,7 @@ RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
       radius_(0.5*(khalf_width+khalf_height)),
       view_look_at_point_x_(khalf_width),
       view_look_at_point_y_(khalf_height),
-      view_look_at_point_z_(0)
+      view_look_at_point_z_(khalf_depth)
 {
     SetCurrent(*canvas);
 
@@ -564,25 +564,25 @@ void RRTGLContext::SetLookAtPointZ(double look_at_z)
 
 static void CheckGLError()
 {
-    GLenum errLast = GL_NO_ERROR;
+    GLenum last_error = GL_NO_ERROR;
 
     for ( ;; )
     {
-        GLenum err = glGetError();
-        if ( err == GL_NO_ERROR )
+        GLenum error = glGetError();
+        if ( error == GL_NO_ERROR )
             return;
 
         // normally the error is reset by the call to glGetError() but if
         // glGetError() itself returns an error, we risk looping forever here
         // so check that we get a different error than the last time
-        if ( err == errLast )
+        if ( error == last_error )
         {
             wxLogError(wxT("OpenGL error state couldn't be reset."));
             return;
         }
 
-        errLast = err;
+        last_error = error;
 
-        wxLogError(wxT("OpenGL error %d"), err);
+        wxLogError(wxT("OpenGL error %d"), error);
     }
 }
