@@ -1,8 +1,10 @@
+#ifndef ROBOJACKETS_3D_TRAJECTORY_3DSPACE_H
+#define ROBOJACKETS_3D_TRAJECTORY_3DSPACE_H
 
 #include <boost/functional/hash.hpp>
 #include <Eigen/Dense>
-#include <StateSpace.hpp>
-#include <Tree.hpp>
+#include "StateSpace.h"
+#include "Tree.h"
 
 namespace RRT {
 
@@ -41,3 +43,5 @@ std::shared_ptr<RRT::Tree<Eigen::Vector3d>> TreeFor3dSpace(
     Eigen::Vector3d goal, double step);
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_3DSPACE_H

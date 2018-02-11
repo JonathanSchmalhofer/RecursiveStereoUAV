@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_TREE_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_TREE_H
 
 #include <deque>
 #include <flann/algorithms/dist.h>
@@ -7,7 +8,7 @@
 #include <functional>
 #include <list>
 #include <memory>
-#include <StateSpace.hpp>
+#include "StateSpace.h"
 #include <stdexcept>
 #include <stdlib.h>
 #include <type_traits>
@@ -497,3 +498,5 @@ protected:
     std::shared_ptr<StateSpace> _stateSpace{};
 };
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_TREE_H

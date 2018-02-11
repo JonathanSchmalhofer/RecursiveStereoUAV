@@ -1,7 +1,8 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H
 
 #include <Eigen/Dense>
-#include <StateSpace.hpp>
+#include "StateSpace.h"
 
 namespace RRT {
 
@@ -49,3 +50,5 @@ private:
 };
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H

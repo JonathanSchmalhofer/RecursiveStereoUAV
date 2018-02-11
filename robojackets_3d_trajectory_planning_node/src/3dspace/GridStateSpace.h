@@ -1,8 +1,9 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_GRIDSTATESPACE_H
+#define ROBOJACKETS_3D_TRAJECTORY_GRIDSTATESPACE_H
 
 #include <Eigen/Dense>
-#include <3dspace/ObstacleGrid.hpp>
-#include <3dspace/PlaneStateSpace.hpp>
+#include "3dspace/ObstacleGrid.h"
+#include "3dspace/PlaneStateSpace.h"
 
 namespace RRT {
 
@@ -37,3 +38,5 @@ private:
 };
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_GRIDSTATESPACE_H

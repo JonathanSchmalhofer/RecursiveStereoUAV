@@ -1,5 +1,5 @@
-#include "PlannerWrapper.hpp"
-#include "planning/Path.hpp"
+#include "PlannerWrapper.h"
+#include "planning/Path.h"
 
 PlannerWrapper::PlannerWrapper()
 {

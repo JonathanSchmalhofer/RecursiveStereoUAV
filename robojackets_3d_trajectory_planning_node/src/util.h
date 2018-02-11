@@ -1,4 +1,5 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_UTIL_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANNING_UTIL_H
 
 #include <Eigen/Dense>
 
@@ -10,3 +11,5 @@ bool inRange(T n, T min, T max) {
 }
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANNING_UTIL_H

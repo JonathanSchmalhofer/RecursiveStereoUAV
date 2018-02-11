@@ -1,6 +1,7 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_WXAPPLICATION_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANNING_WXAPPLICATION_H
 
-#include "PlannerWrapper.hpp"
+#include "PlannerWrapper.h"
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -244,3 +245,5 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 };
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANNING_WXAPPLICATION_H

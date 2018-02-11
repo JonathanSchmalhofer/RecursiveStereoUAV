@@ -1,7 +1,8 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_BIRRT_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_BIRRT_H
 
 #include <limits.h>
-#include <Tree.hpp>
+#include "Tree.h"
 
 namespace RRT {
     
@@ -204,3 +205,5 @@ private:
 };
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_BIRRT_H

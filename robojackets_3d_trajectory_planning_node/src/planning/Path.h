@@ -1,6 +1,7 @@
-#pragma once
+#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_PATH_H
+#define ROBOJACKETS_3D_TRAJECTORY_PLANNING_PATH_H
 
-#include <StateSpace.hpp>
+#include "StateSpace.h"
 #include <vector>
 
 namespace RRT {
@@ -51,3 +52,6 @@ void SmoothPath(std::vector<Eigen::Vector3d>& pts, const StateSpace& stateSpace)
 }
 
 }  // namespace RRT
+
+#endif // ROBOJACKETS_3D_TRAJECTORY_PLANNING_PATH_H
+

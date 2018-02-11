@@ -1,8 +1,7 @@
-
 #include <math.h>
 #include <memory>
 #include <functional>
-#include <3dspace/3dspace.hpp>
+#include "3dspace/3dspace.h"
 
 using namespace Eigen;
 using namespace RRT;

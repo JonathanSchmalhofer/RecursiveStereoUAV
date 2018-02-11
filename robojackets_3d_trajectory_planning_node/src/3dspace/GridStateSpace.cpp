@@ -1,6 +1,6 @@
 #include <math.h>
-#include <3dspace/GridStateSpace.hpp>
-#include <util.hpp>
+#include "3dspace/GridStateSpace.h"
+#include "util.h"
 #include <stdexcept>
 
 using namespace Eigen;
