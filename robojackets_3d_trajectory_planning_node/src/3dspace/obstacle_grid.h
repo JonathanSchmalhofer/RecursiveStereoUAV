@@ -2,6 +2,8 @@
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_OBSTACLE_GRID_H
 
 #include <Eigen/Dense>
+#include <octomap/octomap.h>
+#include <octomap_ros/conversions.h>
 
 namespace RRT
 {
@@ -23,6 +25,11 @@ public:
 
     Eigen::Vector3i GetGridSquareForLocation(const Eigen::Vector3d& loc) const;
 
+    /// @brief Initialize internally
+    void Initialize();
+
+    /// @brief Returns OcTree-obstacles
+    octomap::OcTree* GetOctTreeObstacles();
 
     /// Finds the distance from state to its neareset obstacle. Only searches up to
     /// max_distance around state so as to not waste time checking far away and irrelevant
@@ -53,6 +60,22 @@ private:
 
     /// @brief 3d array of obstacles
     bool* obstacles_;
+
+    /// @brief Obstacles represented in an OcTree
+    octomap::OcTree* octree_obstacles_;
+
+    /// @brief Resolution of octomap
+    const double kresolution_octomap = 1;
+
+    /// @brief Minimum extent in x-direction to be considered for uniform sampling in planning space
+    const double kminimum_uniform_extent_x = 100;
+
+    /// @brief Minimum extent in y-direction to be considered for uniform sampling in planning space
+    const double kminimum_uniform_extent_y = 100;
+
+    /// @brief Minimum extent in z-direction to be considered for uniform sampling in planning space
+    const double kminimum_uniform_extent_z = 20;
+
 };
 
 }  // namespace RRT

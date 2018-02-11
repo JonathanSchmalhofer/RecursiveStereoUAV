@@ -14,6 +14,7 @@ ObstacleGrid::ObstacleGrid(double width,
                            int discretized_width,
                            int discretized_height,
                            int discretized_depth)
+    : octree_obstacles_(NULL)
 {
     width_ = width;
     height_ = height;
@@ -24,12 +25,49 @@ ObstacleGrid::ObstacleGrid(double width,
 
     obstacles_ =
         (bool*)malloc(sizeof(bool) * discretized_width * discretized_height * discretized_depth);
+    Initialize();
     Clear();
 }
 
 ObstacleGrid::~ObstacleGrid()
 {
     free(obstacles_);
+    if(octree_obstacles_ != NULL)
+    {
+        delete octree_obstacles_;
+    }
+}
+
+void ObstacleGrid::Initialize()
+{
+    if(octree_obstacles_ != NULL)
+    {
+        delete octree_obstacles_;
+    }
+    octree_obstacles_ = new octomap::OcTree(kresolution_octomap);
+
+    // add test wall
+    ROS_INFO("Make Octomap great again");
+    double x_wall, y_wall, z_wall;
+    y_wall = 40;
+    for(x_wall = -0.3*kminimum_uniform_extent_x; x_wall <= 0.3*kminimum_uniform_extent_x; x_wall+=0.5*kresolution_octomap)
+    {
+        for(z_wall = -0.3*kminimum_uniform_extent_z; z_wall <= 0.3*kminimum_uniform_extent_z; z_wall+=0.5* kresolution_octomap)
+        {
+            octomap::point3d start(x_wall, y_wall-5, z_wall);
+            octomap::point3d end(x_wall, y_wall, z_wall);
+
+            //ROS_INFO("%f, %f, %f", x_wall, y_wall, z_wall);
+
+            octree_obstacles_->insertRay(start, end);
+        }
+    }
+    ROS_INFO("Trump was here");
+}
+
+octomap::OcTree* ObstacleGrid::GetOctTreeObstacles()
+{
+    return octree_obstacles_;
 }
 
 Vector3i ObstacleGrid::GetGridSquareForLocation(const Vector3d& loc) const

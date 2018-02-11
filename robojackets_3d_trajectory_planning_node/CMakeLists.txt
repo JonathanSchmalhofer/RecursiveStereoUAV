@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
+    octomap_ros
+    octomap_msgs
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
@@ -22,6 +24,10 @@ find_package(Flann REQUIRED)
 add_library(Flann STATIC IMPORTED)
 
 find_package(js_messages REQUIRED)
+
+find_package(octomap REQUIRED)
+
+add_definitions(-DOCTOMAP_NODEBUGOUT)
 
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND)
@@ -54,8 +60,8 @@ find_package(GLUT REQUIRED)
 catkin_package(
     INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS}
     LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY}
-    CATKIN_DEPENDS roscpp js_messages
-    DEPENDS 
+    CATKIN_DEPENDS roscpp js_messages octomap_ros
+    DEPENDS octomap
 )
 
 ###########
@@ -70,6 +76,7 @@ include_directories(
     ${EIGEN3_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
     ${GLUT_INCLUDE_DIRS}
+    ${OCTOMAP_INCLUDE_DIRS}
     "src"
     "src/3dspace"
 )
@@ -88,6 +95,7 @@ target_link_libraries(rrt_3d_node
     ${wxWidgets_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARY}
+    ${OCTOMAP_LIBRARIES}
 )
 
 add_dependencies(rrt_3d_node
