@@ -8,7 +8,8 @@ using namespace std;
 namespace RRT {
 
 ObstacleGrid::ObstacleGrid(double width, double height, double depth, int discretizedWidth,
-                           int discretizedHeight, int discretizedDepth) {
+                           int discretizedHeight, int discretizedDepth)
+{
     _width = width;
     _height = height;
     _depth = depth;
@@ -22,16 +23,21 @@ ObstacleGrid::ObstacleGrid(double width, double height, double depth, int discre
     clear();
 }
 
-ObstacleGrid::~ObstacleGrid() { free(_obstacles); }
+ObstacleGrid::~ObstacleGrid()
+{
+    free(_obstacles);
+}
 
-Vector3i ObstacleGrid::gridSquareForLocation(const Vector3d& loc) const {
+Vector3i ObstacleGrid::gridSquareForLocation(const Vector3d& loc) const
+{
     return Vector3i(loc.x() / width() * discretizedWidth(),
                     loc.y() / height() * discretizedHeight(),
                     loc.z() / height() * discretizedDepth());
 }
 
 double ObstacleGrid::nearestObstacleDist(const Vector3d& state,
-                                        double maxDist) const {
+                                        double maxDist) const
+{
     // x and y are the indices of the cell that state is located in
     double x = (state.x() / (_width / _discretizedWidth));
     double y = (state.y() / (_height / _discretizedHeight));
@@ -42,16 +48,21 @@ double ObstacleGrid::nearestObstacleDist(const Vector3d& state,
     // here we loop through the cells around (x,y,z) to find the minimum distance
     // of
     // the point to the nearest obstacle
-    for (int i = x - xSearchRad; i <= x + xSearchRad; i++) {
-        for (int j = y - ySearchRad; j <= y + ySearchRad; j++) {
-            for (int k = z - zSearchRad; k <= z + zSearchRad; k++) {
+    for (int i = x - xSearchRad; i <= x + xSearchRad; i++)
+    {
+        for (int j = y - ySearchRad; j <= y + ySearchRad; j++)
+        {
+            for (int k = z - zSearchRad; k <= z + zSearchRad; k++)
+            {
                 bool obs = obstacleAt(i, j, k);
-                if (obs) {
+                if (obs)
+                {
                     double xDist = (x - i) * _width / _discretizedWidth;
                     double yDist = (y - j) * _height / _discretizedHeight;
                     double zDist = (z - k) * _depth / _discretizedDepth;
                     double dist = sqrtf(powf(xDist, 2) + powf(yDist, 2) + powf(zDist, 2));
-                    if (dist < maxDist) {
+                    if (dist < maxDist)
+                    {
                         maxDist = dist;
                     }
                 }
@@ -70,29 +81,37 @@ double ObstacleGrid::nearestObstacleDist(const Vector3d& state,
     return maxDist;
 }
 
-void ObstacleGrid::clear() {
-    for (int x = 0; x < discretizedWidth(); x++) {
-        for (int y = 0; y < discretizedHeight(); y++) {
-            for (int z = 0; z < discretizedDepth(); z++) {
+void ObstacleGrid::clear()
+{
+    for (int x = 0; x < discretizedWidth(); x++)
+    {
+        for (int y = 0; y < discretizedHeight(); y++)
+        {
+            for (int z = 0; z < discretizedDepth(); z++)
+            {
                 obstacleAt(x, y, z) = false;
             }
         }
     }
 }
 
-bool& ObstacleGrid::obstacleAt(int x, int y, int z) {
+bool& ObstacleGrid::obstacleAt(int x, int y, int z)
+{
     return _obstacles[x + _discretizedWidth * y + _discretizedDepth * z];
 }
 
-bool ObstacleGrid::obstacleAt(int x, int y, int z) const {
+bool ObstacleGrid::obstacleAt(int x, int y, int z) const
+{
     return _obstacles[x + _discretizedWidth * y + _discretizedDepth * z];
 }
 
-bool& ObstacleGrid::obstacleAt(const Vector3i& gridLoc) {
+bool& ObstacleGrid::obstacleAt(const Vector3i& gridLoc)
+{
     return obstacleAt(gridLoc.x(), gridLoc.y(), gridLoc.z());
 }
 
-bool ObstacleGrid::obstacleAt(const Vector3i& gridLoc) const {
+bool ObstacleGrid::obstacleAt(const Vector3i& gridLoc) const
+{
     return obstacleAt(gridLoc.x(), gridLoc.y(), gridLoc.z());
 }
 

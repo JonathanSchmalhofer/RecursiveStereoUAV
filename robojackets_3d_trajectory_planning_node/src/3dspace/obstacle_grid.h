@@ -3,14 +3,16 @@
 
 #include <Eigen/Dense>
 
-namespace RRT {
+namespace RRT
+{
 
 /**
  * @brief Handles a grid of obstacles laid over a continuous 3d space.
  * @details The state space is broken up into a grid with the given discrete
  * height and widths and depths.
  */
-class ObstacleGrid {
+class ObstacleGrid
+{
 public:
     ObstacleGrid(double width, double height, double depth, int discretizedWidth,
                  int discretizedHeight, int discretizedDepth);

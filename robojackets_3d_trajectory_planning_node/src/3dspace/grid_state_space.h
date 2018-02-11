@@ -12,15 +12,14 @@ namespace RRT {
  * @details The state space is broken up into a grid with the given discrete
  * height and widths and depths.
  */
-class GridStateSpace : public SpaceStateSpace {
+class GridStateSpace
+    : public SpaceStateSpace
+{
 public:
     GridStateSpace(double width, double height, double depth, int discretizedWidth,
                    int discretizedHeight, int discretizedDepth);
 
-    /**
-     * Returns a boolean indicating whether the given point is within bounds and
-     * obstacle-free.
-     */
+    /// @brief Returns a boolean indicating whether the given point is within bounds and obstacle-free.
     bool stateValid(const Eigen::Vector3d& pt) const;
     bool transitionValid(const Eigen::Vector3d& from,
                          const Eigen::Vector3d& to) const;

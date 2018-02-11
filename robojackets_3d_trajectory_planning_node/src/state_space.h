@@ -10,7 +10,8 @@ namespace RRT {
  * This class is abstract and must be subclassed in order to provide actual
  * functionality.
  */
-class StateSpace {
+class StateSpace
+{
 public:
     StateSpace(){};
     virtual ~StateSpace(){};
