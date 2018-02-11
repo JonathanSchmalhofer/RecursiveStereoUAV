@@ -5,9 +5,9 @@
 namespace RRT {
 
 /**
- * @brief Handles a grid of obstacles laid over a continuous 2d plane.
+ * @brief Handles a grid of obstacles laid over a continuous 3d space.
  * @details The state space is broken up into a grid with the given discrete
- * height and widths.
+ * height and widths and depths.
  */
 class ObstacleGrid {
 public:
@@ -47,7 +47,7 @@ private:
     int _discretizedWidth, _discretizedHeight, _discretizedDepth;
     double _width, _height, _depth;
 
-    /// 2d array of obstacles
+    /// 3d array of obstacles
     bool* _obstacles;
 };
 

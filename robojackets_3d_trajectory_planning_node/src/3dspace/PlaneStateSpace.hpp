@@ -6,7 +6,7 @@
 namespace RRT {
 
 /**
- * @brief A 2d plane with continuous states and no obstacles.
+ * @brief A 3d space with continuous states and no obstacles.
  */
 class PlaneStateSpace : public StateSpace {
 public:

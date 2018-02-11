@@ -5,9 +5,9 @@
 
 #include <Eigen/Dense>
 #include <memory> // for make_unique
-#include "2dplane/GridStateSpace.hpp"
+#include "3dspace/GridStateSpace.hpp"
 #include "BiRRT.hpp"
-#include "2dplane/2dplane.hpp"
+#include "3dspace/3dspace.hpp"
 
 
 class PlannerWrapper

@@ -71,13 +71,13 @@ include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${GLUT_INCLUDE_DIRS}
     "src"
-    "src/2dplane"
+    "src/3dspace"
 )
 
 add_executable(rrt_3d_node
-    "src/2dplane/2dplane.cpp"
-    "src/2dplane/GridStateSpace.cpp"
-    "src/2dplane/ObstacleGrid.cpp"
+    "src/3dspace/3dspace.cpp"
+    "src/3dspace/GridStateSpace.cpp"
+    "src/3dspace/ObstacleGrid.cpp"
     "src/wxApplication.cpp"
     "src/PlannerWrapper.cpp"
     "src/rrt_node.cpp"

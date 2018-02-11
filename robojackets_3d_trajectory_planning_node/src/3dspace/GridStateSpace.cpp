@@ -1,5 +1,5 @@
 #include <math.h>
-#include <2dplane/GridStateSpace.hpp>
+#include <3dspace/GridStateSpace.hpp>
 #include <util.hpp>
 #include <stdexcept>
 
