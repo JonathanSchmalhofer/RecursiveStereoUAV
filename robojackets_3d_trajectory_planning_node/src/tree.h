@@ -8,7 +8,7 @@
 #include <functional>
 #include <list>
 #include <memory>
-#include "StateSpace.h"
+#include "state_space.h"
 #include <stdexcept>
 #include <stdlib.h>
 #include <type_traits>

@@ -1,7 +1,7 @@
 #ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_PATH_H
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_PATH_H
 
-#include "StateSpace.h"
+#include "state_space.h"
 #include <vector>
 
 namespace RRT {

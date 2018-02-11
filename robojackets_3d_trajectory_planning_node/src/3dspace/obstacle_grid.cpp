@@ -1,4 +1,4 @@
-#include "ObstacleGrid.h"
+#include "obstacle_grid.h"
 #include <stdlib.h>
 #include <iostream>
 

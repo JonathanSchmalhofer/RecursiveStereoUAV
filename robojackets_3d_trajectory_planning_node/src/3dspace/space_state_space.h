@@ -1,17 +1,17 @@
-#ifndef ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H
-#define ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H
+#ifndef ROBOJACKETS_3D_TRAJECTORY_SPACE_STATE_SPACE_H
+#define ROBOJACKETS_3D_TRAJECTORY_SPACE_STATE_SPACE_H
 
 #include <Eigen/Dense>
-#include "StateSpace.h"
+#include "state_space.h"
 
 namespace RRT {
 
 /**
  * @brief A 3d space with continuous states and no obstacles.
  */
-class PlaneStateSpace : public StateSpace {
+class SpaceStateSpace : public StateSpace {
 public:
-    PlaneStateSpace(double width, double height, double depth)
+    SpaceStateSpace(double width, double height, double depth)
         : _width(width), _height(height), _depth(depth) {}
 
     Eigen::Vector3d randomState() const {
@@ -51,4 +51,4 @@ private:
 
 }  // namespace RRT
 
-#endif // ROBOJACKETS_3D_TRAJECTORY_PLANESTATESPACE_H
+#endif // ROBOJACKETS_3D_TRAJECTORY_SPACE_STATE_SPACE_H

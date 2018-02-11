@@ -2,8 +2,8 @@
 #define ROBOJACKETS_3D_TRAJECTORY_GRIDSTATESPACE_H
 
 #include <Eigen/Dense>
-#include "3dspace/ObstacleGrid.h"
-#include "3dspace/PlaneStateSpace.h"
+#include "3dspace/obstacle_grid.h"
+#include "3dspace/space_state_space.h"
 
 namespace RRT {
 
@@ -12,7 +12,7 @@ namespace RRT {
  * @details The state space is broken up into a grid with the given discrete
  * height and widths and depths.
  */
-class GridStateSpace : public PlaneStateSpace {
+class GridStateSpace : public SpaceStateSpace {
 public:
     GridStateSpace(double width, double height, double depth, int discretizedWidth,
                    int discretizedHeight, int discretizedDepth);

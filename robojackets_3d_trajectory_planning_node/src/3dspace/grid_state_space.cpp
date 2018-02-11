@@ -1,5 +1,5 @@
 #include <math.h>
-#include "3dspace/GridStateSpace.h"
+#include "3dspace/grid_state_space.h"
 #include "util.h"
 #include <stdexcept>
 
@@ -12,11 +12,11 @@ namespace RRT {
 
 GridStateSpace::GridStateSpace(double width, double height, double depth, int discretizedWidth,
                                int discretizedHeight, int discretizedDepth)
-    : PlaneStateSpace(width, height, depth),
+    : SpaceStateSpace(width, height, depth),
       _obstacleGrid(width, height, depth, discretizedWidth, discretizedHeight, discretizedDepth) {}
 
 bool GridStateSpace::stateValid(const Vector3d& pt) const {
-    return PlaneStateSpace::stateValid(pt) &&
+    return SpaceStateSpace::stateValid(pt) &&
            !_obstacleGrid.obstacleAt(_obstacleGrid.gridSquareForLocation(pt));
 }
 

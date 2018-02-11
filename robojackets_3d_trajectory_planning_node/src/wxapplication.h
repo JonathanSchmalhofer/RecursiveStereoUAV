@@ -1,7 +1,7 @@
 #ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_WXAPPLICATION_H
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_WXAPPLICATION_H
 
-#include "PlannerWrapper.h"
+#include "planner_wrapper.h"
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP

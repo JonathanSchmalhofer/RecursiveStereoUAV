@@ -7,7 +7,7 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "rrt_node");
     ros::NodeHandle node_handle;
     
-    //ROS_INFO("Starting RRT node with wxWidget visualization");
+    //ROS_INFO("Starting RRT 3d node with wxWidget visualization");
 
     wxEntryStart( argc, argv );
     wxTheApp->CallOnInit();

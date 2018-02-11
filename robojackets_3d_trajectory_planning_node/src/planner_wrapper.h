@@ -6,8 +6,8 @@
 
 #include <Eigen/Dense>
 #include <memory> // for make_unique
-#include "3dspace/GridStateSpace.h"
-#include "BiRRT.h"
+#include "3dspace/grid_state_space.h"
+#include "birrt.h"
 #include "3dspace/3dspace.h"
 
 

@@ -76,10 +76,10 @@ include_directories(
 
 add_executable(rrt_3d_node
     "src/3dspace/3dspace.cpp"
-    "src/3dspace/GridStateSpace.cpp"
-    "src/3dspace/ObstacleGrid.cpp"
-    "src/wxApplication.cpp"
-    "src/PlannerWrapper.cpp"
+    "src/3dspace/grid_state_space.cpp"
+    "src/3dspace/obstacle_grid.cpp"
+    "src/wxapplication.cpp"
+    "src/planner_wrapper.cpp"
     "src/rrt_node.cpp"
 )
 

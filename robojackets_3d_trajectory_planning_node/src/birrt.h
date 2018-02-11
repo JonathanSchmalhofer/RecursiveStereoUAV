@@ -2,7 +2,7 @@
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_NODE_BIRRT_H
 
 #include <limits.h>
-#include "Tree.h"
+#include "tree.h"
 
 namespace RRT {
     

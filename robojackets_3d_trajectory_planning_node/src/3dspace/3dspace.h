@@ -3,8 +3,8 @@
 
 #include <boost/functional/hash.hpp>
 #include <Eigen/Dense>
-#include "StateSpace.h"
-#include "Tree.h"
+#include "state_space.h"
+#include "tree.h"
 
 namespace RRT {
 
