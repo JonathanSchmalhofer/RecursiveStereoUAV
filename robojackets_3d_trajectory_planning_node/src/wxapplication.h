@@ -59,6 +59,18 @@ public:
     void ClearTrees();
     void AddTree(TreeToDraw tree);
 
+    /// @brief Get the start point
+    Eigen::Vector3d GetStartPoint();
+
+    /// @brief Get the goal point
+    Eigen::Vector3d GetGoalPoint();
+
+    /// @brief Set the start point
+    void SetStartPoint(Eigen::Vector3d start_point);
+
+    /// @brief Set the goal point
+    void SetGoalPoint(Eigen::Vector3d goal_point);
+
     // render the cube showing it at given angles
     void DrawNow();
 
@@ -102,6 +114,8 @@ private:
     std::vector<Eigen::Vector3d> points_;
     std::vector<std::pair<Eigen::Vector3d, Eigen::Vector3d>> lines_;
     std::vector<TreeToDraw> trees_;
+    Eigen::Vector3d start_point_;
+    Eigen::Vector3d goal_point_;
 
     /// @brief Azimuth angle.
     double view_azimuth_;
@@ -237,6 +251,7 @@ public:
     RRTFrame* GetFrame();
 
 private:
+    void ExtractStartAndGoalStateForContext();
     void ExtractPointsAndLinesFromTreeForContext();
 
     PlannerWrapper *planner_;

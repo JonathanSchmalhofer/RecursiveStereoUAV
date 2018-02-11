@@ -7,9 +7,11 @@ PlannerWrapper::PlannerWrapper()
     statespace_ = std::make_shared<RRT::GridStateSpace>(size.x(), size.y(), size.z(), 40, 40, 40);
     birrt_ = std::make_unique<RRT::BiRRT<Eigen::Vector3d>>(statespace_, 3);
 
+    Eigen::Vector3d start_state(10, 10, 10);
+    Eigen::Vector3d goal_state(790, 790, 790);
     //  setup birrt
-    birrt_->SetStartState(size / 10);
-    birrt_->SetGoalState(size / 2);
+    birrt_->SetStartState(start_state);
+    birrt_->SetGoalState(goal_state);
     birrt_->SetMaxStepSize(100);
     birrt_->SetStepSize(10);
     birrt_->SetMaxIterations(1000);
@@ -17,7 +19,6 @@ PlannerWrapper::PlannerWrapper()
     birrt_->SetGoalBias(0.2);
     birrt_->SetWaypointBias(0.2);
     birrt_->SetMaxDistanceToGoal(5);
-    
 
     start_velocity_ = Eigen::Vector3d(3, 0, 0);
     goal_velocity_ = Eigen::Vector3d(0, 3, 0);
@@ -36,7 +37,7 @@ void PlannerWrapper::Step()
     previous_solution_.clear();
     if (birrt_->GetStartSolutionNode() != nullptr)
     {
-        //ROS_INFO("   Found a solution");
+        ROS_INFO("   Found a solution");
         previous_solution_ = birrt_->GetPath();
         RRT::SmoothPath(previous_solution_, *statespace_);
     }

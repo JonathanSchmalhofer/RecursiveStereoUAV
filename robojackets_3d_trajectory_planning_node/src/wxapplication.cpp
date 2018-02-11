@@ -74,12 +74,22 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
 	    ros::Duration(1).sleep();
     }
 
+    ExtractStartAndGoalStateForContext();
     ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();
 
     if(IsMainLoopRunning())
     {
         event.RequestMore();
+    }
+}
+
+void wxApplicationNode::ExtractStartAndGoalStateForContext()
+{
+    if(NULL != context_)
+    {
+        context_->SetStartPoint(planner_->birrt_->GetStartState());
+        context_->SetGoalPoint(planner_->birrt_->GetGoalState());
     }
 }
 
@@ -445,7 +455,7 @@ void RRTGLContext::DrawNow()
     {
         glColor3f(0.0f,0.0f,1.0f); //blue color as default
 
-        glBegin(GL_POINTS); //starts drawing of points
+        glBegin(GL_POINTS); // starts drawing of points
             /// draw all points
             for(const PointWithColor& colored_point : tree.colored_points_)
             {
@@ -456,11 +466,11 @@ void RRTGLContext::DrawNow()
                            colored_point.first.y(),
                            colored_point.first.z());
             }
-        glEnd(); //end drawing of points
+        glEnd(); // end drawing of points
 
         glColor3f(0.0f,0.0f,1.0f); //blue color as default
 
-        glBegin(GL_LINES); //starts drawing of lines
+        glBegin(GL_LINES); // starts drawing of lines
             /// draw all lines
             for(const LineWithColor& colored_line : tree.colored_lines_)
             {
@@ -474,8 +484,26 @@ void RRTGLContext::DrawNow()
                            colored_line.first.second.y(),
                            colored_line.first.second.z());
             }
-        glEnd(); //end drawing of lines
+        glEnd(); // end drawing of lines
     }
+
+    glPointSize(20.0f); //set point size to 20 pixels
+    
+    // Start Point
+    glColor3f(0.0f,1.0f,0.0f); // GREEN for start point
+    glBegin(GL_POINTS); // starts drawing of start point
+        glVertex3f(GetStartPoint().x(),
+                   GetStartPoint().y(),
+                   GetStartPoint().z());
+    glEnd(); // end drawing of start point
+    
+    // Goal Point
+    glColor3f(1.0f,0.65f,0.0f); // ORANGE for goal point
+    glBegin(GL_POINTS); // starts drawing of goal point
+        glVertex3f(GetGoalPoint().x(),
+                   GetGoalPoint().y(),
+                   GetGoalPoint().z());
+    glEnd(); // end drawing of goal point
 
     glDisable(GL_POINT_SMOOTH);
     glBlendFunc(GL_NONE, GL_NONE);
@@ -496,6 +524,26 @@ void RRTGLContext::ClearTrees()
 void RRTGLContext::AddTree(TreeToDraw tree)
 {
     trees_.push_back(tree);
+}
+
+Eigen::Vector3d RRTGLContext::GetStartPoint()
+{
+    return start_point_;
+}
+
+Eigen::Vector3d RRTGLContext::GetGoalPoint()
+{
+    return goal_point_;
+}
+
+void RRTGLContext::SetStartPoint(Eigen::Vector3d start_point)
+{
+    start_point_ = start_point;
+}
+
+void RRTGLContext::SetGoalPoint(Eigen::Vector3d goal_point)
+{
+    goal_point_ = goal_point;
 }
 
 double RRTGLContext::GetAzimuth()
