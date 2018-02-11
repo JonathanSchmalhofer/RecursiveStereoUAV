@@ -51,4 +51,5 @@ jobs:
                     rosdep install std_msgs && \
                     rosdep install roscpp && \
                     cd ~/master_ws && \
+                    catkin config --blacklist robojackets_trajectory_planning_node robojackets_3d_trajectory_planning_node js_wxwidget_node && \
                     catkin build -c
