@@ -196,4 +196,26 @@ bool ObstacleGrid::InsertOccupiedMeasurement(const Eigen::Vector3d& position)
     }
 }
 
+bool ObstacleGrid::CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to)
+{
+    if(octree_obstacles_)
+    {
+        octomap::point3d start(from.x(), from.y(), from.z());
+        octomap::point3d direction(to.x() - from.x(),
+                                   to.y() - from.y(),
+                                   to.z() - from.z());
+        octomap::point3d cell_hit_by_ray;
+
+        //ROS_INFO("Casting Ray from (%f,%f,%f) to (%f,%f,%f)", start.x(), start.y(), start.z(), direction.x(), direction.y(), direction.z());
+        bool ignore_unknown_cells = true;
+        double max_range = sqrtf(powf(to.x() - from.x(), 2) + powf(to.y() - from.y(), 2) + powf(to.z() - from.z(), 2)); // EuclidianDistance3d(x_a, x_b);
+        bool collision_occured = octree_obstacles_->castRay(start, direction, cell_hit_by_ray, ignore_unknown_cells, max_range);
+        return (!collision_occured);
+    }
+    else
+    {
+        return true;
+    }
+}
+
 }  // namespace RRT

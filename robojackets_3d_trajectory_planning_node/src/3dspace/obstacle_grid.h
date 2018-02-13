@@ -56,6 +56,7 @@ public:
 
     bool InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eigen::Vector3d& to);
     bool InsertOccupiedMeasurement(const Eigen::Vector3d& position);
+    bool CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to);
 
 private:
     int discretized_width_, discretized_height_, discretized_depth_;
