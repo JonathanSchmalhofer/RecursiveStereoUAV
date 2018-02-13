@@ -54,6 +54,9 @@ public:
     double GetHeight() const;
     double GetDepth() const;
 
+    bool InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eigen::Vector3d& to);
+    bool InsertOccupiedMeasurement(const Eigen::Vector3d& position);
+
 private:
     int discretized_width_, discretized_height_, discretized_depth_;
     double width_, height_, depth_;

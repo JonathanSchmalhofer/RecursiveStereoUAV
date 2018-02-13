@@ -168,4 +168,32 @@ double ObstacleGrid::GetHeight() const { return height_; }
 
 double ObstacleGrid::GetDepth() const { return depth_; }
 
+bool ObstacleGrid::InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eigen::Vector3d& to)
+{
+    if(octree_obstacles_)
+    {
+        octomap::point3d start(from.x(), from.y(), from.z());
+        octomap::point3d end(to.x(), to.y(), to.z());
+        return octree_obstacles_->insertRay(start, end);
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool ObstacleGrid::InsertOccupiedMeasurement(const Eigen::Vector3d& position)
+{
+    if(octree_obstacles_)
+    {
+        octomap::point3d endpoint(position.x(), position.y(), position.z());
+        octree_obstacles_->updateNode(endpoint, true); // integrate 'occupied' measurement
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 }  // namespace RRT
