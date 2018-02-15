@@ -46,10 +46,10 @@ void ObstacleGrid::Initialize()
     // add test wall
     ROS_INFO("Make Octomap great again");
     double x_wall, y_wall, z_wall;
-    y_wall = 40;
-    for(x_wall = -0.3*kminimum_uniform_extent_x; x_wall <= 0.3*kminimum_uniform_extent_x; x_wall+=0.5*kresolution_octomap)
+    y_wall = 750;
+    for(x_wall = 0; x_wall <= 800; x_wall+=0.5*kresolution_octomap)
     {
-        for(z_wall = -0.3*kminimum_uniform_extent_z; z_wall <= 0.3*kminimum_uniform_extent_z; z_wall+=0.5* kresolution_octomap)
+        for(z_wall = 300; z_wall <= 800; z_wall+=0.5* kresolution_octomap)
         {
             octomap::point3d start(x_wall, y_wall-5, z_wall);
             octomap::point3d end(x_wall, y_wall, z_wall);
