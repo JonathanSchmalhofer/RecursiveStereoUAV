@@ -42,3 +42,7 @@ void PlannerWrapper::Step()
         RRT::SmoothPath(previous_solution_, *statespace_);
     }
 }
+
+Eigen::Vector3d PlannerWrapper::GetStartVelocity() { return start_velocity_; };
+Eigen::Vector3d PlannerWrapper::GetGoalVelocity() { return goal_velocity_; };
+std::vector<Eigen::Vector3d> PlannerWrapper::GetPreviousSolution() { return previous_solution_; };

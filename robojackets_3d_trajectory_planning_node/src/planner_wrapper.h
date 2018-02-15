@@ -17,9 +17,14 @@ public:
     PlannerWrapper();
     void Step();
 
+    Eigen::Vector3d GetStartVelocity();
+    Eigen::Vector3d GetGoalVelocity();
+    std::vector<Eigen::Vector3d> GetPreviousSolution();
+
     std::shared_ptr<RRT::GridStateSpace> statespace_;
     std::unique_ptr<RRT::BiRRT<Eigen::Vector3d>> birrt_;
 
+private:
     Eigen::Vector3d start_velocity_;
     Eigen::Vector3d goal_velocity_;
     std::vector<Eigen::Vector3d> previous_solution_;
