@@ -23,15 +23,12 @@ ObstacleGrid::ObstacleGrid(double width,
     discretized_height_ = discretized_height;
     discretized_depth_ = discretized_depth;
 
-    obstacles_ =
-        (bool*)malloc(sizeof(bool) * discretized_width * discretized_height * discretized_depth);
     Initialize();
     Clear();
 }
 
 ObstacleGrid::~ObstacleGrid()
 {
-    free(obstacles_);
     if(octree_obstacles_ != NULL)
     {
         delete octree_obstacles_;
@@ -45,7 +42,7 @@ void ObstacleGrid::Initialize()
         delete octree_obstacles_;
     }
     octree_obstacles_ = new octomap::OcTree(kresolution_octomap);
-
+/*
     // add test wall
     ROS_INFO("Make Octomap great again");
     double x_wall, y_wall, z_wall;
@@ -62,7 +59,7 @@ void ObstacleGrid::Initialize()
             octree_obstacles_->insertRay(start, end);
         }
     }
-    ROS_INFO("Trump was here");
+    ROS_INFO("Trump was here");*/
 }
 
 octomap::OcTree* ObstacleGrid::GetOctTreeObstacles()
@@ -80,80 +77,59 @@ Vector3i ObstacleGrid::GetGridSquareForLocation(const Vector3d& loc) const
 double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
                                                   double max_distance) const
 {
-    // x and y are the indices of the cell that state is located in
-    double x = (state.x() / (width_ / discretized_width_));
-    double y = (state.y() / (height_ / discretized_height_));
-    double z = (state.z() / (depth_ / discretized_depth_));
-    int search_radius_x = max_distance * discretized_width_ / width_;
-    int search_radius_y = max_distance * discretized_height_ / height_;
-    int search_radius_z = max_distance * discretized_depth_ / depth_;
-    // here we loop through the cells around (x,y,z) to find the minimum distance
-    // of the point to the nearest obstacle
-    for (int i = x - search_radius_x; i <= x + search_radius_x; i++)
-    {
-        for (int j = y - search_radius_y; j <= y + search_radius_y; j++)
-        {
-            for (int k = z - search_radius_z; k <= z + search_radius_z; k++)
-            {
-                bool obs = IsObstacleAt(i, j, k);
-                if (obs)
-                {
-                    double x_distance = (x - i) * width_ / discretized_width_;
-                    double y_distance = (y - j) * height_ / discretized_height_;
-                    double z_distance = (z - k) * depth_ / discretized_depth_;
-                    double dist = sqrtf(powf(x_distance, 2) + powf(y_distance, 2) + powf(z_distance, 2));
-                    if (dist < max_distance)
-                    {
-                        max_distance = dist;
-                    }
-                }
-            }
-        }
-    }
+    /*
+    double x,y,z;
+    octree_obstacles_->getMetricMin(x,y,z);
+    octomap::point3d min(x,y,z);
+    octree_obstacles_->getMetricMax(x,y,z);
+    octomap::point3d max(x,y,z);max_distance
+    
+    bool unknown_as_occupied = false;
+    unknownAsOccupied = false;
+    float max_clamped_distance = 1.0;
+    //- the first argument ist the max distance at which distance computations are clamped
+    //- the second argument is the octomap
+    //- arguments 3 and 4 can be used to restrict the distance map to a subarea
+    //- argument 5 defines whether unknown space is treated as occupied or free
+    //The constructor copies data but does not yet compute the distance map
+    DynamicEDTOctomap distmap(max_clamped_distance, octree_obstacles_, min, max, unknown_as_occupied);
 
-    // the boundaries of the grid count as obstacles
-    max_distance = std::min(max_distance, state.x());             // left boundary
-    max_distance = std::min(max_distance, GetWidth() - state.x());   // right boundary
-    max_distance = std::min(max_distance, state.y());             // top boundary
-    max_distance = std::min(max_distance, GetHeight() - state.y());  // bottom boundary
-    max_distance = std::min(max_distance, state.z());             // front boundary
-    max_distance = std::min(max_distance, GetDepth() - state.z());   // back boundary
+    //This computes the distance map
+    distmap.update(); 
 
-    return max_distance;
+    //This is how you can query the map
+    octomap::point3d p(state.x(), state.y(), state.z());
+
+    octomap::point3d closestObst;
+    double distance;
+
+    distmap.getDistanceAndClosestObstacle(p, distance, closestObst);
+
+    if(distance < distmap.getMaxDist() && distance < max_distance)
+        return distance;
+    else*/
+        return max_distance;
 }
 
 void ObstacleGrid::Clear()
 {
-    for (int x = 0; x < GetDiscretizedWidth(); x++)
-    {
-        for (int y = 0; y < GetDiscretizedHeight(); y++)
-        {
-            for (int z = 0; z < GetDiscretizedDepth(); z++)
-            {
-                IsObstacleAt(x, y, z) = false;
-            }
-        }
-    }
-}
-
-bool& ObstacleGrid::IsObstacleAt(int x, int y, int z)
-{
-    return obstacles_[x + discretized_width_ * y + discretized_depth_ * z];
+    octree_obstacles_->clear();
 }
 
 bool ObstacleGrid::IsObstacleAt(int x, int y, int z) const
 {
-    return obstacles_[x + discretized_width_ * y + discretized_depth_ * z];
+    if(nullptr == octree_obstacles_) { return false; };
+
+    octomap::OcTreeNode* node = octree_obstacles_->search(octomap::point3d(x,y,z));
+
+    if(nullptr == node) { return false; };
+
+    return octree_obstacles_->isNodeOccupied(node);
 }
 
-bool& ObstacleGrid::IsObstacleAt(const Vector3i& grid_location)
+bool ObstacleGrid::IsObstacleAt(const Vector3d& grid_location) const
 {
-    return IsObstacleAt(grid_location.x(), grid_location.y(), grid_location.z());
-}
-
-bool ObstacleGrid::IsObstacleAt(const Vector3i& grid_location) const
-{
-    return IsObstacleAt(grid_location.x(), grid_location.y(), grid_location.z());
+    return IsObstacleAt(grid_location.x(),grid_location.y(),grid_location.z());
 }
 
 int ObstacleGrid::GetDiscretizedWidth() const { return discretized_width_; }
@@ -196,7 +172,7 @@ bool ObstacleGrid::InsertOccupiedMeasurement(const Eigen::Vector3d& position)
     }
 }
 
-bool ObstacleGrid::CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to)
+bool ObstacleGrid::CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const
 {
     if(octree_obstacles_)
     {
@@ -206,7 +182,6 @@ bool ObstacleGrid::CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, 
                                    to.z() - from.z());
         octomap::point3d cell_hit_by_ray;
 
-        //ROS_INFO("Casting Ray from (%f,%f,%f) to (%f,%f,%f)", start.x(), start.y(), start.z(), direction.x(), direction.y(), direction.z());
         bool ignore_unknown_cells = true;
         double max_range = sqrtf(powf(to.x() - from.x(), 2) + powf(to.y() - from.y(), 2) + powf(to.z() - from.z(), 2)); // EuclidianDistance3d(x_a, x_b);
         bool collision_occured = octree_obstacles_->castRay(start, direction, cell_hit_by_ray, ignore_unknown_cells, max_range);

@@ -4,6 +4,7 @@
 #include <Eigen/Dense>
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
+//#include <dynamicEDT3D/dynamicEDTOctomap.h>
 
 namespace RRT
 {
@@ -42,10 +43,8 @@ public:
     double GetDistanceToNearestObstacle(const Eigen::Vector3d& state,
                                         double max_distance) const;
     void Clear();
-    bool& IsObstacleAt(int x, int y, int z);
     bool IsObstacleAt(int x, int y, int z) const;
-    bool& IsObstacleAt(const Eigen::Vector3i& grid_location);
-    bool IsObstacleAt(const Eigen::Vector3i& grid_location) const;
+    bool IsObstacleAt(const Eigen::Vector3d& grid_location) const;
 
     int GetDiscretizedWidth() const;
     int GetDiscretizedHeight() const;
@@ -56,14 +55,11 @@ public:
 
     bool InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eigen::Vector3d& to);
     bool InsertOccupiedMeasurement(const Eigen::Vector3d& position);
-    bool CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to);
+    bool CheckIfCollisionFreeLineBetween(const Eigen::Vector3d& from, const Eigen::Vector3d& to) const;
 
 private:
     int discretized_width_, discretized_height_, discretized_depth_;
     double width_, height_, depth_;
-
-    /// @brief 3d array of obstacles
-    bool* obstacles_;
 
     /// @brief Obstacles represented in an OcTree
     octomap::OcTree* octree_obstacles_;
