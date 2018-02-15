@@ -144,7 +144,7 @@ void RTRRTStarClass::IndentedRosInfo(const tree<NodeData>& tree_in)
         {
             node_info_string.append("  ");
         }
-        ROS_INFO(node_info_string.append(ToString(it)).c_str());
+        ROS_INFO("%s", node_info_string.append(ToString(it)).c_str());
         ++it;
     }
 }
@@ -154,7 +154,7 @@ void RTRRTStarClass::NodeListRosInfo(const std::list<NodeIt>& list_in)
     ROS_INFO("List:");
     for (auto& node_from_list : list_in)
     {
-        ROS_INFO(std::string("   " + ToString(node_from_list)).c_str());
+        ROS_INFO("%s", std::string("   " + ToString(node_from_list)).c_str());
     }
 }
 
