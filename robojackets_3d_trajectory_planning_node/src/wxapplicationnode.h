@@ -3,7 +3,7 @@
 
 #include "planner_wrapper.h"
 #include "rrtglcontext.h"
-#include "rrtglcanvas.h"
+#include "rrtframe.h"
 
 
 // ----------------------------------------------------------------------------
@@ -20,26 +20,6 @@ const double kdelta_translation = 10; // [-]
 static void CheckGLError();
 
 ////////////////////////////////////////////////////////////////////////////////////
-
-
-
-// Define a new frame type
-class RRTFrame : public wxFrame
-{
-public:
-    RRTFrame();
-
-    RRTGLCanvas* GetCanvas();
-
-private:
-    RRTGLCanvas* canvas_;
-
-    void OnClose(wxCommandEvent& event);
-
-    wxDECLARE_EVENT_TABLE();
-};
-
-
 
 class wxApplicationNode
     : public wxApp
