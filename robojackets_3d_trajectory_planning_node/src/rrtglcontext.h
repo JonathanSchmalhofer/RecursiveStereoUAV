@@ -1,6 +1,7 @@
 #ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_RRTGLCONTEXT_H
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_RRTGLCONTEXT_H
 
+#include <Eigen/Dense>
 #include "tree_to_draw.h"
 
 // the rendering context used by all GL canvases

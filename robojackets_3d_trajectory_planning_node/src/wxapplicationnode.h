@@ -6,19 +6,6 @@
 #include "rrtframe.h"
 
 
-// ----------------------------------------------------------------------------
-// helper functions
-// ----------------------------------------------------------------------------
-
-const int khalf_width = 400;
-const int khalf_height = 400;
-const int khalf_depth = 400;
-
-const double kdelta_angle = 5; // [deg]
-const double kdelta_translation = 10; // [-]
-
-static void CheckGLError();
-
 ////////////////////////////////////////////////////////////////////////////////////
 
 class wxApplicationNode

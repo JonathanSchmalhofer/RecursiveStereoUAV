@@ -2,6 +2,7 @@
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_RRTGLCANVAS_H
 
 #include "tree_to_draw.h"
+#include "constants.h"
 
 class RRTGLCanvas : public wxGLCanvas
 {
