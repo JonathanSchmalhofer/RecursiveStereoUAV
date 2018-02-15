@@ -78,13 +78,13 @@ int main(int argc, char **argv)
             ROS_INFO("  Image.header.seq %d", airsim_to_ros.GetImageHeaderSeq());
             ROS_INFO("  Image.header.stamp.sec %d", airsim_to_ros.GetImageHeaderStampSec());
             ROS_INFO("  Image.header.stamp.nsec %d", airsim_to_ros.GetImageHeaderStampNsec());
-            ROS_INFO("  Image.header.frame_id %s", airsim_to_ros.GetImageHeaderFrameid());
+            ROS_INFO("  Image.header.frame_id %s", airsim_to_ros.GetImageHeaderFrameid().c_str());
             ROS_INFO("  Image.height %d", airsim_to_ros.GetImageHeight());
             ROS_INFO("  Image.width %d", airsim_to_ros.GetImageWidth());
-            ROS_INFO("  Image.encoding %s", airsim_to_ros.GetImageEncoding());
+            ROS_INFO("  Image.encoding %s", airsim_to_ros.GetImageEncoding().c_str());
             ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
             ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
-            ROS_INFO("  size(Image.data) %d", airsim_to_ros.GetImageDataSize());
+            ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros.GetImageDataSize()));
             
             if (
                     airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
