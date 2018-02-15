@@ -85,7 +85,7 @@ add_executable(rrt_3d_node
     "src/3dspace/3dspace.cpp"
     "src/3dspace/grid_state_space.cpp"
     "src/3dspace/obstacle_grid.cpp"
-    "src/wxapplication.cpp"
+    "src/wxapplicationnode.cpp"
     "src/planner_wrapper.cpp"
     "src/rrt_node.cpp"
 )

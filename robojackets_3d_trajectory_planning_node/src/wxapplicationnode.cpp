@@ -1,4 +1,4 @@
-#include "wxapplication.h"
+#include "wxapplicationnode.h"
 #include <string>
 #include <ros/ros.h>
 
