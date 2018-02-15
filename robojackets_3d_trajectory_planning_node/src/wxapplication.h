@@ -249,6 +249,7 @@ public:
     void DoUpdate(wxIdleEvent &event);
 
     RRTFrame* GetFrame();
+    PlannerWrapper* GetPlanner();
 
 private:
     void ExtractStartAndGoalStateForContext();

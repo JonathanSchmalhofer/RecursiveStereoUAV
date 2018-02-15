@@ -47,6 +47,11 @@ RRTFrame* wxApplicationNode::GetFrame()
     return frame_;
 }
 
+PlannerWrapper* wxApplicationNode::GetPlanner()
+{
+    return planner_;
+}
+
 RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
 {
     
