@@ -1,6 +1,7 @@
 #ifndef ROBOJACKETS_3D_TRAJECTORY_PLANNING_TREETODRAW_H
 #define ROBOJACKETS_3D_TRAJECTORY_PLANNING_TREETODRAW_H
 
+#include <Eigen/Dense>
 #include <vector>
 
 #include <wx/wxprec.h>
