@@ -25,6 +25,8 @@ add_library(Flann STATIC IMPORTED)
 
 find_package(js_messages REQUIRED)
 
+find_package(dynamicedt3d_catkin REQUIRED)
+
 find_package(octomap REQUIRED)
 
 add_definitions(-DOCTOMAP_NODEBUGOUT)
@@ -60,7 +62,7 @@ find_package(GLUT REQUIRED)
 catkin_package(
     INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS}
     LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY}
-    CATKIN_DEPENDS roscpp js_messages octomap_ros
+    CATKIN_DEPENDS roscpp js_messages octomap_ros dynamicedt3d_catkin
     DEPENDS octomap
 )
 
@@ -77,6 +79,7 @@ include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${GLUT_INCLUDE_DIRS}
     ${OCTOMAP_INCLUDE_DIRS}
+    ${dynamicedt3d_catkin_INCLUDE_DIRS}
     "src"
     "src/3dspace"
 )
@@ -99,6 +102,7 @@ target_link_libraries(rrt_3d_node
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARY}
     ${OCTOMAP_LIBRARIES}
+    ${dynamicedt3d_catkin_LIBRARIES}
 )
 
 add_dependencies(rrt_3d_node
