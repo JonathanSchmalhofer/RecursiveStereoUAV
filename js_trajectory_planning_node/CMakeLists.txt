@@ -9,20 +9,17 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
-    octomap_catkin
-    #octomap_ros
-    #octomap_msgs
+    octomap_ros
+    octomap_msgs
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_messages REQUIRED)
 
-find_package(octomap_catkin REQUIRED)
+find_package(octomap REQUIRED)
 
-#find_package(octomap REQUIRED)
-
-#add_definitions(-DOCTOMAP_NODEBUGOUT)
+add_definitions(-DOCTOMAP_NODEBUGOUT)
 
 find_package(Eigen3)
 if(NOT EIGEN3_FOUND)
@@ -43,8 +40,8 @@ endif()
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS}
-    CATKIN_DEPENDS roscpp js_messages #octomap_ros
-    DEPENDS octomap_catkin
+    CATKIN_DEPENDS roscpp js_messages octomap_ros
+    DEPENDS octomap
 )
 
 ###########
@@ -54,10 +51,9 @@ catkin_package(
 include_directories(
     include
     ${js_messages_INCLUDE_DIRS}/includes
-    ${octomap_catkin_INCLUDE_DIRS}
+    ${js_messages_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
-    ${catkin_INCLUDE_DIRS}
-    #${OCTOMAP_INCLUDE_DIRS}
+    ${OCTOMAP_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
 )
 
@@ -88,13 +84,11 @@ target_link_libraries(trajectory_planning_rrt_2d_node
 )
 
 target_link_libraries(rtrrtstar_class_library
-    #${OCTOMAP_LIBRARIES}
-    ${octomap_catkin_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
 )
 
 target_link_libraries(rrt_class_library
-    #${OCTOMAP_LIBRARIES}
-    ${octomap_catkin_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
 )
 
 add_dependencies(trajectory_planning_node

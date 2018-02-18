@@ -9,9 +9,7 @@
 
 #include "node_struct.h"
 #include <octomap/octomap.h>
-//#include <octomap_ros/conversions.h>
-#include <string>
-#include <ros/ros.h>
+#include <octomap_ros/conversions.h>
 #include "tree/tree_extended.hh"
 
 namespace js_trajectory_planning_node
