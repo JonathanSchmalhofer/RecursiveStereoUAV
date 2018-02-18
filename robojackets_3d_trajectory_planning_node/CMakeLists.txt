@@ -61,7 +61,7 @@ find_package(GLUT REQUIRED)
 
 catkin_package(
     INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS}
-    LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY}
+    LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${dynamicedt3d_catkin_LIBRARIES}
     CATKIN_DEPENDS roscpp js_messages octomap_ros dynamicedt3d_catkin
     DEPENDS octomap
 )
@@ -103,6 +103,7 @@ target_link_libraries(rrt_3d_node
     ${GLUT_LIBRARY}
     ${OCTOMAP_LIBRARIES}
     ${dynamicedt3d_catkin_LIBRARIES}
+    #/home/johnny/master_ws/devel/lib/libdynamicedt3d.a
 )
 
 add_dependencies(rrt_3d_node

@@ -1,2 +1,2 @@
 # This overrides the dependency tracker with the dynamicEDT3D library file.
-#set( @PROJECT_NAME@_LIBRARIES @CATKIN_DEVEL_PREFIX@/lib/libdynamicedt3d${CMAKE_STATIC_LIBRARY_SUFFIX} )
+set( @PROJECT_NAME@_LIBRARIES @CATKIN_DEVEL_PREFIX@/lib/libdynamicedt3d${CMAKE_STATIC_LIBRARY_SUFFIX} )
