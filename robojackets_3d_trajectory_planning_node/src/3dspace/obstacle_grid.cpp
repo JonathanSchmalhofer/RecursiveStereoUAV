@@ -77,15 +77,14 @@ Vector3i ObstacleGrid::GetGridSquareForLocation(const Vector3d& loc) const
 double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
                                                   double max_distance) const
 {
-    /*
     double x,y,z;
     octree_obstacles_->getMetricMin(x,y,z);
     octomap::point3d min(x,y,z);
     octree_obstacles_->getMetricMax(x,y,z);
-    octomap::point3d max(x,y,z);max_distance
+    octomap::point3d max(x,y,z);
     
     bool unknown_as_occupied = false;
-    unknownAsOccupied = false;
+    unknown_as_occupied = false;
     float max_clamped_distance = 1.0;
     //- the first argument ist the max distance at which distance computations are clamped
     //- the second argument is the octomap
@@ -100,14 +99,14 @@ double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
     //This is how you can query the map
     octomap::point3d p(state.x(), state.y(), state.z());
 
-    octomap::point3d closestObst;
-    double distance;
+    octomap::point3d closest_obstacle;
+    float distance;
 
-    distmap.getDistanceAndClosestObstacle(p, distance, closestObst);
+    distmap.getDistanceAndClosestObstacle(p, distance, closest_obstacle);
 
     if(distance < distmap.getMaxDist() && distance < max_distance)
-        return distance;
-    else*/
+        return static_cast<double>(distance);
+    else
         return max_distance;
 }
 

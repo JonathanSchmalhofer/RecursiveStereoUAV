@@ -4,7 +4,7 @@
 #include <Eigen/Dense>
 #include <octomap/octomap.h>
 #include <octomap_ros/conversions.h>
-//#include <dynamicEDT3D/dynamicEDTOctomap.h>
+#include <dynamicEDT3D/dynamicEDTOctomap.h>
 
 namespace RRT
 {
