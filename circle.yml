@@ -37,8 +37,8 @@ jobs:
                     cd ~/wxWidgets && \
                     apt-get install -y wget && \
                     apt-get install -y tar && \
-                    wget https://github.com/wxWidgets/wxWidgets/archive/v3.1.1-rc.tar.gz && \
-                    tar xfvz wxWidgets-3.1.1-rc.tar.gz && \
+                    wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.1-rc/wxWidgets-3.1.1-rc.tar.bz2 && \
+                    tar xvjf wxWidgets-3.1.1-rc.tar.bz2 && \
                     cd wxWidgets-3.1.1-rc && \
                     ./configure --disable-shared --enable-unicode --with-opengl && \
                     make && \
