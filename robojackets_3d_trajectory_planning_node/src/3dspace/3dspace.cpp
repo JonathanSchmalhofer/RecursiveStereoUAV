@@ -1,7 +1,7 @@
 #include <math.h>
 #include <memory>
 #include <functional>
-#include "3dspace/3dspace.h"
+#include "robojackets_3d_trajectory_planning_node/3dspace/3dspace.h"
 
 using namespace Eigen;
 using namespace RRT;

@@ -1,5 +1,5 @@
 #include <math.h>
-#include "3dspace/grid_state_space.h"
+#include "robojackets_3d_trajectory_planning_node/3dspace/grid_state_space.h"
 #include "util.h"
 #include <stdexcept>
 

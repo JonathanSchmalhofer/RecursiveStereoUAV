@@ -1,4 +1,4 @@
-#include "wxapplicationnode.h"
+#include "robojackets_3d_trajectory_planning_node/wxapplicationnode.h"
 #include <string>
 #include <ros/ros.h>
 

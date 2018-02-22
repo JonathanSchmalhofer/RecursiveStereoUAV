@@ -1,4 +1,4 @@
-#include "obstacle_grid.h"
+#include "robojackets_3d_trajectory_planning_node/3dspace/obstacle_grid.h"
 #include <stdlib.h>
 #include <iostream>
 

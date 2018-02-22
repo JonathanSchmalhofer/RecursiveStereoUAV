@@ -1,4 +1,4 @@
-#include "rrtframe.h"
+#include "robojackets_3d_trajectory_planning_node/rrtframe.h"
 
 // ----------------------------------------------------------------------------
 // RRTFrame: main application window

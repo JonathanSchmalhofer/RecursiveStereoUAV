@@ -1,6 +1,6 @@
-#include "rrtglcontext.h"
-#include "constants.h"
-#include "helpers.h"
+#include "robojackets_3d_trajectory_planning_node/rrtglcontext.h"
+#include "robojackets_3d_trajectory_planning_node/constants.h"
+#include "robojackets_3d_trajectory_planning_node/helpers.h"
 
 // ----------------------------------------------------------------------------
 // RRTGLContext

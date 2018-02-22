@@ -72,6 +72,7 @@ catkin_package(
 
 include_directories(
     include
+    include/robojackets_3d_trajectory_planning_node
     ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}

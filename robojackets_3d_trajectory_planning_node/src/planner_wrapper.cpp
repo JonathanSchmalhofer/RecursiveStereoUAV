@@ -1,5 +1,5 @@
-#include "planner_wrapper.h"
-#include "postprocessing.h"
+#include "robojackets_3d_trajectory_planning_node/planner_wrapper.h"
+#include "robojackets_3d_trajectory_planning_node/postprocessing.h"
 
 PlannerWrapper::PlannerWrapper()
 {
