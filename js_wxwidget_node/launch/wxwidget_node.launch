@@ -1,3 +1,0 @@
-<launch>
-    <node name="wxwidget_node" pkg="js_wxwidget_node" type="wxwidget_node" output="screen"/>
-</launch>
