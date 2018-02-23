@@ -60,8 +60,8 @@ find_package(GLUT REQUIRED)
 ###################################
 
 catkin_package(
-    INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS}
-    LIBRARIES trajectory_planning_node ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${dynamicedt3d_catkin_LIBRARIES}
+    INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS}
+    LIBRARIES ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${dynamicedt3d_catkin_LIBRARIES} ${OCTOMAP_LIBRARIES}
     CATKIN_DEPENDS roscpp js_messages octomap_ros dynamicedt3d_catkin
     DEPENDS octomap
 )
@@ -85,16 +85,28 @@ include_directories(
     "src/3dspace"
 )
 
-add_executable(rrt_3d_node
+add_library(birrt_lib
     "src/3dspace/3dspace.cpp"
     "src/3dspace/grid_state_space.cpp"
     "src/3dspace/obstacle_grid.cpp"
+    "src/planner_wrapper.cpp"
+)
+
+add_library(wxapplication_wrapper_lib
     "src/wxapplicationnode.cpp"
     "src/rrtglcontext.cpp"
     "src/rrtframe.cpp"
     "src/helpers.cpp"
-    "src/planner_wrapper.cpp"
+)
+
+add_executable(rrt_3d_node
     "src/rrt_node.cpp"
+)
+
+target_link_libraries(birrt_lib
+    ${catkin_LIBRARIES}
+    ${OCTOMAP_LIBRARIES}
+    ${dynamicedt3d_catkin_LIBRARIES}
 )
 
 target_link_libraries(rrt_3d_node
@@ -102,9 +114,8 @@ target_link_libraries(rrt_3d_node
     ${wxWidgets_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARY}
-    ${OCTOMAP_LIBRARIES}
-    ${dynamicedt3d_catkin_LIBRARIES}
-    #/home/johnny/master_ws/devel/lib/libdynamicedt3d.a
+    birrt_lib
+    wxapplication_wrapper_lib
 )
 
 add_dependencies(rrt_3d_node
@@ -115,12 +126,41 @@ add_dependencies(rrt_3d_node
 ## Install ##
 #############
 
+install(TARGETS birrt_lib
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
+install(TARGETS wxapplication_wrapper_lib
+    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
+)
+
 install(TARGETS rrt_3d_node
      RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY include/${PROJECT_NAME}/
+    DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
+    FILES_MATCHING PATTERN "*.h"
+    PATTERN ".git" EXCLUDE
 )
 
 #############
 ## Testing ##
 #############
 
+if(CATKIN_ENABLE_TESTING)
 
+    catkin_add_gtest(rrt_3d_node_tests
+        test/tree_test.cpp
+    )
+    
+    target_link_libraries(rrt_3d_node_tests
+        ${catkin_LIBRARIES}
+        ${wxWidgets_LIBRARIES}
+        ${OPENGL_LIBRARIES}
+        ${GLUT_LIBRARY}
+        "/opt/ros/kinetic/lib/liboctomap.so"
+        ${dynamicedt3d_catkin_LIBRARIES}
+        birrt_lib
+    )
+endif()

@@ -14,7 +14,7 @@ namespace RRT
 TEST(Tree, Example_2dplane)
 {
     shared_ptr<Tree<Vector3d>> tree =
-        TreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
+        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
                        Vector3d(40, 40, 40),  // goal point
                        5);                    // step size
 
@@ -30,7 +30,7 @@ TEST(Tree, Example_2dplane)
 
 TEST(Tree, FailOnImpossibleRequest)
 {
-    shared_ptr<Tree<Vector3d>> tree = TreeFor3dSpace(
+    shared_ptr<Tree<Vector3d>> tree = GetTreeFor3dSpace(
         make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
         Vector3d(60, 60, 60),  // goal point outside the bounds of the state space
         5);                    // step size
@@ -50,7 +50,7 @@ TEST(Tree, getPath)
 {
     Vector3d start = {10, 10, 10}, goal = {40, 40, 40};
     shared_ptr<Tree<Vector3d>> tree =
-        TreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
+        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
                        goal,  // goal point
                        5);    // step size
 
@@ -80,7 +80,7 @@ TEST(Tree, ASC)
 {
     // test adaptive stepsize control
     shared_ptr<Tree<Vector3d>> tree =
-        TreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
+        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
                        Vector3d(40, 40),  // goal point
                        5);                // step size
 
@@ -112,3 +112,10 @@ TEST(Tree, ASC)
 }
 
 }  // namespace RRT
+
+// Run all the tests that were declared with TEST()
+int main(int argc, char **argv)
+{
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
