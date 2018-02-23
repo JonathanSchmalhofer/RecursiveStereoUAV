@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include <memory>
-#include "3dspace/3dspace.h"
-#include "3dspace/grid_state_space.h"
-#include "tree.h"
+#include "robojackets_3d_trajectory_planning_node/3dspace/3dspace.h"
+#include "robojackets_3d_trajectory_planning_node/3dspace/grid_state_space.h"
+#include "robojackets_3d_trajectory_planning_node/tree.h"
 #include <vector>
 
 using namespace Eigen;
@@ -11,7 +11,7 @@ using namespace std;
 namespace RRT
 {
 
-TEST(Tree, Example_2dplane)
+TEST(Tree, Example3dSpace)
 {
     shared_ptr<Tree<Vector3d>> tree =
         GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
@@ -46,7 +46,7 @@ TEST(Tree, FailOnImpossibleRequest)
                             // reachable
 }
 
-TEST(Tree, getPath)
+TEST(Tree, GetPath)
 {
     Vector3d start = {10, 10, 10}, goal = {40, 40, 40};
     shared_ptr<Tree<Vector3d>> tree =
@@ -76,7 +76,7 @@ TEST(Tree, getPath)
     EXPECT_EQ(start, path.front());
 }
 
-TEST(Tree, ASC)
+TEST(Tree, AdaptiveScaling)
 {
     // test adaptive stepsize control
     shared_ptr<Tree<Vector3d>> tree =
