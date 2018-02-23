@@ -10,8 +10,6 @@ find_package(catkin REQUIRED COMPONENTS
     roslaunch
 )
 
-roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
-
 ###################################
 ## catkin specific configuration ##
 ###################################
