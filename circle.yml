@@ -2,24 +2,9 @@ version: 2
 jobs:
     build:
         docker:
-            - image: jonathanschmalhofer/recursivestereo:latest
+            - image: jonathanschmalhofer/recursivestereo:7e194f5fdac25be175f193962b0b3c985beac5c6
         steps:
             - setup_remote_docker
-            - run:
-                name: Install missing tools
-                command: |
-                    apt-get update && \
-                    apt-get install -y python-catkin-tools && \
-                    apt-get install -y ros-kinetic-desktop-full && \
-                    rosdep update && \
-                    echo "source /opt/ros/kinetic/setup.bash" >> ~/.bashrc && \
-                    source ~/.bashrc && \
-                    source /opt/ros/kinetic/setup.bash && \
-                    apt-get install -y python-rosinstall python-rosinstall-generator python-wstool build-essential && \
-                    apt-get install -y ros-kinetic-octomap* && \
-                    apt-get install -y python-rospkg && \
-                    apt-get update && \
-                    apt-get install -y qt5-default libeigen3-dev g++ ninja-build cmake clang-format-3.6 ccache libflann-dev qtdeclarative5-dev qtdeclarative5-qtquick2-plugin qml-module-qtquick-{controls,dialogs} libboost-all-dev
             - run:
                 name: Prepare workspace for checkout
                 command: |
@@ -30,19 +15,6 @@ jobs:
                 command: |
                     cd ~/master_ws/src && \
                     git clone https://github.com/JonathanSchmalhofer/RecursiveStereoUAV.git
-            - run:
-                name: Download and build wxWidgets 3.1.1 release candidate
-                command: |
-                    mkdir -p ~/wxWidgets && \
-                    cd ~/wxWidgets && \
-                    apt-get install -y wget && \
-                    apt-get install -y tar && \
-                    wget https://github.com/wxWidgets/wxWidgets/releases/download/v3.1.1-rc/wxWidgets-3.1.1-rc.tar.bz2 && \
-                    tar xvjf wxWidgets-3.1.1-rc.tar.bz2 && \
-                    cd wxWidgets-3.1.1-rc && \
-                    ./configure --disable-shared --enable-unicode --with-opengl && \
-                    make && \
-                    make install
             - run:
                 name: Build using catkin and run tests
                 command: |
