@@ -2,7 +2,7 @@ version: 2
 jobs:
     build:
         docker:
-            - image: jonathanschmalhofer/recursivestereo
+            - image: jonathanschmalhofer/recursivestereo:cc1384122343bf1c650225074711a79589780834
         steps:
             - setup_remote_docker
             - run:
