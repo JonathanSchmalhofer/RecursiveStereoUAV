@@ -44,7 +44,7 @@ jobs:
                     make && \
                     make install
             - run:
-                name: Build using catkin
+                name: Build using catkin and run tests
                 command: |
                     source /opt/ros/kinetic/setup.bash && \
                     rosdep update && \
@@ -52,4 +52,5 @@ jobs:
                     rosdep install roscpp && \
                     cd ~/master_ws && \
                     catkin config --blacklist robojackets_trajectory_planning_node robojackets_3d_trajectory_planning_node js_wxwidget_node && \
-                    catkin build -c
+                    catkin build -c && \
+                    catkin run_tests
