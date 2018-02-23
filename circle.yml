@@ -2,7 +2,7 @@ version: 2
 jobs:
     build:
         docker:
-            - image: ros:kinetic-perception-xenial
+            - image: jonathanschmalhofer/recursivestereo:latest
         steps:
             - setup_remote_docker
             - run:
