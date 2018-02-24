@@ -10,6 +10,123 @@ using namespace std;
 
 namespace RRT
 {
+
+TEST(Tree, Instantiation)
+{
+    shared_ptr<Tree<Vector3d>> tree =
+        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
+                       Vector3d(40, 40, 40),  // goal point
+                       5);                    // step size
+
+    bool is_nullptr = (tree == nullptr);
+    ASSERT_FALSE(is_nullptr);
+}
+
+TEST(Tree, GetterAndSetter)
+{
+    shared_ptr<Tree<Vector3d>> tree =
+        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
+                       Vector3d(40, 40, 40),  // goal point
+                       5);                    // step size
+
+    // Max Iterations
+    int max_iterations = 42;
+    tree->SetMaxIterations(max_iterations);
+    EXPECT_EQ(tree->GetMaxIterations(), max_iterations);
+    max_iterations = 12;
+    tree->SetMaxIterations(max_iterations);
+    EXPECT_EQ(tree->GetMaxIterations(), max_iterations);
+
+    // Adaptive Scaling
+    bool adaptive_scaling = false;
+    tree->SetAdaptiveScalingEnable(adaptive_scaling);
+    EXPECT_EQ(tree->IsAdaptiveScalingEnable(), adaptive_scaling);
+    adaptive_scaling = true;
+    tree->SetAdaptiveScalingEnable(adaptive_scaling);
+    EXPECT_EQ(tree->IsAdaptiveScalingEnable(), adaptive_scaling);
+
+    // Goal Bias
+    double goal_bias = 0.0f;
+    tree->SetGoalBias(goal_bias);
+    EXPECT_EQ(tree->GetGoalBias(), goal_bias);
+    goal_bias = 0.42f;
+    tree->SetGoalBias(goal_bias);
+    EXPECT_EQ(tree->GetGoalBias(), goal_bias);
+    goal_bias = 1.0f;
+    tree->SetGoalBias(goal_bias);
+    EXPECT_EQ(tree->GetGoalBias(), goal_bias);
+
+    // Waypoint Bias
+    double waypoint_bias = 0.0f;
+    tree->SetWaypointBias(waypoint_bias);
+    EXPECT_EQ(tree->GetWaypointBias(), waypoint_bias);
+    waypoint_bias = 0.42f;
+    tree->SetWaypointBias(waypoint_bias);
+    EXPECT_EQ(tree->GetWaypointBias(), waypoint_bias);
+    waypoint_bias = 1.0f;
+    tree->SetWaypointBias(waypoint_bias);
+    EXPECT_EQ(tree->GetWaypointBias(), waypoint_bias);
+
+    // Waypoints
+    tree->ClearWaypoints();
+    EXPECT_EQ(tree->waypoints().size(), 0);
+
+    // Enter random waypoints and check whether the size changes as expected
+    std::vector<Vector3d> new_waypoints;
+    for (int i = 0; i < 20; i++)
+    {
+        new_waypoints.push_back(Vector3d(drand48(),drand48(),drand48()));
+
+        tree->SetWaypoints(new_waypoints);
+        EXPECT_EQ(tree->waypoints().size(), new_waypoints.size());
+    }
+
+    tree->ClearWaypoints();
+    EXPECT_EQ(tree->waypoints().size(), 0);
+
+    // Step Size
+    double step_size = 0.0f;
+    tree->SetStepSize(step_size);
+    EXPECT_EQ(tree->GetStepSize(), step_size);
+    step_size = 0.42f;
+    tree->SetStepSize(step_size);
+    EXPECT_EQ(tree->GetStepSize(), step_size);
+    step_size = 1.0f;
+    tree->SetStepSize(step_size);
+    EXPECT_EQ(tree->GetStepSize(), step_size);
+    step_size = -42.0f;
+    tree->SetStepSize(step_size);
+    EXPECT_EQ(tree->GetStepSize(), step_size);
+
+    // Max Step Size
+    double max_step_size = 0.0f;
+    tree->SetMaxStepSize(max_step_size);
+    EXPECT_EQ(tree->GetMaxStepSize(), max_step_size);
+    max_step_size = 0.42f;
+    tree->SetMaxStepSize(max_step_size);
+    EXPECT_EQ(tree->GetMaxStepSize(), max_step_size);
+    max_step_size = 1.0f;
+    tree->SetMaxStepSize(max_step_size);
+    EXPECT_EQ(tree->GetMaxStepSize(), max_step_size);
+    max_step_size = -42.0f;
+    tree->SetMaxStepSize(max_step_size);
+    EXPECT_EQ(tree->GetMaxStepSize(), max_step_size);
+
+    // Max Distance to Goal
+    double max_distance_to_goal = 0.0f;
+    tree->SetMaxDistanceToGoal(max_distance_to_goal);
+    EXPECT_EQ(tree->GetMaxDistanceToGoal(), max_distance_to_goal);
+    max_distance_to_goal = 0.42f;
+    tree->SetMaxDistanceToGoal(max_distance_to_goal);
+    EXPECT_EQ(tree->GetMaxDistanceToGoal(), max_distance_to_goal);
+    max_distance_to_goal = 1.0f;
+    tree->SetMaxDistanceToGoal(max_distance_to_goal);
+    EXPECT_EQ(tree->GetMaxDistanceToGoal(), max_distance_to_goal);
+    max_distance_to_goal = -42.0f;
+    tree->SetMaxDistanceToGoal(max_distance_to_goal);
+    EXPECT_EQ(tree->GetMaxDistanceToGoal(), max_distance_to_goal);
+}
+
 TEST(Tree, Example3dSpace)
 {
     shared_ptr<Tree<Vector3d>> tree =
