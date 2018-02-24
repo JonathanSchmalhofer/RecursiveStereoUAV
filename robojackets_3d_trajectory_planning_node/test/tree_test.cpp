@@ -10,7 +10,6 @@ using namespace std;
 
 namespace RRT
 {
-
 TEST(Tree, Example3dSpace)
 {
     shared_ptr<Tree<Vector3d>> tree =
@@ -79,23 +78,25 @@ TEST(Tree, GetPath)
 TEST(Tree, AdaptiveScaling)
 {
     // test adaptive stepsize control
-    shared_ptr<Tree<Vector3d>> tree =
-        GetTreeFor3dSpace(make_shared<GridStateSpace>(50, 50, 50, 50, 50, 50),
-                       Vector3d(40, 40),  // goal point
-                       5);                // step size
+    shared_ptr<RRT::Tree<Eigen::Vector3d>> tree =
+        GetTreeFor3dSpace(make_shared<RRT::GridStateSpace>(800, 800, 800, 40, 40,40),
+                       Eigen::Vector3d(790, 790, 790), // goal point
+                       10);                     // step size
 
     // give it plenty of iterations so it's not likely to fail
     const int max_iterations = 10000;
     tree->SetMaxIterations(max_iterations);
     tree->SetMaxDistanceToGoal(5);
-    tree->SetMaxStepSize(10);
+    tree->SetMaxStepSize(50);
+    tree->SetStepSize(10);
     tree->SetAdaptiveScalingEnable(true);
+    tree->SetGoalBias(0.2);
 
-    tree->SetStartState(Vector3d(10, 10, 10));
+    tree->SetStartState(Eigen::Vector3d(10, 10, 10));
     bool success = tree->Run();  // Run with the given starting point
     ASSERT_TRUE(success);
 
-    vector<Vector3d> path;
+    vector<Eigen::Vector3d> path;
     tree->GetPath(&path, tree->GetLastNode(), true);
 
     // Check to see if the nodes in the tree have uniform stepsize or varied.
@@ -108,7 +109,7 @@ TEST(Tree, AdaptiveScaling)
         double n = path_one.norm() / path_two.norm();
         if (n < 0.99 || n > 1.01) varied = true;
     }
-    ASSERT_TRUE(varied);
+    EXPECT_EQ(varied, true);
 }
 
 }  // namespace RRT
