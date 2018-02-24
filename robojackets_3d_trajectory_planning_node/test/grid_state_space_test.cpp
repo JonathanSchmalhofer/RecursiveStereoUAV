@@ -154,6 +154,81 @@ TEST(GridStateSpace, CheckValidTransitionsWithObstacles)
     }
 }
 
+TEST(GridStateSpace, CheckIntermediateStates)
+{
+    double width = 500.0f, height= 500.0f, depth = 500.0f;
+    GridStateSpace grid_state_space(width, height, depth, width, height, depth);
+
+    // Take random points from withing the (almost) entire grid state space
+    // and check whether the intermediate state is calculated correctly
+    for (int i = 0; i < 100; i++)
+    {
+        // Random points in Grid Space scaled for [x,y,z] within [ [0,0,0],[0.99,0.99,0.99] ]
+        double x_a = drand48() * 0.99;
+        double y_a = drand48() * 0.99;
+        double z_a = drand48() * 0.99;
+        double x_b = drand48() * 0.99;
+        double y_b = drand48() * 0.99;
+        double z_b = drand48() * 0.99;
+        Vector3d point_a( x_a * width, y_a * height, z_a * depth );
+        Vector3d point_b( x_b * width, y_b * height, z_b * depth );
+
+        ////////////////////////////////////////////////////////////////////////
+        // Calculate intermediate states into both directions for...
+
+        // min_step_size = max_step_size = 0.5
+        {
+            Vector3d delta_a_b = point_a - point_b;
+            double distance_a_b = delta_a_b.norm();
+
+            // A --> B
+            Vector3d between_a_to_b = grid_state_space.GetIntermediateState(point_a,
+                                                                            point_b,
+                                                                           0.5 * distance_a_b,
+                                                                           0.5 * distance_a_b);
+            Vector3d delta_a_to_new = between_a_to_b - point_a;
+            double distance_a_to_new = delta_a_to_new.norm();
+            bool step_approx_half_distance_from_a_to_new = (distance_a_to_new <= 0.51 * distance_a_b) && (distance_a_to_new >= 0.49 * distance_a_b);
+            EXPECT_EQ(step_approx_half_distance_from_a_to_new, true);
+        }
+
+        // ... 500 variations with [min_step_size;max_step_size] = [[0.1;0.3],[0.4;0.9] * distance(a,b)
+        // HINT: GetIntermediateState(...) with 4 arguments for GridStateSpace always has adaptive
+        //       scaling enabled.
+        for (int j = 0; j < 500; j++)
+        {
+            double scale_factor_min = drand48() * 0.2 + 0.1;
+            double scale_factor_max = drand48() * 0.5 + 0.4;
+            Vector3d delta_a_b = point_a - point_b;
+            double distance_a_b = delta_a_b.norm();
+
+            // A --> B
+            Vector3d between_a_to_b = grid_state_space.GetIntermediateState(point_a,
+                                                                            point_b,
+                                                                           scale_factor_min * distance_a_b,
+                                                                           scale_factor_max * distance_a_b);
+            Vector3d delta_a_to_new = between_a_to_b - point_a;
+            double distance_a_to_new = delta_a_to_new.norm();
+            bool step_farther_than_min_step_size = distance_a_to_new >= 0.49 * scale_factor_min * distance_a_b;
+            bool step_less_than_max_step_size    = distance_a_to_new <= 1.01 * scale_factor_max * distance_a_b;
+            EXPECT_EQ(step_farther_than_min_step_size, true);
+            EXPECT_EQ(step_less_than_max_step_size, true);
+
+            // B --> A
+            Vector3d between_b_to_a = grid_state_space.GetIntermediateState(point_b,
+                                                                            point_a,
+                                                                           scale_factor_min * distance_a_b,
+                                                                           scale_factor_max * distance_a_b);
+            Vector3d delta_b_to_new = between_b_to_a - point_b;
+            double distance_b_to_new = delta_b_to_new.norm();
+            step_farther_than_min_step_size = distance_b_to_new >= 0.49 * scale_factor_min * distance_a_b;
+            step_less_than_max_step_size    = distance_b_to_new <= 1.01 * scale_factor_max * distance_a_b;
+            EXPECT_EQ(step_farther_than_min_step_size, true);
+            EXPECT_EQ(step_less_than_max_step_size, true);
+        }
+    }
+}
+
 }  // namespace RRT
 
 // Run all the tests that were declared with TEST()
