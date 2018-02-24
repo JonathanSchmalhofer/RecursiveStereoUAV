@@ -84,8 +84,7 @@ double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
     octomap::point3d max(x,y,z);
     
     bool unknown_as_occupied = false;
-    unknown_as_occupied = false;
-    float max_clamped_distance = 1.0;
+    float max_clamped_distance = max_distance;
     //- the first argument ist the max distance at which distance computations are clamped
     //- the second argument is the octomap
     //- arguments 3 and 4 can be used to restrict the distance map to a subarea
@@ -104,7 +103,7 @@ double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
 
     distmap.getDistanceAndClosestObstacle(p, distance, closest_obstacle);
 
-    if(distance < distmap.getMaxDist() && distance < max_distance)
+    if(distance < distmap.getMaxDist() && distance < max_distance && distance != distmap.distanceValue_Error)
         return static_cast<double>(distance);
     else
         return max_distance;

@@ -39,11 +39,17 @@ Vector3d GridStateSpace::GetIntermediateState(const Vector3d& source,
 
     Vector3d delta = target - source;
     delta = delta / delta.norm();  //  unit vector
-    double dist = obstacle_grid_.GetDistanceToNearestObstacle(source, max_step_size * 2);
+    double max_search_radius = 2 * max_step_size;
+    double dist = obstacle_grid_.GetDistanceToNearestObstacle(source, max_search_radius);
 
-    double step_size =
-        (dist / max_step_size) *
-        min_step_size;  // scale based on how far we are from obstacles
+    // no obstacle in search radius - make distance random with k * dist
+    // with k within [0.5;1.0]
+    if (dist == max_search_radius)
+    {
+        double scale_factor = (drand48() / 2) + 0.5;
+        dist *= scale_factor;
+    }
+    double step_size = (dist / max_step_size) * min_step_size;  // scale based on how far we are from obstacles
     if (step_size > max_step_size) step_size = max_step_size;
     if (step_size < min_step_size) step_size = min_step_size;
     if (debug)

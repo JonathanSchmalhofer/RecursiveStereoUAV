@@ -293,7 +293,7 @@ public:
         else
         {
             intermediate_state = state_space_->GetIntermediateState(
-                source->GetState(), target, GetStepSize());
+                source->GetState(), target, GetStepSize(), GetStepSize());
         }
 
         //  Make sure there's actually a direct path from @source to

@@ -88,7 +88,6 @@ TEST(Tree, AdaptiveScaling)
     tree->SetMaxIterations(max_iterations);
     tree->SetMaxDistanceToGoal(5);
     tree->SetMaxStepSize(50);
-    tree->SetStepSize(10);
     tree->SetAdaptiveScalingEnable(true);
     tree->SetGoalBias(0.2);
 
@@ -98,6 +97,9 @@ TEST(Tree, AdaptiveScaling)
 
     vector<Eigen::Vector3d> path;
     tree->GetPath(&path, tree->GetLastNode(), true);
+
+    bool adaptive_scaling_enabled = tree->IsAdaptiveScalingEnable();
+    ASSERT_TRUE(adaptive_scaling_enabled);
 
     // Check to see if the nodes in the tree have uniform stepsize or varied.
     // Stepsizes should vary
