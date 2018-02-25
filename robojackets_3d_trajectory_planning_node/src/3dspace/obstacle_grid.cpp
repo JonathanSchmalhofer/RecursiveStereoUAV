@@ -33,6 +33,11 @@ ObstacleGrid::~ObstacleGrid()
     {
         delete octree_obstacles_;
     }
+
+    if(distance_map_ != NULL)
+    {
+        delete distance_map_;
+    }
 }
 
 void ObstacleGrid::Initialize()
@@ -42,6 +47,40 @@ void ObstacleGrid::Initialize()
         delete octree_obstacles_;
     }
     octree_obstacles_ = new octomap::OcTree(kresolution_octomap);
+
+    if(distance_map_ != NULL)
+    {
+        delete distance_map_;
+    }
+    InitDistanceMap();
+}
+
+bool ObstacleGrid::InitDistanceMap()
+{
+    if (octree_obstacles_ != nullptr &&
+        distance_map_     == nullptr)
+    {
+        double x,y,z;
+        octree_obstacles_->getMetricMin(x,y,z);
+        octomap::point3d min(x,y,z);
+        octree_obstacles_->getMetricMax(x,y,z);
+        octomap::point3d max(x,y,z);
+
+        bool unknown_as_occupied = false;
+        float max_clamped_distance = sqrtf(powf(width_, 2) + powf(height_, 2) + powf(depth_, 2));
+        //- the first argument ist the max distance at which distance computations are clamped
+        //- the second argument is the octomap
+        //- arguments 3 and 4 can be used to restrict the distance map to a subarea
+        //- argument 5 defines whether unknown space is treated as occupied or free
+        //The constructor copies data but does not yet compute the distance map
+        distance_map_ = new DynamicEDTOctomap (max_clamped_distance, octree_obstacles_, min, max, unknown_as_occupied);
+
+        //This computes the distance map
+        distance_map_->update();
+
+        return true;
+    }
+    return false;
 }
 
 octomap::OcTree* ObstacleGrid::GetOctTreeObstacles()
@@ -59,36 +98,28 @@ Vector3i ObstacleGrid::GetGridSquareForLocation(const Vector3d& loc) const
 double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
                                                   double max_distance) const
 {
-    double x,y,z;
-    octree_obstacles_->getMetricMin(x,y,z);
-    octomap::point3d min(x,y,z);
-    octree_obstacles_->getMetricMax(x,y,z);
-    octomap::point3d max(x,y,z);
-    
-    bool unknown_as_occupied = false;
-    float max_clamped_distance = max_distance;
-    //- the first argument ist the max distance at which distance computations are clamped
-    //- the second argument is the octomap
-    //- arguments 3 and 4 can be used to restrict the distance map to a subarea
-    //- argument 5 defines whether unknown space is treated as occupied or free
-    //The constructor copies data but does not yet compute the distance map
-    DynamicEDTOctomap distmap(max_clamped_distance, octree_obstacles_, min, max, unknown_as_occupied);
+    if (distance_map_ != NULL)
+    {
+        //This computes the distance map
+        distance_map_->update(); 
 
-    //This computes the distance map
-    distmap.update(); 
+        //This is how you can query the map
+        octomap::point3d p(state.x(), state.y(), state.z());
 
-    //This is how you can query the map
-    octomap::point3d p(state.x(), state.y(), state.z());
+        octomap::point3d closest_obstacle;
+        float distance;
 
-    octomap::point3d closest_obstacle;
-    float distance;
+        distance_map_->getDistanceAndClosestObstacle(p, distance, closest_obstacle);
 
-    distmap.getDistanceAndClosestObstacle(p, distance, closest_obstacle);
-
-    if(distance < distmap.getMaxDist() && distance < max_distance && distance != distmap.distanceValue_Error)
-        return static_cast<double>(distance);
+        if(distance < distance_map_->getMaxDist() && distance < max_distance && distance != distance_map_->distanceValue_Error)
+            return static_cast<double>(distance);
+        else
+            return max_distance;
+    }
     else
+    {
         return max_distance;
+    }
 }
 
 void ObstacleGrid::Clear()
@@ -130,7 +161,12 @@ bool ObstacleGrid::InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eig
     {
         octomap::point3d start(from.x(), from.y(), from.z());
         octomap::point3d end(to.x(), to.y(), to.z());
-        return octree_obstacles_->insertRay(start, end);
+        bool return_value = octree_obstacles_->insertRay(start, end);
+        if (return_value)
+        {
+            distance_map_->update();
+        }
+        return return_value;
     }
     else
     {
@@ -144,6 +180,10 @@ bool ObstacleGrid::InsertOccupiedMeasurement(const Eigen::Vector3d& position)
     {
         octomap::point3d endpoint(position.x(), position.y(), position.z());
         octree_obstacles_->updateNode(endpoint, true); // integrate 'occupied' measurement
+        if(distance_map_ != NULL)
+        {
+            distance_map_->update();
+        }
         return true;
     }
     else

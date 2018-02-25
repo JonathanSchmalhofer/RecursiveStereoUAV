@@ -29,6 +29,9 @@ public:
     /// @brief Initialize internally
     void Initialize();
 
+    /// @brief Initialize Distancemap
+    bool InitDistanceMap();
+
     /// @brief Returns OcTree-obstacles
     octomap::OcTree* GetOctTreeObstacles();
 
@@ -63,6 +66,9 @@ private:
 
     /// @brief Obstacles represented in an OcTree
     octomap::OcTree* octree_obstacles_;
+
+    /// @brief Distance map based on OcTree octree_obstacles_
+    DynamicEDTOctomap* distance_map_;
 
     /// @brief Resolution of octomap
     const double kresolution_octomap = 1;
