@@ -42,24 +42,6 @@ void ObstacleGrid::Initialize()
         delete octree_obstacles_;
     }
     octree_obstacles_ = new octomap::OcTree(kresolution_octomap);
-/*
-    // add test wall
-    ROS_INFO("Make Octomap great again");
-    double x_wall, y_wall, z_wall;
-    y_wall = 750;
-    for(x_wall = 0; x_wall <= 800; x_wall+=0.5*kresolution_octomap)
-    {
-        for(z_wall = 300; z_wall <= 800; z_wall+=0.5* kresolution_octomap)
-        {
-            octomap::point3d start(x_wall, y_wall-5, z_wall);
-            octomap::point3d end(x_wall, y_wall, z_wall);
-
-            //ROS_INFO("%f, %f, %f", x_wall, y_wall, z_wall);
-
-            octree_obstacles_->insertRay(start, end);
-        }
-    }
-    ROS_INFO("Trump was here");*/
 }
 
 octomap::OcTree* ObstacleGrid::GetOctTreeObstacles()
