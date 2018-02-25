@@ -60,14 +60,27 @@ bool ObstacleGrid::InitDistanceMap()
     if (octree_obstacles_ != nullptr &&
         distance_map_     == nullptr)
     {
-        double x,y,z;
-        octree_obstacles_->getMetricMin(x,y,z);
-        octomap::point3d min(x,y,z);
-        octree_obstacles_->getMetricMax(x,y,z);
-        octomap::point3d max(x,y,z);
+        double x_min,y_min,z_min,x_max,y_max,z_max;
+        octree_obstacles_->getMetricMin(x_min,y_min,z_min);
+        octree_obstacles_->getMetricMax(x_max,y_max,z_max);
+
+        double distance_max_min = sqrtf(powf(x_max-x_min, 2) + powf(y_max-y_min, 2) + powf(z_max-z_min, 2));
+
+        //ROS_INFO("x_min = %d, y_min = %d, z_min = %d", x_min, y_min, z_min);
+        //ROS_INFO("x_max = %d, y_max = %d, z_max = %d", x_max, y_max, z_max);
+        if (distance_max_min == 0)
+        {
+            x_min = 0; y_min = 0; y_max = 0;
+            x_max = 0.1*width_;
+            y_max = 0.1*height_;
+            z_max = 0.1*depth_;
+            //ROS_INFO("Max Bounds");
+        }
+        octomap::point3d min(x_min,y_min,z_min);
+        octomap::point3d max(x_max,y_max,z_max);
 
         bool unknown_as_occupied = false;
-        float max_clamped_distance = sqrtf(powf(width_, 2) + powf(height_, 2) + powf(depth_, 2));
+        float max_clamped_distance = 20; // sqrtf(powf(width_, 2) + powf(height_, 2) + powf(depth_, 2));
         //- the first argument ist the max distance at which distance computations are clamped
         //- the second argument is the octomap
         //- arguments 3 and 4 can be used to restrict the distance map to a subarea
@@ -111,13 +124,24 @@ double ObstacleGrid::GetDistanceToNearestObstacle(const Vector3d& state,
 
         distance_map_->getDistanceAndClosestObstacle(p, distance, closest_obstacle);
 
+        /*if (distance != distance_map_->distanceValue_Error)
+        {
+            ROS_INFO("No Distance Value could be retreived");
+        }*/
+
         if(distance < distance_map_->getMaxDist() && distance < max_distance && distance != distance_map_->distanceValue_Error)
+        {
+            //ROS_INFO("Found a Obstacle close");
             return static_cast<double>(distance);
+        }
         else
+        {
             return max_distance;
+        }
     }
     else
     {
+        //ROS_INFO("No distance map available");
         return max_distance;
     }
 }
@@ -164,7 +188,14 @@ bool ObstacleGrid::InsertRayOccupiedAtEnd(const Eigen::Vector3d& from, const Eig
         bool return_value = octree_obstacles_->insertRay(start, end);
         if (return_value)
         {
-            distance_map_->update();
+            if(distance_map_ != NULL)
+            {
+                distance_map_->update();
+            }
+            else
+            {
+                //ROS_INFO("No distance map available");
+            }
         }
         return return_value;
     }
@@ -184,10 +215,15 @@ bool ObstacleGrid::InsertOccupiedMeasurement(const Eigen::Vector3d& position)
         {
             distance_map_->update();
         }
+        else
+        {
+            //ROS_INFO("No distance map available");
+        }
         return true;
     }
     else
     {
+        //ROS_INFO("No octree available");
         return false;
     }
 }
