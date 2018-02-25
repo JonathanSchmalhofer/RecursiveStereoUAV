@@ -22,6 +22,21 @@ PlannerWrapper::PlannerWrapper()
 
     start_velocity_ = Eigen::Vector3d(3, 0, 0);
     goal_velocity_ = Eigen::Vector3d(0, 3, 0);
+
+
+    // add test wall
+    ROS_INFO("Make Octomap great again");
+    double x_wall, y_wall, z_wall;
+    y_wall = 750;
+    for(x_wall = 500; x_wall <= size.x(); x_wall += 1)
+    {
+        for(z_wall = 500; z_wall <= size.z(); z_wall += 1)
+        {
+            Eigen::Vector3d wall_point(x_wall, y_wall, z_wall);
+            statespace_->GetObstacleGrid().InsertOccupiedMeasurement(wall_point);
+        }
+    }
+    ROS_INFO("Trump was here");
 }
 
 void PlannerWrapper::Step()
