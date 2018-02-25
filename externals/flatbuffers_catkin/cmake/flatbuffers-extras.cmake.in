@@ -1,2 +1,2 @@
 # This overrides the dependency tracker with the flatbuffers library file.
-#set( @PROJECT_NAME@_LIBRARIES @CATKIN_DEVEL_PREFIX@/lib/libflatbuffers${CMAKE_SHARED_LIBRARY_SUFFIX} )
+set( @PROJECT_NAME@_LIBRARIES @CATKIN_DEVEL_PREFIX@/lib/libflatbuffers${CMAKE_STATIC_LIBRARY_SUFFIX} )
