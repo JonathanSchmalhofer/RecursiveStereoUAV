@@ -47,7 +47,7 @@ endif()
 find_package(wxWidgets REQUIRED net gl core base)
 include(${wxWidgets_USE_FILE})
 
-if(wxWidgets_VERSION LESS 2.9)
+if(wxWidgets_VERSION LESS 3.1)
     message(FATAL_ERROR "wxWidgets is not a high enough version!")
 endif()
 
@@ -92,14 +92,11 @@ add_library(birrt_lib
     "src/planner_wrapper.cpp"
 )
 
-add_library(wxapplication_wrapper_lib
+add_executable(rrt_3d_node
     "src/wxapplicationnode.cpp"
     "src/rrtglcontext.cpp"
     "src/rrtframe.cpp"
     "src/helpers.cpp"
-)
-
-add_executable(rrt_3d_node
     "src/rrt_node.cpp"
 )
 
@@ -115,7 +112,6 @@ target_link_libraries(rrt_3d_node
     ${OPENGL_LIBRARIES}
     ${GLUT_LIBRARY}
     birrt_lib
-    wxapplication_wrapper_lib
 )
 
 add_dependencies(rrt_3d_node
@@ -127,10 +123,6 @@ add_dependencies(rrt_3d_node
 #############
 
 install(TARGETS birrt_lib
-    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-)
-
-install(TARGETS wxapplication_wrapper_lib
     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
