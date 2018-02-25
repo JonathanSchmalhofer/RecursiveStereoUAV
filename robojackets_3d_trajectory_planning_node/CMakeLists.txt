@@ -142,49 +142,49 @@ install(DIRECTORY include/${PROJECT_NAME}/
 
 if(CATKIN_ENABLE_TESTING)
 
-    catkin_add_gtest(rrt_3d_node_tree_tests
-        test/tree_test.cpp
-    )
-    catkin_add_gtest(rrt_3d_node_birrt_tests
-        test/birrt_test.cpp
-    )
-    catkin_add_gtest(rrt_3d_node_grid_state_space_tests
-        test/grid_state_space_test.cpp
-    )
+#    catkin_add_gtest(rrt_3d_node_tree_tests
+#        test/tree_test.cpp
+#    )
+#    catkin_add_gtest(rrt_3d_node_birrt_tests
+#        test/birrt_test.cpp
+#    )
+#    catkin_add_gtest(rrt_3d_node_grid_state_space_tests
+#        test/grid_state_space_test.cpp
+#    )
     catkin_add_gtest(rrt_3d_node_space_state_space_tests
         test/space_state_space_test.cpp
     )
     catkin_add_gtest(rrt_3d_node_obstacle_grid_tests
         test/obstacle_grid_test.cpp
     )
-    
-    target_link_libraries(rrt_3d_node_tree_tests
-        ${catkin_LIBRARIES}
-        ${wxWidgets_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        ${GLUT_LIBRARY}
-        ${dynamicedt3d_catkin_LIBRARIES}
-        birrt_lib
-    )
-    
-    target_link_libraries(rrt_3d_node_birrt_tests
-        ${catkin_LIBRARIES}
-        ${wxWidgets_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        ${GLUT_LIBRARY}
-        ${dynamicedt3d_catkin_LIBRARIES}
-        birrt_lib
-    )
-    
-    target_link_libraries(rrt_3d_node_grid_state_space_tests
-        ${catkin_LIBRARIES}
-        ${wxWidgets_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        ${GLUT_LIBRARY}
-        ${dynamicedt3d_catkin_LIBRARIES}
-        birrt_lib
-    )
-    
+
+#    target_link_libraries(rrt_3d_node_tree_tests
+#        ${catkin_LIBRARIES}
+#        ${wxWidgets_LIBRARIES}
+#        ${OPENGL_LIBRARIES}
+#        ${GLUT_LIBRARY}
+#        ${dynamicedt3d_catkin_LIBRARIES}
+#        birrt_lib
+#    )
+
+#    target_link_libraries(rrt_3d_node_birrt_tests
+#        ${catkin_LIBRARIES}
+#        ${wxWidgets_LIBRARIES}
+#        ${OPENGL_LIBRARIES}
+#        ${GLUT_LIBRARY}
+#        ${dynamicedt3d_catkin_LIBRARIES}
+#        birrt_lib
+#    )
+
+#    target_link_libraries(rrt_3d_node_grid_state_space_tests
+#        ${catkin_LIBRARIES}
+#        ${wxWidgets_LIBRARIES}
+#        ${OPENGL_LIBRARIES}
+#        ${GLUT_LIBRARY}
+#        ${dynamicedt3d_catkin_LIBRARIES}
+#        birrt_lib
+#    )
+
     target_link_libraries(rrt_3d_node_space_state_space_tests
         ${catkin_LIBRARIES}
         ${wxWidgets_LIBRARIES}
@@ -193,7 +193,7 @@ if(CATKIN_ENABLE_TESTING)
         ${dynamicedt3d_catkin_LIBRARIES}
         birrt_lib
     )
-    
+
     target_link_libraries(rrt_3d_node_obstacle_grid_tests
         ${catkin_LIBRARIES}
         ${wxWidgets_LIBRARIES}
