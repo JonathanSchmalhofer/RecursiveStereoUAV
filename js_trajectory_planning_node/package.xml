@@ -2,10 +2,10 @@
 <package>
     <name>js_trajectory_planning_node</name>
     <version>0.0.1</version>
-    <description>The js_trajectory_planning_node package</description>
+    <description>The BiRRT-Trajectory Planning Node package based in implementation from RoboJackets</description>
     <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Bryan Schmalhofer</maintainer>
 
-    <license>MIT</license>
+    <license>???</license>
 
     <author>Jonathan Bryan Schmalhofer</author>
 
@@ -14,15 +14,18 @@
     <build_depend>js_messages</build_depend>
     <build_depend>message_generation</build_depend>
     <build_depend>octomap</build_depend>
-    <build_depend>octomap_msgs</build_depend>  
+    <build_depend>octomap_msgs</build_depend>
     <build_depend>octomap_ros</build_depend>
+    <build_depend>dynamicedt3d_catkin</build_depend>
     <build_depend>eigen3</build_depend>
     <build_depend>cmake_modules</build_depend>
+
     <run_depend>message_runtime</run_depend>
     <run_depend>js_messages</run_depend>
     <run_depend>roscpp</run_depend>
     <run_depend>octomap</run_depend>
     <run_depend>octomap_msgs</run_depend>
     <run_depend>octomap_ros</run_depend>
+    <run_depend>dynamicedt3d_catkin</run_depend>
 
 </package>
