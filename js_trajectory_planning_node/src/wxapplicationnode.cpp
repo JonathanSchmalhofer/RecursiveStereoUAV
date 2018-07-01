@@ -76,7 +76,7 @@ void wxApplicationNode::DoUpdate(wxIdleEvent &event)
     {
         planner_->Step();
         ros::spinOnce();
-	    ros::Duration(1).sleep();
+        ros::Duration(1).sleep();
     }
 
     ExtractStartAndGoalStateForContext();

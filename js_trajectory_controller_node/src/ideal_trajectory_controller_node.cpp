@@ -12,7 +12,7 @@
 
 void Trajectory3dCallback(const js_messages::Trajectory3D::ConstPtr& trajectory3d_message)
 {
-    ROS_INFO("The sequence is: [%i]", trajectory3d_message->header.seq);
+    ROS_INFO("The sequence is: [%d]", trajectory3d_message->header.seq);
 }
 
 int main(int argc, char **argv)

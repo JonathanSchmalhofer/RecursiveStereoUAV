@@ -15,6 +15,7 @@ add_message_files(
     FILES
     Trajectory3D.msg
     Trajectory3DPointStamped.msg
+    PointCloud.msg
 )
 
 generate_messages(
