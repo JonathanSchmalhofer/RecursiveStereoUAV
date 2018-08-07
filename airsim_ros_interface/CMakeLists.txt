@@ -28,7 +28,8 @@ include(ExternalProject)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost 1.65 REQUIRED COMPONENTS date_time)
+set(Boost_ADDITIONAL_VERSIONS "1.65" "1.65.0")
+find_package(Boost 1.65.0 REQUIRED COMPONENTS date_time)
 
 ################################################################################
 #

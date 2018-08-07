@@ -16,12 +16,12 @@ IF %ERRORLEVEL% NEQ 0 (
 :aftercmakecheck
 
 REM //---------- if BOOST doesn't exist then download it ----------
-IF "%BOOST_ROOT%"=="" (
-    ECHO Boost could not be found in BOOST_ROOT, so Boost 1.6.5 will be installed...
-    call :installboost
-) ELSE (
-    ECHO Boost found in %BOOST_ROOT%
-)
+REM IF "%BOOST_ROOT%"=="" (
+REM    ECHO Boost could not be found in BOOST_ROOT, so Boost 1.6.5 will be installed...
+REM    call :installboost
+REM ) ELSE (
+REM    ECHO Boost found in %BOOST_ROOT%
+REM )
 :afterboostcheck
 
 REM //---------- compile airsim_ros_interface that we got from git submodule ----------
