@@ -5,6 +5,12 @@
 Unreal/
 Unreal/*/*.*
 
+# Downloaded cmake
+*/cmake-3.7.2-win64-x64/*/*.*
+
+# Downloaded boost
+*/boost_1_65_0/*/*.*
+
 # Compiled Object files
 *.slo
 *.lo
