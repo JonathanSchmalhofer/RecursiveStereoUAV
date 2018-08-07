@@ -6,7 +6,7 @@ Unreal/
 Unreal/*/*.*
 
 # Downloaded cmake
-*/cmake-3.7.2-win64-x64/*/*.*
+*/cmake-*/*/*.*
 
 # Downloaded boost
 */boost_1_65_0/*/*.*
