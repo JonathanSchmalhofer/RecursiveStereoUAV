@@ -8,10 +8,25 @@ chdir /d %ROOT_DIR%
 REM //---------- if cmake doesn't exist then install it ----------
 WHERE cmake >nul 2>nul
 IF %ERRORLEVEL% NEQ 0 (
+    echo Cmake does not exist yet...
     call :installcmake
+) ELSE (
+    echo Cmake found.
 )
+:aftercmakecheck
+
+REM //---------- if BOOST doesn't exist then download it ----------
+IF "%BOOST_ROOT%"=="" (
+    ECHO Boost could not be found in BOOST_ROOT, so Boost 1.6.5 will be installed...
+    call :installboost
+) ELSE (
+    ECHO Boost found in %BOOST_ROOT%
+)
+:afterboostcheck
 
 REM //---------- compile airsim_ros_interface that we got from git submodule ----------
+:regular_build_pipeline
+echo Starting Build
 IF NOT EXIST build mkdir build
 cd build
 goto :downloadzeromqsrc
@@ -40,26 +55,44 @@ chdir /d %ROOT_DIR%
 echo #### Build failed
 goto :eof_own
 
+:installboost
+if NOT EXIST boost_1_65_0 call :downloadboost
+echo Set BOOST_ROOT to path of boost_1_65_0
+echo set BOOST_ROOT=%ROOT_DIR%\boost_1_65_0;
+set BOOST_ROOT=%ROOT_DIR%\boost_1_65_0;
+goto :afterboostecheck
+
+:downloadboost
+echo Boost was not found, so we are installing Boost 1.6.5 for you... 
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "http://dl.bintray.com/boostorg/release/1.65.0/source/boost_1_65_0.zip"
+if ERRORLEVEL 1 goto :boostfailed
+echo Decompressing boost_1_65_0.zip...
+%ROOT_DIR%\..\tools\unzip "boost_1_65_0.zip"
+if ERRORLEVEL 1 goto :boostfailed
+del boost_1_65_0.zip
+
 :installcmake
 if NOT EXIST cmake-3.7.2-win64-x64 call :downloadcmake
+echo Adding cmake-3.7.2-win64-x64 to path
 set PATH=%PATH%;%ROOT_DIR%\cmake-3.7.2-win64-x64\bin;
-goto :eof_own
+goto :aftercmakecheck
 
 :downloadcmake
 echo CMake was not found, so we are installing it for you... 
-%ROOT_DIR%\..\tools\httpget "https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip"
+REM //%ROOT_DIR%\..\tools\HttpGet "https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip"
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "https://cmake.org/files/v3.7/cmake-3.7.2-win64-x64.zip"
 if ERRORLEVEL 1 goto :cmakefailed
 echo Decompressing cmake-3.7.2-win64-x64.zip...
-%ROOT_DIR%\tools\unzip "cmake-3.7.2-win64-x64.zip"
+%ROOT_DIR%\..\tools\unzip "cmake-3.7.2-win64-x64.zip"
 if ERRORLEVEL 1 goto :cmakefailed
 del cmake-3.7.2-win64-x64.zip
-goto :eof_own
 
 :downloadzeromqsrc
 cd %ROOT_DIR%\build
 if exist "include/zeromq_src/zmq.h" goto :prebuildstep2
 echo Downloading ZeroMQ 4.2.2
-%ROOT_DIR%\..\tools\httpget "https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz"
+REM //%ROOT_DIR%\..\tools\HttpGet "https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz"
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "https://github.com/zeromq/libzmq/releases/download/v4.2.2/zeromq-4.2.2.tar.gz"
 if ERRORLEVEL 1 goto :buildfailed
 echo Decompressing zeromq-4.2.2.tar.gz
 %ROOT_DIR%\..\tools\TarTool "zeromq-4.2.2.tar.gz" ./
@@ -85,7 +118,8 @@ goto :prebuildstep2
 cd %ROOT_DIR%\build
 if exist "include/zeromq_cpp/zmq.hpp" goto :prebuildstep4
 echo Downloading ZeroMQ CPP 4.2.2
-%ROOT_DIR%\..\tools\httpget "https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz"
+REM //%ROOT_DIR%\..\tools\HttpGet "https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz"
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz"
 if ERRORLEVEL 1 goto :buildfailed
 echo Decompressing v4.2.2.tar.gz
 %ROOT_DIR%\..\tools\TarTool "v4.2.2.tar.gz" ./
@@ -104,7 +138,8 @@ goto :prebuildstep4
 cd %ROOT_DIR%\build
 if exist "include/flatbuffers_src/flatbuffers/base.h" goto :prebuildstep6
 echo Downloading Flatbuffers 1.8.0
-%ROOT_DIR%\..\tools\httpget "https://github.com/google/flatbuffers/archive/v1.8.0.tar.gz"
+REM //%ROOT_DIR%\..\tools\HttpGet "https://github.com/google/flatbuffers/archive/v1.8.0.tar.gz"
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "https://github.com/google/flatbuffers/archive/v1.8.0.tar.gz"
 if ERRORLEVEL 1 goto :buildfailed
 echo Decompressing v1.8.0.tar.gz
 %ROOT_DIR%\..\tools\TarTool "v1.8.0.tar.gz" ./
@@ -122,6 +157,12 @@ goto :prebuildstep6
 
 :cmakefailed
 echo CMake install failed, please install cmake manually from https://cmake.org/
+pause
+exit 1
+
+:boostfailed
+echo Boost install failed, please install Boost 1.6.5 manually from https://www.boost.org/doc/libs/1_65_0/more/getting_started/windows.html
+pause
 exit 1
 
 :eof_own
