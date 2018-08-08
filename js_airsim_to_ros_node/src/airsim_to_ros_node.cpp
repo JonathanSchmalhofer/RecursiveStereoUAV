@@ -18,7 +18,8 @@ int main(int argc, char **argv)
     
     ROS_INFO("Starting AirSim to ros node");
 
-    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://192.168.178.56:5676");
+    // Subscribe to IP of Host running AirSim
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://10.159.186.224:5676");
     
     ROS_INFO("Created airsim_to_ros");
 
