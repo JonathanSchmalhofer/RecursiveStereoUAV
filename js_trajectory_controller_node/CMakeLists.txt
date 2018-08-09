@@ -29,7 +29,7 @@ find_package(flatbuffers_catkin REQUIRED)
 catkin_package(
     INCLUDE_DIRS
     LIBRARIES ideal_trajectory_controller_node
-    CATKIN_DEPENDS roscpp js_messages flatbuffers_catkin zeromq_catkin
+    CATKIN_DEPENDS roscpp js_messages js_common flatbuffers_catkin zeromq_catkin
 )
 
 ###########

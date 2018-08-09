@@ -5,7 +5,9 @@ add_compile_options(
     $<$<CXX_COMPILER_ID:GNU>:-std=c++14>
 )
 
-find_package(catkin REQUIRED COMPONENTS js_messages
+find_package(catkin REQUIRED COMPONENTS
+    js_messages
+    js_common
 )
 
 find_package(zeromq_catkin REQUIRED)
@@ -14,6 +16,8 @@ find_package(flatbuffers_catkin REQUIRED)
 
 find_package(js_messages REQUIRED)
 
+find_package(js_common REQUIRED)
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -21,7 +25,7 @@ find_package(js_messages REQUIRED)
 catkin_package(
     INCLUDE_DIRS include
     LIBRARIES airsim_to_ros_library
-    CATKIN_DEPENDS zeromq_catkin flatbuffers_catkin js_messages
+    CATKIN_DEPENDS zeromq_catkin flatbuffers_catkin js_messages js_common
 )
 
 ###########
@@ -34,6 +38,7 @@ include_directories(
     ${flatbuffers_catkin_INCLUDE_DIRS}
     ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
+    ${js_common_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 

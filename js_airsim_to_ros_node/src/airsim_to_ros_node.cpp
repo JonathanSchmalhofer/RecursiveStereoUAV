@@ -7,6 +7,7 @@
 #include <string>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
+#include <js_common/common.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
 sensor_msgs::Image airsim_image_left_msg, airsim_image_right_msg;
@@ -17,9 +18,15 @@ int main(int argc, char **argv)
     ros::NodeHandle node_handle;
     
     ROS_INFO("Starting AirSim to ros node");
-
+    
+    // Get Parameters from ROS Parameter Server
+    std::string ip_airsim;
+    std::string port_airsim_to_ros;
+    js_common::TryGetParameter("/recursivestereo/parameters/ip_airsim", ip_airsim, "127.0.0.1");
+    js_common::TryGetParameter("/recursivestereo/parameters/port_airsim_to_ros", port_airsim_to_ros, "5676");
+    
     // Subscribe to IP of Host running AirSim
-    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://10.159.186.224:5676");
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://" + ip_airsim + ":" + port_airsim_to_ros);
     
     ROS_INFO("Created airsim_to_ros");
 

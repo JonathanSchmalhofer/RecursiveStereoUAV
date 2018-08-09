@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="js_python_example_node" type="pynode.py" name="pynode">
+    </node>
+</launch>
