@@ -8,12 +8,8 @@
     <license>MIT</license>
 
     <author>Jonathan Bryan Schmalhofer</author>
-    <build_depend>zeromq_catkin</build_depend>
-    <build_depend>flatbuffers_catkin</build_depend>
     <build_depend>js_messages</build_depend>
     <buildtool_depend>catkin</buildtool_depend>
-    <run_depend>zeromq_catkin</run_depend>
-    <run_depend>flatbuffers_catkin</run_depend>
     <run_depend>js_messages</run_depend>
 
 
