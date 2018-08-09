@@ -1,3 +1,4 @@
 <launch>
+    <param name="/recursivestereo/parameters/port_trajectory_control_to_airsim" type="str" value="6677" />
     <node name="ideal_trajectory_controller_node" pkg="js_trajectory_controller_node" type="ideal_trajectory_controller_node" output="screen"/>
 </launch>

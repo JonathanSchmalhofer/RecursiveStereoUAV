@@ -6,6 +6,7 @@
 ///
 #include <string>
 #include <ros/ros.h>
+#include <js_common/common.h>
 #include <js_trajectory_controller_node/trajectory_point_to_airsim_class.h>
 #include <js_messages/Trajectory3D.h>
 #include <js_messages/Trajectory3DPointStampedRoot_generated.h>
@@ -20,13 +21,18 @@ int main(int argc, char **argv)
     ros::init(argc, argv, "ideal_trajectory_controller_node");
     ros::NodeHandle node_handle;
     
-    js_trajectory_controller_node::Trajectory3DPointToAirSimClass ros_to_airsim("tcp://*:6677");
+    // Get Parameters from ROS Parameter Server
+    std::string port_trajectory_control_to_airsim;
+    js_common::TryGetParameter("/recursivestereo/parameters/port_trajectory_control_to_airsim", port_trajectory_control_to_airsim, "6677");
+    
+    // Setup Subscriber and Publisher
+    js_trajectory_controller_node::Trajectory3DPointToAirSimClass ros_to_airsim("tcp://*:" + port_trajectory_control_to_airsim);
     ros::Subscriber trajectory3d_subscriber = node_handle.subscribe("/trajectory_planning/trajectory3d", 1000, Trajectory3dCallback);
     
     ROS_INFO("Starting trajectory controller node");
-
+    
     double z = 0.0f;
-
+    
     ros::Rate node_rate(10); // 10.0 hz
     while (ros::ok())
     {
@@ -44,6 +50,6 @@ int main(int argc, char **argv)
         ros::spinOnce();
         node_rate.sleep();
     }
-
+    
     return 0;
 }

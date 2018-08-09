@@ -9,11 +9,14 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
+    js_common
 )
 
 roslaunch_add_file_check(launch USE_TEST_DEPENDENCIES)
 
 find_package(js_messages REQUIRED)
+
+find_package(js_common REQUIRED)
 
 find_package(zeromq_catkin REQUIRED)
 
@@ -39,6 +42,7 @@ include_directories(
     ${flatbuffers_catkin_INCLUDE_DIRS}
     ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
+    ${js_common_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
 )
 
