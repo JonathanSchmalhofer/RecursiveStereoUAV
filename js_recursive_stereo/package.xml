@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>js_recursive_stereo</name>
+    <version>0.0.1</version>
+    <description>The js_recursive_stereo package</description>
+    <maintainer email="jonathan.schmalhofer@mytum.de">Jonathan Bryan Schmalhofer</maintainer>
+
+    <license>MIT</license>
+
+    <buildtool_depend>catkin</buildtool_depend>
+    <build_depend>message_generation</build_depend>
+    <build_depend>rospy</build_depend>
+    <build_export_depend>rospy</build_export_depend>
+    <exec_depend>message_runtime</exec_depend>
+    <exec_depend>rospy</exec_depend>
+
+</package>
