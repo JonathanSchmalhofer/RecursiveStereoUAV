@@ -1,4 +1,4 @@
 <launch>
-    <node pkg="js_recursive_stereo" type="recursive_stereo.py" name="recursive_stereo">
+    <node pkg="js_recursive_stereo" type="recursive_stereo.py" name="recursive_stereo" output="screen">
     </node>
 </launch>
