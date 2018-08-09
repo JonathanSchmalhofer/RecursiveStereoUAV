@@ -2,8 +2,11 @@
 
 import rospy
 from std_msgs.msg import String
+from RecursiveStereo import RecursiveStereo
 
 def RecursiveStereoNode():
+    algorithm = RecursiveStereo()
+    algorithm.Step()
     pub = rospy.Publisher('pointcloud', String, queue_size=1)
     rospy.init_node('recursive_stereo', anonymous=True)
     rate = rospy.Rate(10) # 10hz
