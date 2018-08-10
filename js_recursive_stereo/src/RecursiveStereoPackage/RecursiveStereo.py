@@ -8,6 +8,10 @@ class RecursiveStereo:
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
+        self.cx          = 0
+        self.cy          = 0
+        self.fx          = 0
+        self.fy          = 0
         
         # Parameters for (SemiGlobal)BlockMatching
         self.blockmatching_blocksize = 15
