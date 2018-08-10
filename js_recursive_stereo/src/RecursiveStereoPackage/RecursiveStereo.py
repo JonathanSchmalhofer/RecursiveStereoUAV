@@ -8,16 +8,17 @@ class RecursiveStereo:
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
-        self.cx          = 0
-        self.cy          = 0
-        self.fx          = 0
-        self.fy          = 0
+        self.c_u         = 609.5593
+        self.c_v         = 172.8540
+        self.b           = 0.5372
+        self.f           = 721.5377
+        self.disparity   = None
         
         # Parameters for (SemiGlobal)BlockMatching
         self.blockmatching_blocksize = 15
-        self.blockmatching_window_size = 3
-        self.blockmatching_minimum_disparities = 0
-        self.blockmatching_maximum_disparities = 64
+        self.blockmatching_window_size = 5
+        self.blockmatching_minimum_disparities = -64
+        self.blockmatching_maximum_disparities = 128
     
     def RequirementsFulfilled(self):
         if self.left_image is None:
@@ -26,25 +27,13 @@ class RecursiveStereo:
             return False
         return True
         
-    def GenerateDepthPCL(self, depth):
-        """Transform a depth image into a point cloud with one point for each
-        pixel in the image, using the camera transform for a camera
-        centred at cx, cy with field of view fx, fy.
-
-        depth is a 2-D ndarray with shape (rows, cols) containing
-        depths from 1 to 254 inclusive. The result is a 3-D array with
-        shape (rows, cols, 3). Pixels with invalid depth in the input have
-        NaN for the z-coordinate in the result.
-        
-        Copied from: https://codereview.stackexchange.com/questions/79032/generating-a-3d-point-cloud
-        """
-        rows, cols = depth.shape
-        c, r = np.meshgrid(np.arange(cols), np.arange(rows), sparse=True)
-        valid = (depth > 0) & (depth < 255)
-        z = np.where(valid, depth / 256.0, np.nan)
-        x = np.where(valid, z * (c - self.cx) / self.fx, 0)
-        y = np.where(valid, z * (r - self.cy) / self.fy, 0)
-        return np.dstack((x, y, z))
+    def GeneratePCLFromDisparity(self, disparity):
+        Q = np.float32([[ 1, 0,  0,        -self.c_u ],
+                        [ 0, 1,  0,        -self.c_v ],
+                        [ 0, 0,  0,         self.f   ],
+                        [ 0, 0, -1/self.b,  0        ]])
+        points = cv2.reprojectImageTo3D(disparity, Q)
+        return points
     
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity = self.blockmatching_minimum_disparities,
@@ -57,12 +46,38 @@ class RecursiveStereo:
                                            speckleWindowSize = 100,
                                            speckleRange = 32
                                          )
-            disparity = stereo.compute(self.left_image, self.right_image)
+            disparity = stereo.compute(self.left_image, self.right_image).astype(np.float32) / 16.0
             return disparity
+    
+    # Copied from https://github.com/opencv/opencv/blob/master/samples/python/stereo_match.py
+    def ExportPCLToPly(self, filename, vertices):
+        ply_header = '''ply
+format ascii 1.0
+element vertex %(vert_num)d
+property float x
+property float y
+property float z
+property uchar red
+property uchar green
+property uchar blue
+end_header
+'''
+        vertices = vertices.reshape(-1, 3)
+        with open(filename, 'wb') as file:
+            file.write((ply_header % dict(vert_num=len(vertices))).encode('utf-8'))
+            np.savetxt(file, vertices, fmt='%f %f %f 0 0 0 ')
     
     def Step(self):
         if self.RequirementsFulfilled():
             print("Go")
             disparity = self.GetDisparityImage()
+            self.disparity = disparity
+            points = self.GeneratePCLFromDisparity(disparity)
+            self.pcl = points
+            mask = ((disparity < disparity.max()) & (disparity > disparity.min()))
+            out_points = points[mask]
+            out_fn = 'out.ply'
+            self.ExportPCLToPly('out.ply', out_points)
+            print('%s saved' % 'out.ply')
         else:
             print("Something is missing")
