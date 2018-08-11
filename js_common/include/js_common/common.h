@@ -48,7 +48,7 @@ namespace js_common
         }
         else
         {
-            ROS_INFO("Using Default Value param %s = %s", parameter_name.c_str(), default_value.c_str());
+            ROS_INFO("Using Default Value param %s = %d", parameter_name.c_str(), default_value);
             parameter_value = default_value;
         }
     }
