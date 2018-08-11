@@ -44,6 +44,7 @@ class RecursiveStereoNode:
         except CvBridgeError as e:
             print(e)
         self.algorithm.left_image  = cv_image_left
+        self.algorithm.color_image = cv_image_left
         self.sequence_left         = image.header.seq
         self.CallbackCalculate()
     
