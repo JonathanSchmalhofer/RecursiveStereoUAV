@@ -1,6 +1,6 @@
 ///
 /// @file
-/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+/// @copyright Copyright (C) 2017-2018, Jonathan Bryan Schmalhofer
 ///
 /// @brief Definition of class StereoImageRpcClient based on original AirSim code
 ///

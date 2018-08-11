@@ -1,6 +1,6 @@
 ///
 /// @file
-/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+/// @copyright Copyright (C) 2017-2018, Jonathan Bryan Schmalhofer
 ///
 /// @brief Definition of additional datatypes for shared memory queue adapted from boost example and collected includes
 ///

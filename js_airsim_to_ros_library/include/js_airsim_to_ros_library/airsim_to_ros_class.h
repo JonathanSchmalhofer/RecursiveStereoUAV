@@ -1,6 +1,6 @@
 ///
 /// @file
-/// @copyright Copyright (C) 2017, Jonathan Bryan Schmalhofer
+/// @copyright Copyright (C) 2017-2018, Jonathan Bryan Schmalhofer
 ///
 /// @brief Class to receive Data from AirSim and make available in ROS as ROS-Message
 ///
