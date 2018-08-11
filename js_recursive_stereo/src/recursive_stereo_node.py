@@ -2,17 +2,20 @@
 import cv2
 
 import rospy
+import rospkg
 from std_msgs.msg import String
 from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
 from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
-import os
-import rospkg
+
 
 class RecursiveStereoNode:
     def __init__(self):
         self.publisher       = rospy.Publisher('pointcloud', String, queue_size=1)
         self.rospack         = rospkg.RosPack() # get an instance of RosPack with the default search paths
         self.subscriber_left = rospy.Subscriber('/airsim/left/image_raw', Image, self.Callback)
+        self.bridge = CvBridge()
         
         # Recursive Stereo
         self.algorithm = RecursiveStereo()
@@ -38,8 +41,14 @@ class RecursiveStereoNode:
         #self.algorithm.Step()
     
     def Callback(self, data):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+        cv2.imshow("Image window", cv_image)
+        cv2.waitKey(3)
         self.algorithm.Step()
-        hello_str = "hello world %s" % rospy.get_time()
+        hello_str = "received an image %s" % rospy.get_time()
         self.publisher.publish(hello_str)
     
 if __name__ == '__main__':
