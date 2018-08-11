@@ -20,9 +20,11 @@ int main(int argc, char **argv)
     ROS_INFO("Starting AirSim to ros node");
     
     // Get Parameters from ROS Parameter Server
+    bool verbose;
     std::string ip_airsim;
     std::string port_airsim_to_ros;
-    js_common::TryGetParameter("/recursivestereo/parameters/ip_airsim", ip_airsim, "127.0.0.1");
+    js_common::TryGetParameter("/recursivestereo/parameters/verbose",            verbose,            false);
+    js_common::TryGetParameter("/recursivestereo/parameters/ip_airsim",          ip_airsim,          "127.0.0.1");
     js_common::TryGetParameter("/recursivestereo/parameters/port_airsim_to_ros", port_airsim_to_ros, "5676");
     
     // Subscribe to IP of Host running AirSim
@@ -37,7 +39,10 @@ int main(int argc, char **argv)
     std::uint32_t last_sequence_sent = 0;
     while (ros::ok())
     {
-        ROS_INFO("Waiting for data");
+        if ( verbose == true )
+        {
+            ROS_INFO("Waiting for data");
+        }
         int8_t received_return_value = airsim_to_ros.ReceivedMessage();
         if (1 == received_return_value)
         {
@@ -46,7 +51,10 @@ int main(int argc, char **argv)
             case 0: // Unknown
                 break;
             case 1: // Left
-                ROS_INFO("Left image received");
+                if ( verbose == true )
+                {
+                    ROS_INFO("Left image received");
+                }
                 // Header
                 airsim_image_left_msg.header.seq         = airsim_to_ros.GetImageHeaderSeq();
                 airsim_image_left_msg.header.stamp.sec   = airsim_to_ros.GetImageHeaderStampSec();
@@ -62,7 +70,10 @@ int main(int argc, char **argv)
                 memcpy((char*)(&airsim_image_left_msg.data[0]), airsim_to_ros.GetImageData(), airsim_to_ros.GetImageDataSize());
                 break;
             case 2: // Right
-                ROS_INFO("Right image received");
+                if ( verbose == true )
+                {
+                    ROS_INFO("Right image received");
+                }
                 // Header
                 airsim_image_right_msg.header.seq         = airsim_to_ros.GetImageHeaderSeq();
                 airsim_image_right_msg.header.stamp.sec   = airsim_to_ros.GetImageHeaderStampSec();
@@ -81,25 +92,30 @@ int main(int argc, char **argv)
                 break;
             }
             
-            // TODO: Introduce Debug Mode
-            ROS_INFO("Image received");
-            ROS_INFO("  Image.header.seq %d", airsim_to_ros.GetImageHeaderSeq());
-            ROS_INFO("  Image.header.stamp.sec %d", airsim_to_ros.GetImageHeaderStampSec());
-            ROS_INFO("  Image.header.stamp.nsec %d", airsim_to_ros.GetImageHeaderStampNsec());
-            ROS_INFO("  Image.header.frame_id %s", airsim_to_ros.GetImageHeaderFrameid().c_str());
-            ROS_INFO("  Image.height %d", airsim_to_ros.GetImageHeight());
-            ROS_INFO("  Image.width %d", airsim_to_ros.GetImageWidth());
-            ROS_INFO("  Image.encoding %s", airsim_to_ros.GetImageEncoding().c_str());
-            ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
-            ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
-            ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros.GetImageDataSize()));
+            if ( verbose == true )
+            {
+                ROS_INFO("Image received");
+                ROS_INFO("  Image.header.seq %d", airsim_to_ros.GetImageHeaderSeq());
+                ROS_INFO("  Image.header.stamp.sec %d", airsim_to_ros.GetImageHeaderStampSec());
+                ROS_INFO("  Image.header.stamp.nsec %d", airsim_to_ros.GetImageHeaderStampNsec());
+                ROS_INFO("  Image.header.frame_id %s", airsim_to_ros.GetImageHeaderFrameid().c_str());
+                ROS_INFO("  Image.height %d", airsim_to_ros.GetImageHeight());
+                ROS_INFO("  Image.width %d", airsim_to_ros.GetImageWidth());
+                ROS_INFO("  Image.encoding %s", airsim_to_ros.GetImageEncoding().c_str());
+                ROS_INFO("  Image.is_bigendian %d", airsim_to_ros.GetImageIsBigendian());
+                ROS_INFO("  Image.step %d", airsim_to_ros.GetImageStep());
+                ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros.GetImageDataSize()));
+            }
             
             if (
                     airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
                 &&  airsim_image_left_msg.header.seq > last_sequence_sent
             )
             {
-                ROS_INFO("Images forwarded");
+                if ( verbose == true )
+                {
+                    ROS_INFO("Images forwarded");
+                }
                 left_stereoimage_chatter.publish(airsim_image_left_msg);
                 right_stereoimage_chatter.publish(airsim_image_right_msg);
             }
