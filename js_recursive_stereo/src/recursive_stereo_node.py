@@ -10,7 +10,7 @@ import rospkg
 
 class RecursiveStereoNode:
     def __init__(self):
-        self.publisher       = rospy.Publisher('pointcloud', String, queue_size=1)
+        self.publisher       = rospy.Publisher('/airsim/pointcloud', String, queue_size=1)
         self.rospack         = rospkg.RosPack() # get an instance of RosPack with the default search paths
         self.subscriber_left = rospy.Subscriber('/airsim/left/image_raw', Image, self.Callback)
         
@@ -31,11 +31,11 @@ class RecursiveStereoNode:
     
 
         rospy.loginfo("Loading Images")
-        image_left  = cv2.imread(rospack.get_path('js_recursive_stereo') + '/resources/left_0000000000.png')
-        image_right = cv2.imread(rospack.get_path('js_recursive_stereo') + '/resources/right_0000000000.png')
+        image_left  = cv2.imread(self.rospack.get_path('js_recursive_stereo') + '/resources/left_0000000000.png')
+        image_right = cv2.imread(self.rospack.get_path('js_recursive_stereo') + '/resources/right_0000000000.png')
         self.algorithm.left_image  = image_left
         self.algorithm.right_image = image_right
-        #self.algorithm.Step()
+        self.algorithm.Step()
     
     def Callback(self, data):
         self.algorithm.Step()
@@ -43,8 +43,8 @@ class RecursiveStereoNode:
         self.publisher.publish(hello_str)
     
 if __name__ == '__main__':
-    node = RecursiveStereoNode()
     rospy.init_node('recursive_stereo_node', anonymous=True)
+    node = RecursiveStereoNode()
     try:
         rospy.spin()
     except KeyboardInterrupt:
