@@ -1,0 +1,3 @@
+# PointCloud Files
+*.ply
+/*/*.ply
