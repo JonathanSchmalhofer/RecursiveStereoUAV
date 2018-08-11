@@ -25,10 +25,10 @@ class RecursiveStereoNode:
         self.algorithm.c_v = rospy.get_param('/recursivestereo/parameters/c_v', 172.8840)
         self.algorithm.b   = rospy.get_param('/recursivestereo/parameters/b',     0.5572)
         self.algorithm.f   = rospy.get_param('/recursivestereo/parameters/f',   721.5577)
-        self.algorithm.blockmatching_blocksize           = rospy.get_param('/recursivestereo/parameters/blockmatching_blocksize',            15)
+        self.algorithm.blockmatching_blocksize           = rospy.get_param('/recursivestereo/parameters/blockmatching_blocksize',            10)
         self.algorithm.blockmatching_window_size         = rospy.get_param('/recursivestereo/parameters/blockmatching_window_size',           9)
-        self.algorithm.blockmatching_minimum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_minimum_disparities', -64)
-        self.algorithm.blockmatching_maximum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_maximum_disparities', 128)
+        self.algorithm.blockmatching_minimum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_minimum_disparities',   1)
+        self.algorithm.blockmatching_maximum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_maximum_disparities',  65)
         self.algorithm.export_pcl       = False
         self.algorithm.enable_recursive = True
     
