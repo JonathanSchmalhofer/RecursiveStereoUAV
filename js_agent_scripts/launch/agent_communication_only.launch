@@ -1,7 +1,6 @@
 <launch>
     <group>
         <include file="$(find js_airsim_to_ros_node)/launch/airsim_to_ros_node.launch" />
-        <include file="$(find js_trajectory_planning_node)/launch/trajectory_planning_node.launch" />
         <include file="$(find js_trajectory_controller_node)/launch/ideal_trajectory_controller_node.launch" />
     </group>
 </launch>

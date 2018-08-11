@@ -1,5 +1,5 @@
 <launch>
-    <param name="/recursivestereo/parameters/ip_airsim" type="str" value="10.159.186.224" />
+    <param name="/recursivestereo/parameters/ip_airsim" type="str" value="192.168.178.56" />
     <param name="/recursivestereo/parameters/port_airsim_to_ros" type="str" value="5676" />
     <node name="airsim_to_ros_node" pkg="js_airsim_to_ros_node" type="airsim_to_ros_node" output="screen"/>
 </launch>
