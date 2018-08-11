@@ -254,19 +254,18 @@ int main(int argc, const char *argv[])
                             received_image_response_vector.at(current_image_index).second.height
                         );
                     }
-                    
-                    //Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
-                    mutex_data->message_image_information_.header_stamp_sec_ = 0;
-                    mutex_data->message_image_information_.header_stamp_nsec_ = 0;
-                    mutex_data->message_image_information_.header_seq_ = loop_counter;
-                    mutex_data->message_image_information_.header_frame_id_ = "";
-                    mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
-                    mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
-                    mutex_data->message_image_information_.image_encoding_ = "rgba8";
-                    mutex_data->message_image_information_.image_is_bigendian_ = false;
-                    mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
-                    mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.width;
                 }
+				//Fill additional information on image - see https://answers.ros.org/question/195979/creating-sensor_msgsimage-from-scratch/
+				mutex_data->message_image_information_.header_stamp_sec_ = 0;
+				mutex_data->message_image_information_.header_stamp_nsec_ = 0;
+				mutex_data->message_image_information_.header_seq_ = loop_counter;
+				mutex_data->message_image_information_.header_frame_id_ = "";
+				mutex_data->message_image_information_.image_height_ = received_image_response_vector.at(current_image_index).second.height;
+				mutex_data->message_image_information_.image_width_ = received_image_response_vector.at(current_image_index).second.width;
+				mutex_data->message_image_information_.image_encoding_ = "rgba8";
+				mutex_data->message_image_information_.image_is_bigendian_ = false;
+				mutex_data->message_image_information_.type_ = received_image_response_vector.at(current_image_index).first;
+				mutex_data->message_image_information_.image_step_ = 4 * received_image_response_vector.at(current_image_index).second.width;
                 
                 //Notify to the other process that there is a message
                 mutex_data->condition_empty_.notify_one();

@@ -39,6 +39,7 @@ int main(int argc, const char *argv[])
     {
         std::cout << "Deactivated ZeroMQ Forwarding.\n";
         no_zeromq_forwarding = true;
+		address = "tcp://127.0.0.1:6677";
     }
     
     //Create a shared memory object.
