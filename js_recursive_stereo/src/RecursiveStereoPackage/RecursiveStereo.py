@@ -72,8 +72,28 @@ class RecursiveStereo:
         if self.blockmatching_maximum_disparities is None:
             print('No maximum disparity parameter for blockmatching set')
             return False
+        self.PrintParameters()
         return True
-        
+    
+    def PrintParameters(self):
+        print("    Running RecursiveStereo with following parameters:")
+        print(" ")
+        print("        # Configuration")
+        print("        self.export_pcl       = {}".format(self.export_pcl))
+        print("        self.enable_recursive = {}".format(self.enable_recursive))
+        print(" ")
+        print("        # Parameters for PCL Generation")
+        print("        self.c_u         = {}".format(self.c_u))
+        print("        self.c_v         = {}".format(self.c_v))
+        print("        self.b           = {}".format(self.b))
+        print("        self.f           = {}".format(self.f))
+        print(" ")
+        print("        # Parameters for (SemiGlobal)BlockMatching")
+        print("        self.blockmatching_blocksize           = {}".format(self.blockmatching_blocksize))
+        print("        self.blockmatching_window_size         = {}".format(self.blockmatching_window_size))
+        print("        self.blockmatching_minimum_disparities = {}".format(self.blockmatching_minimum_disparities))
+        print("        self.blockmatching_maximum_disparities = {}".format(self.blockmatching_maximum_disparities))
+    
     def GeneratePCLFromDisparity(self, disparity):
         Q = np.float32([[ 1, 0,  0,        -self.c_u ],
                         [ 0, 1,  0,        -self.c_v ],
