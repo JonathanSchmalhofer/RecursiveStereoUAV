@@ -20,22 +20,57 @@ class RecursiveStereo:
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
-        self.c_u         = 609.5593
-        self.c_v         = 172.8540
-        self.b           = 0.5372
-        self.f           = 721.5377
         self.disparity   = None
         
+        # Configuration
+        self.export_pcl       = False
+        self.enable_revursive = True
+        
+        # Parameters for PCL Generation
+        self.c_u         = None # default from KITTI: 609.5593
+        self.c_v         = None # default from KITTI: 172.8540
+        self.b           = None # default from KITTI: 0.5372
+        self.f           = None # default from KITTI: 721.5377
+        
         # Parameters for (SemiGlobal)BlockMatching
-        self.blockmatching_blocksize = 15
-        self.blockmatching_window_size = 5
-        self.blockmatching_minimum_disparities = -64
-        self.blockmatching_maximum_disparities = 128
+        self.blockmatching_blocksize           = None # default used for KITTI: 15
+        self.blockmatching_window_size         = None # default used for KITTI: 9
+        self.blockmatching_minimum_disparities = None # default used for KITTI: -64
+        self.blockmatching_maximum_disparities = None # default used for KITTI: 128
     
     def RequirementsFulfilled(self):
         if self.left_image is None:
+            print('No left image set')
             return False
         if self.right_image is None:
+            print('No right image set')
+            return False
+        if self.c_u is None:
+            print('No c_u parameter set')
+            return False
+        if self.c_v is None:
+            print('No c_v parameter set')
+            return False
+        if self.b is None:
+            print('No b parameter set')
+            return False
+        if self.b == 0:
+            print('Parameter b may not be zero')
+            return False
+        if self.f is None:
+            print('No f parameter set')
+            return False
+        if self.blockmatching_blocksize is None:
+            print('No blocksize parameter for blockmatching set')
+            return False
+        if self.blockmatching_window_size is None:
+            print('No window size parameter for blockmatching set')
+            return False
+        if self.blockmatching_minimum_disparities is None:
+            print('No minimum disparity parameter for blockmatching set')
+            return False
+        if self.blockmatching_maximum_disparities is None:
+            print('No maximum disparity parameter for blockmatching set')
             return False
         return True
         
@@ -44,20 +79,17 @@ class RecursiveStereo:
                         [ 0, 1,  0,        -self.c_v ],
                         [ 0, 0,  0,         self.f   ],
                         [ 0, 0, -1/self.b,  0        ]])
-        points = cv2.reprojectImageTo3D(disparity, Q)
-        return points
+        pcl = cv2.reprojectImageTo3D(disparity, Q)
+        return pcl
     
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity = self.blockmatching_minimum_disparities,
                                            numDisparities = (self.blockmatching_maximum_disparities-self.blockmatching_minimum_disparities),
                                            blockSize = self.blockmatching_blocksize,
-                                           P1 = 8*3*self.blockmatching_window_size**2,
+                                           P1 = 4*3*self.blockmatching_window_size**2,
                                            P2 = 32*3*self.blockmatching_window_size**2,
-                                           disp12MaxDiff = 1,
-                                           uniquenessRatio = 15,
-                                           speckleWindowSize = 100,
-                                           speckleRange = 32
-                                         )
+                                           preFilterCap = 10
+                                          )
             disparity = stereo.compute(self.left_image, self.right_image).astype(np.float32) / 16.0
             return disparity
     
@@ -70,15 +102,22 @@ class RecursiveStereo:
     
     def Step(self):
         if self.RequirementsFulfilled():
-            print("Go")
+            print("Step")
+            # Get disparity image
             disparity = self.GetDisparityImage()
             self.disparity = disparity
+            # Get point cloud
             points = self.GeneratePCLFromDisparity(disparity)
-            self.pcl = points
-            mask = ((disparity < disparity.max()) & (disparity > disparity.min()))
-            out_points = points[mask]
-            out_fn = 'out.ply'
-            self.ExportPCLToPly('out.ply', out_points)
-            print('%s saved' % 'out.ply')
+            mask = ((disparity < disparity.max()) &
+                    (disparity > disparity.min()) &
+                    (np.isfinite(disparity)))
+            pcl = points[mask]
+            # Export point cloud
+            if self.export_pcl == True:
+                pcl_filename = 'out.ply'
+                self.ExportPCLToPly(pcl_filename, pcl)
+            self.pcl = pcl
+            if enable_revursive == True:
+                pass
         else:
-            print("Something is missing")
+            print("Not all requirements fulfilled for calculation step")
