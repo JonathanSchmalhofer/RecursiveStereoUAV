@@ -3,19 +3,24 @@ import cv2
 
 import rospy
 import rospkg
-from std_msgs.msg import String
-from sensor_msgs.msg import Image
-from cv_bridge import CvBridge, CvBridgeError
+from std_msgs.msg      import String, Header
+from sensor_msgs.msg   import Image
+from geometry_msgs.msg import Point
+from sensor_msgs.msg   import PointCloud
+from cv_bridge         import CvBridge, CvBridgeError
 
 from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
 
 
 class RecursiveStereoNode:
     def __init__(self):
-        self.publisher       = rospy.Publisher('/airsim/pointcloud', String, queue_size=1)
-        self.rospack         = rospkg.RosPack() # get an instance of RosPack with the default search paths
-        self.subscriber_left = rospy.Subscriber('/airsim/left/image_raw', Image, self.Callback)
-        self.bridge = CvBridge()
+        self.rospack          = rospkg.RosPack() # get an instance of RosPack with the default search paths
+        self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.Callback, queue_size = 1)
+        self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.Callback, queue_size = 1)
+        self.publisher        = rospy.Publisher('/airsim/pointcloud', PointCloud, queue_size = 1)
+        self.cv_bridge        = CvBridge()
+        self.sequence_left    = None
+        self.sequence_right   = None
         
         # Recursive Stereo
         self.algorithm = RecursiveStereo()
@@ -32,24 +37,41 @@ class RecursiveStereoNode:
         self.algorithm.export_pcl       = False
         self.algorithm.enable_recursive = True
     
-
-        rospy.loginfo("Loading Images")
-        image_left  = cv2.imread(self.rospack.get_path('js_recursive_stereo') + '/resources/left_0000000000.png')
-        image_right = cv2.imread(self.rospack.get_path('js_recursive_stereo') + '/resources/right_0000000000.png')
-        self.algorithm.left_image  = image_left
-        self.algorithm.right_image = image_right
-        self.algorithm.Step()
-    
-    def Callback(self, data):
+    def CallbackLeft(self, image):
+        cv_image_left = None
         try:
-            cv_image = self.bridge.imgmsg_to_cv2(data, "bgr8")
+            cv_image_left = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
         except CvBridgeError as e:
             print(e)
-        cv2.imshow("Image window", cv_image)
-        cv2.waitKey(3)
-        self.algorithm.Step()
-        hello_str = "received an image %s" % rospy.get_time()
-        self.publisher.publish(hello_str)
+        self.algorithm.left_image  = cv_image_left
+        self.sequence_left         = image.header.seq
+        self.CallbackCalculate()
+    
+    def CallbackRight(self, image):
+        cv_image_right = None
+        try:
+            cv_image_right = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+        self.algorithm.right_image  = cv_image_right
+        self.sequence_right         = image.header.seq
+        self.CallbackCalculate()
+    
+    def CallbackCalculate(self):
+        if ((self.sequence_left is None) or (self.sequence_right is None)):
+            return
+        if self.sequence_left == self.sequence_right:
+            self.algorithm.Step()
+            pointcloud = PointCloud()
+            print('Calculating')
+            print(self.algorithm.pcl.shape)
+            print(len(self.algorithm.pcl))
+            #for i in range(numberOfPoints):
+            #    pointcloud.points[i].x = inputPoints[i].x
+            #    pointcloud.points[i].y = inputPoints[i].y
+            #    pointcloud.points[i].z = inputPoints[i].z
+            #hello_str = "received an image %s" % rospy.get_time()
+            #self.publisher.publish(hello_str)
     
 if __name__ == '__main__':
     rospy.init_node('recursive_stereo_node', anonymous=True)
