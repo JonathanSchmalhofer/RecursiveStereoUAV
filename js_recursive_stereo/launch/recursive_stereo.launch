@@ -1,8 +1,8 @@
 <launch>
-    <param name="/recursivestereo/parameters/c_u" type="double" value="609.5593" />
-    <param name="/recursivestereo/parameters/c_v" type="double" value="172.8540" />
-    <param name="/recursivestereo/parameters/b" type="double" value="0.5372" />
-    <param name="/recursivestereo/parameters/f" type="double" value="721.5377" />
+    <param name="/recursivestereo/parameters/c_u" type="double" value="501.3814" />
+    <param name="/recursivestereo/parameters/c_v" type="double" value="301.2037" />
+    <param name="/recursivestereo/parameters/b" type="double" value="0.1359544" />
+    <param name="/recursivestereo/parameters/f" type="double" value="569" />
     <param name="/recursivestereo/parameters/blockmatching_blocksize" type="int" value="10" />
     <param name="/recursivestereo/parameters/blockmatching_window_size" type="int" value="9" />
     <param name="/recursivestereo/parameters/blockmatching_minimum_disparities" type="int" value="1" />
