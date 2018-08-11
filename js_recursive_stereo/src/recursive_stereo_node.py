@@ -14,6 +14,7 @@ from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
 
 class RecursiveStereoNode:
     def __init__(self):
+        self.verbose          = rospy.get_param('/recursivestereo/parameters/verbose', False)
         self.rospack          = rospkg.RosPack() # get an instance of RosPack with the default search paths
         self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.CallbackLeft, queue_size = 1)
         self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.CallbackRight, queue_size = 1)
@@ -37,12 +38,16 @@ class RecursiveStereoNode:
         self.algorithm.export_pcl       = True
         self.algorithm.enable_recursive = True
     
+    def VerbosePrint(self, string):
+        if self.verbose == True:
+            print(string)
+    
     def CallbackLeft(self, image):
         cv_image_left = None
         try:
             cv_image_left = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
         except CvBridgeError as e:
-            print(e)
+            self.VerbosePrint(e)
         self.algorithm.left_image  = cv_image_left
         self.algorithm.color_image = cv_image_left
         self.sequence_left         = image.header.seq
@@ -53,7 +58,7 @@ class RecursiveStereoNode:
         try:
             cv_image_right = self.cv_bridge.imgmsg_to_cv2(image, "bgr8")
         except CvBridgeError as e:
-            print(e)
+            self.VerbosePrint(e)
         self.algorithm.right_image  = cv_image_right
         self.sequence_right         = image.header.seq
         self.CallbackCalculate()
@@ -65,20 +70,16 @@ class RecursiveStereoNode:
             self.algorithm.pcl_filename = 'airsim_pcl_seq_{}.ply'.format(self.sequence_left)
             self.algorithm.Step()
             pointcloud = PointCloud()
-            print('Calculating')
-            print(self.algorithm.pcl.shape)
-            print(len(self.algorithm.pcl))
-            print(type(pointcloud.points))
-            print(len(pointcloud.points))
+            self.VerbosePrint('Calculating')
             for i in range(len(self.algorithm.pcl)):
                  pointcloud.points.append(Point(self.algorithm.pcl[i,0], 
                                                 self.algorithm.pcl[i,1], 
                                                 self.algorithm.pcl[i,2]))
             self.publisher.publish(pointcloud)
         else:
-            print('Sequence of left image and rigt image do not match (yet)')
-            print('   Seq(Left)  = {}'.format(self.sequence_left))
-            print('   Seq(Right) = {}'.format(self.sequence_right))
+            self.VerbosePrint('Sequence of left image and rigt image do not match (yet)')
+            self.VerbosePrint('   Seq(Left)  = {}'.format(self.sequence_left))
+            self.VerbosePrint('   Seq(Right) = {}'.format(self.sequence_right))
     
 if __name__ == '__main__':
     rospy.init_node('recursive_stereo_node', anonymous=True)
@@ -86,5 +87,5 @@ if __name__ == '__main__':
     try:
         rospy.spin()
     except KeyboardInterrupt:
-        print("Shutting down")
+        self.VerbosePrint("Shutting down")
     cv2.destroyAllWindows()
