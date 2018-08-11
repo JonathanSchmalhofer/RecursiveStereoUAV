@@ -24,7 +24,7 @@ class RecursiveStereo:
         
         # Configuration
         self.export_pcl       = False
-        self.enable_revursive = True
+        self.enable_recursive = True
         
         # Parameters for PCL Generation
         self.c_u         = None # default from KITTI: 609.5593
@@ -117,7 +117,7 @@ class RecursiveStereo:
                 pcl_filename = 'out.ply'
                 self.ExportPCLToPly(pcl_filename, pcl)
             self.pcl = pcl
-            if enable_revursive == True:
+            if self.enable_recursive == True:
                 pass
         else:
             print("Not all requirements fulfilled for calculation step")
