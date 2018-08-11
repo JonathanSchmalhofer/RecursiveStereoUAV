@@ -3,10 +3,10 @@
     <param name="/recursivestereo/parameters/c_v" type="double" value="172.8540" />
     <param name="/recursivestereo/parameters/b" type="double" value="0.5372" />
     <param name="/recursivestereo/parameters/f" type="double" value="721.5377" />
-    <param name="/recursivestereo/parameters/blockmatching_blocksize" type="int" value="15" />
+    <param name="/recursivestereo/parameters/blockmatching_blocksize" type="int" value="10" />
     <param name="/recursivestereo/parameters/blockmatching_window_size" type="int" value="9" />
-    <param name="/recursivestereo/parameters/blockmatching_minimum_disparities" type="int" value="-64" />
-    <param name="/recursivestereo/parameters/blockmatching_maximum_disparities" type="int" value="128" />
+    <param name="/recursivestereo/parameters/blockmatching_minimum_disparities" type="int" value="1" />
+    <param name="/recursivestereo/parameters/blockmatching_maximum_disparities" type="int" value="65" />
     <node pkg="js_recursive_stereo" type="recursive_stereo_node.py" name="recursive_stereo_node" output="screen">
     </node>
 </launch>

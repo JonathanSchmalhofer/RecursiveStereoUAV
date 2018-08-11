@@ -17,6 +17,7 @@ end_header
 class RecursiveStereo:
     def __init__(self):
         # Attributes
+        self.color_image = None
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
@@ -25,6 +26,7 @@ class RecursiveStereo:
         # Configuration
         self.export_pcl       = False
         self.enable_recursive = True
+        self.pcl_filename     = 'out.ply'
         
         # Parameters for PCL Generation
         self.c_u         = None # default from KITTI: 609.5593
@@ -95,10 +97,11 @@ class RecursiveStereo:
         print("        self.blockmatching_maximum_disparities = {}".format(self.blockmatching_maximum_disparities))
     
     def GeneratePCLFromDisparity(self, disparity):
-        Q = np.float32([[ 1, 0,  0,        -self.c_u ],
-                        [ 0, 1,  0,        -self.c_v ],
-                        [ 0, 0,  0,         self.f   ],
-                        [ 0, 0, -1/self.b,  0        ]])
+        Q = np.float32(
+            [[ 0,         0,         0,          self.f],
+             [-1.0000,    0,         0,          self.c_u],
+             [ 0,        -1.0000,    0,          self.c_v],
+             [ 0,         0,         1/self.b,   0]])
         pcl = cv2.reprojectImageTo3D(disparity, Q)
         return pcl
     
@@ -114,29 +117,37 @@ class RecursiveStereo:
             return disparity
     
     # Copied from https://github.com/opencv/opencv/blob/master/samples/python/stereo_match.py
-    def ExportPCLToPly(self, filename, vertices):
+    def ExportPCLToPly(self, filename, vertices, colors = None):
         vertices = vertices.reshape(-1, 3)
+        if colors is not None:
+            colors = colors.reshape(-1, 3)
+            vertices = np.hstack([vertices, colors])
         with open(filename, 'wb') as file:
             file.write((ply_header % dict(vert_num=len(vertices))).encode('utf-8'))
-            np.savetxt(file, vertices, fmt='%f %f %f 0 0 0 ')
+            if colors is None:
+                np.savetxt(file, vertices, fmt='%f %f %f 0 0 0 ')
+            else:
+                np.savetxt(file, vertices, fmt='%f %f %f %d %d %d ')
     
     def Step(self):
         if self.RequirementsFulfilled():
             print("Step")
             # Get disparity image
-            disparity = self.GetDisparityImage()
-            self.disparity = disparity
+            self.disparity = self.GetDisparityImage()
             # Get point cloud
-            points = self.GeneratePCLFromDisparity(disparity)
-            mask = ((disparity < disparity.max()) &
-                    (disparity > disparity.min()) &
-                    (np.isfinite(disparity)))
-            pcl = points[mask]
+            points = self.GeneratePCLFromDisparity(self.disparity)
+            mask = ((self.disparity < self.disparity.max()) &
+                    (self.disparity > self.disparity.min()) &
+                    (np.isfinite(points[:,:,0]))            &
+                    (np.isfinite(points[:,:,1]))            &
+                    (np.isfinite(points[:,:,2])))
+            self.pcl = points[mask]
             # Export point cloud
             if self.export_pcl == True:
-                pcl_filename = 'out.ply'
-                self.ExportPCLToPly(pcl_filename, pcl)
-            self.pcl = pcl
+                if self.color_image is None:
+                    self.ExportPCLToPly(self.pcl_filename, self.pcl)
+                else:
+                    self.ExportPCLToPly(self.pcl_filename, self.pcl, self.color_image[mask])
             if self.enable_recursive == True:
                 pass
         else:
