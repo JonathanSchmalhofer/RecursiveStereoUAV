@@ -15,8 +15,8 @@ from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
 class RecursiveStereoNode:
     def __init__(self):
         self.rospack          = rospkg.RosPack() # get an instance of RosPack with the default search paths
-        self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.Callback, queue_size = 1)
-        self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.Callback, queue_size = 1)
+        self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.CallbackLeft, queue_size = 1)
+        self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.CallbackRight, queue_size = 1)
         self.publisher        = rospy.Publisher('/airsim/pointcloud', PointCloud, queue_size = 1)
         self.cv_bridge        = CvBridge()
         self.sequence_left    = None
@@ -34,7 +34,7 @@ class RecursiveStereoNode:
         self.algorithm.blockmatching_window_size         = rospy.get_param('/recursivestereo/parameters/blockmatching_window_size',           9)
         self.algorithm.blockmatching_minimum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_minimum_disparities',   1)
         self.algorithm.blockmatching_maximum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_maximum_disparities',  65)
-        self.algorithm.export_pcl       = False
+        self.algorithm.export_pcl       = True
         self.algorithm.enable_recursive = True
     
     def CallbackLeft(self, image):
@@ -61,17 +61,23 @@ class RecursiveStereoNode:
         if ((self.sequence_left is None) or (self.sequence_right is None)):
             return
         if self.sequence_left == self.sequence_right:
+            self.algorithm.pcl_filename = 'airsim_pcl_seq_{}.ply'.format(self.sequence_left)
             self.algorithm.Step()
             pointcloud = PointCloud()
             print('Calculating')
             print(self.algorithm.pcl.shape)
             print(len(self.algorithm.pcl))
-            #for i in range(numberOfPoints):
-            #    pointcloud.points[i].x = inputPoints[i].x
-            #    pointcloud.points[i].y = inputPoints[i].y
-            #    pointcloud.points[i].z = inputPoints[i].z
-            #hello_str = "received an image %s" % rospy.get_time()
-            #self.publisher.publish(hello_str)
+            print(type(pointcloud.points))
+            print(len(pointcloud.points))
+            for i in range(len(self.algorithm.pcl)):
+                 pointcloud.points.append(Point(self.algorithm.pcl[i,0], 
+                                                self.algorithm.pcl[i,1], 
+                                                self.algorithm.pcl[i,2]))
+            self.publisher.publish(pointcloud)
+        else:
+            print('Sequence of left image and rigt image do not match (yet)')
+            print('   Seq(Left)  = {}'.format(self.sequence_left))
+            print('   Seq(Right) = {}'.format(self.sequence_right))
     
 if __name__ == '__main__':
     rospy.init_node('recursive_stereo_node', anonymous=True)
