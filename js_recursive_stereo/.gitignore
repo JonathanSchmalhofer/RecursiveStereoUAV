@@ -1,3 +1,7 @@
 # PointCloud Files
 *.ply
 /*/*.ply
+
+# Batch Files
+*.bat
+/*/*.bat

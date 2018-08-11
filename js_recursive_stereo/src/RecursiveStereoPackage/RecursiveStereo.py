@@ -2,6 +2,18 @@ import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 
+ply_header = '''ply
+format ascii 1.0
+element vertex %(vert_num)d
+property float x
+property float y
+property float z
+property uchar red
+property uchar green
+property uchar blue
+end_header
+'''
+
 class RecursiveStereo:
     def __init__(self):
         # Attributes
@@ -51,17 +63,6 @@ class RecursiveStereo:
     
     # Copied from https://github.com/opencv/opencv/blob/master/samples/python/stereo_match.py
     def ExportPCLToPly(self, filename, vertices):
-        ply_header = '''ply
-format ascii 1.0
-element vertex %(vert_num)d
-property float x
-property float y
-property float z
-property uchar red
-property uchar green
-property uchar blue
-end_header
-'''
         vertices = vertices.reshape(-1, 3)
         with open(filename, 'wb') as file:
             file.write((ply_header % dict(vert_num=len(vertices))).encode('utf-8'))
