@@ -9,7 +9,8 @@ project(airsim_ros_interface)
 #
 ################################################################################
 
-set(AIRSIM_ROOT_DIR "D:/AirSim")
+#set(AIRSIM_ROOT_DIR "C:/AirSim")
+set(AIRSIM_ROOT_DIR $ENV{AIRSIM_ROOT_DIR})
 
 
 ################################################################################
