@@ -23,11 +23,16 @@ class RecursiveStereo:
         self.right_image = None
         self.pcl         = None
         self.disparity   = None
+        self.orb         = cv2.ORB_create() # Initiate ORB detector
         
         # Configuration
         self.export_pcl       = False
         self.enable_recursive = True
         self.pcl_filename     = 'out.ply'
+        
+        # Grid Coordinates
+        self.u_step_px = 50
+        self.v_step_px = 50
         
         # Parameters for PCL Generation
         self.c_u         = None # default from KITTI: 609.5593
@@ -45,13 +50,35 @@ class RecursiveStereo:
         if self.verbose == True:
             print(text)
     
-    def Get2dGridCoordinates(self, u_step_px, v_step_px):
-        width   = image_color.shape[1]
-        height  = image_color.shape[0]
-        u_list = np.arange(step_px, width,  u_step_px, dtype=np.int16)
-        v_list = np.arange(step_px, height, v_step_px, dtype=np.int16)
-        grid = [(u, v) for u in u_list for v in v_list ]
-        return grid
+    def GetOrbKeyPoints(self, image):
+        # find the keypoints with ORB
+        kp      = self.orb.detect(image, None)
+        # compute the descriptors with ORB
+        kp, des = self.orb.compute(image, kp)
+        #seems wrong --> TODO: u_list  = [kpoint.pt[1] for kpoint in kp]
+        #seems wrong --> TODO: v_list  = [kpoint.pt[0] for kpoint in kp]
+        #seems wrong --> TODO: grid    = np.int16( [(v, u) for u in u_list for v in v_list ] )
+        grid    = np.int16( [(kpoint.pt[1], kpoint.pt[0]) for kpoint in kp ] )
+        return grid#, u_list, v_list
+
+    
+    def Get2dGridCoordinates(self):
+        width  = self.left_image.shape[1]
+        height = self.left_image.shape[0]
+        u_list = np.arange(self.u_step_px, width,  self.u_step_px, dtype=np.int16)
+        v_list = np.arange(self.v_step_px, height, self.v_step_px, dtype=np.int16)
+        grid   = [(v, u) for u in u_list for v in v_list ]
+        return grid#, u_list, v_list
+    
+    def Initialize2dCoordinates(self):
+        #grid, u_list, v_list             = self.Get2dGridCoordinates()
+        #grid_orb, u_list_orb, v_list_orb = self.GetOrbKeyPoints(self.left_image)
+        grid     = self.Get2dGridCoordinates()
+        grid_orb = self.GetOrbKeyPoints(self.left_image)
+        grid.extend(grid_orb)
+        #u_list = np.append(u_list, u_list_orb)
+        #v_list = np.append(v_list, v_list_orb)
+        return grid#, u_list, v_list
     
     def RequirementsFulfilled(self):
         requirements_fulfilled = True
@@ -147,14 +174,34 @@ class RecursiveStereo:
             self.PrintParameters()
             # Get disparity image
             self.disparity = self.GetDisparityImage()
+            print('self.disparity.shape = {}'.format(self.disparity.shape))
             # Get point cloud
+            #grid, u_list, v_list = self.Initialize2dCoordinates()
+            grid = self.Initialize2dCoordinates()
+            u_idx  = [x[1] for x in grid]
+            v_idx  = [x[0] for x in grid]
+            print('len(grid) = {}'.format(len(grid)))
+            #print('len(u_list) = {}'.format(len(u_list)))
+            #print('len(v_list) = {}'.format(len(v_list)))
+            print('len(u_idx) = {}'.format(len(u_idx)))
+            print('len(v_idx) = {}'.format(len(v_idx)))
+            #self.disparity = self.disparity[v_idx,u_idx].reshape(len(v_list),len(u_list))
+            self.disparity = self.disparity[v_idx,u_idx]
             points = self.GeneratePCLFromDisparity(self.disparity)
+            print('points.shape = {}'.format(points.shape))
             mask = ((self.disparity < self.disparity.max()) &
-                    (self.disparity > self.disparity.min()) &
+                    (self.disparity > self.disparity.min())
                     (np.isfinite(points[:,:,0]))            &
                     (np.isfinite(points[:,:,1]))            &
                     (np.isfinite(points[:,:,2])))
+            print('len(points) = {}'.format(len(points)))
+            print('len(mask) = {}'.format(len(mask)))
+            print('points.shape = {}'.format(points.shape))
+            print('mask.shape = {}'.format(mask.shape))
+            print('self.disparity.shape = {}'.format(self.disparity.shape))
+            print(mask)
             self.pcl = points[mask]
+            self.export_pcl = False # Temporary
             # Export point cloud
             if self.export_pcl == True:
                 if self.color_image is None:
