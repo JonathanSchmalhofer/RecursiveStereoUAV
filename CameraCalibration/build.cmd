@@ -19,11 +19,10 @@ powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_pow
 if ERRORLEVEL 1 goto :cameracalibrationfailed
 echo Decompressing Environments.zip...
 %ROOT_DIR%\..\tools\unzip "Environments.zip"
-if ERRORLEVEL 1 goto :cameracalibrationfailed
 del Environments.zip
 
 :cameracalibrationfailed
-echo CMake install failed, please install cmake manually from https://cmake.org/
+echo Camera Calibration Installation failed, please install Camera Calibration Environment manually from https://github.com/JonathanSchmalhofer/RecursiveStereoUAV
 pause
 exit 1
 
