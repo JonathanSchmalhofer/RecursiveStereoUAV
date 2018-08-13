@@ -57,9 +57,9 @@ Tr_imu_to_cam               = R_cam_to_rect*Tr_velo_to_cam*Tr_imu_to_velo;
 %
 frame = 0;
 disp( [ '########### Processign Frame #', num2str( frame ) ] );
-imgL        = imread( 'left_0000000000.png' );
-imgR        = imread( 'right_0000000000.png' );
-imgLC       = imread( 'color_0000000000.png' );
+imgL        = imread( '../../resources/left_0000000000.png' );
+imgR        = imread( '../../resources/right_0000000000.png' );
+imgLC       = imread( '../../resources/color_0000000000.png' );
 [ height, width ] = size( imgL );
 %disparityMap = disparity(left, right, 'Method', 'BlockMatching','BlockSize',7);
 disparityMap = disparity(imgL, imgR, 'Method', 'SemiGlobal');

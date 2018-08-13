@@ -16,7 +16,7 @@ def read_calib_file(filepath):
                 pass
     return data
 
-calibration_data = read_calib_file('D:\\zWork\\01_Fernuni_Hagen\\01 - M.Sc. Elektro- und Informationstechnik\\98 - Masterarbeit\\04_KITTI_Benchmark\\Road\\2011_09_26_drive_0027\\2011_09_26\\calib_cam_to_cam.txt')
+calibration_data = read_calib_file('calib_cam_to_cam.txt')
 P_rect_cam_left  = calibration_data['P_rect_00'].reshape((3,4))
 P_rect_cam_right = calibration_data['P_rect_01'].reshape((3,4))
 
@@ -58,9 +58,9 @@ def write_ply(fn, verts, colors):
 # Following part for converting a disparity image to a PointCloud was originally copied from
 # https://stackoverflow.com/questions/45325795/point-cloud-from-kitti-stereo-images
 
-imgC = cv2.imread('color_0000000000.png')
-imgL = cv2.imread('left_0000000000.png')
-imgR = cv2.imread('right_0000000000.png')
+imgC = cv2.imread('../../resources/color_0000000000.png')
+imgL = cv2.imread('../../resources/left_0000000000.png')
+imgR = cv2.imread('../../resources/right_0000000000.png')
 
 window_size = 9
 minDisparity = 1
