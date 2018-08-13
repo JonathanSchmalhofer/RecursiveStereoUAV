@@ -1,9 +1,8 @@
 # build folders
 */build/*/*.*
 
-# Unreal Environment Binaries
-Unreal/
-Unreal/*/*.*
+# Unreal Environment Binaries for CameraCalibration
+CameraCalibration/Environments/*/*.*
 
 # Downloaded cmake
 */cmake-*/*/*.*
