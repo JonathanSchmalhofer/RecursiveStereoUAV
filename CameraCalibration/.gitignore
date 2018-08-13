@@ -1,0 +1,5 @@
+# Unreal Environment Binaries for CameraCalibration
+Environments/
+Environments/*
+Environments/*.*
+Environments/*/*.*
