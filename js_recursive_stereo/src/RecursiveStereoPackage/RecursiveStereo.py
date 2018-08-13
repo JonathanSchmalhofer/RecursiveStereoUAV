@@ -17,6 +17,7 @@ end_header
 class RecursiveStereo:
     def __init__(self):
         # Attributes
+        self.verbose     = False
         self.color_image = None
         self.left_image  = None
         self.right_image = None
@@ -40,61 +41,73 @@ class RecursiveStereo:
         self.blockmatching_minimum_disparities = None # default used for KITTI: -64
         self.blockmatching_maximum_disparities = None # default used for KITTI: 128
     
+    def VerbosePrint(self, text):
+        if self.verbose == True:
+            print(text)
+    
+    def Get2dGridCoordinates(self, u_step_px, v_step_px):
+        width   = image_color.shape[1]
+        height  = image_color.shape[0]
+        u_list = np.arange(step_px, width,  u_step_px, dtype=np.int16)
+        v_list = np.arange(step_px, height, v_step_px, dtype=np.int16)
+        grid = [(u, v) for u in u_list for v in v_list ]
+        return grid
+    
     def RequirementsFulfilled(self):
+        requirements_fulfilled = True
         if self.left_image is None:
-            print('No left image set')
-            return False
+            self.VerbosePrint('No left image set')
+            requirements_fulfilled = False
         if self.right_image is None:
-            print('No right image set')
-            return False
+            self.VerbosePrint('No right image set')
+            requirements_fulfilled = False
         if self.c_u is None:
-            print('No c_u parameter set')
-            return False
+            self.VerbosePrint('No c_u parameter set')
+            requirements_fulfilled = False
         if self.c_v is None:
-            print('No c_v parameter set')
-            return False
+            self.VerbosePrint('No c_v parameter set')
+            requirements_fulfilled = False
         if self.b is None:
-            print('No b parameter set')
-            return False
+            self.VerbosePrint('No b parameter set')
+            requirements_fulfilled = False
         if self.b == 0:
-            print('Parameter b may not be zero')
-            return False
+            self.VerbosePrint('Parameter b may not be zero')
+            requirements_fulfilled = False
         if self.f is None:
-            print('No f parameter set')
-            return False
+            self.VerbosePrint('No f parameter set')
+            requirements_fulfilled = False
         if self.blockmatching_blocksize is None:
-            print('No blocksize parameter for blockmatching set')
-            return False
+            self.VerbosePrint('No blocksize parameter for blockmatching set')
+            requirements_fulfilled = False
         if self.blockmatching_window_size is None:
-            print('No window size parameter for blockmatching set')
-            return False
+            self.VerbosePrint('No window size parameter for blockmatching set')
+            requirements_fulfilled = False
         if self.blockmatching_minimum_disparities is None:
-            print('No minimum disparity parameter for blockmatching set')
-            return False
+            self.VerbosePrint('No minimum disparity parameter for blockmatching set')
+            requirements_fulfilled = False
         if self.blockmatching_maximum_disparities is None:
-            print('No maximum disparity parameter for blockmatching set')
-            return False
-        self.PrintParameters()
-        return True
+            self.VerbosePrint('No maximum disparity parameter for blockmatching set')
+            requirements_fulfilled = False
+        return requirements_fulfilled
     
     def PrintParameters(self):
-        print("    Running RecursiveStereo with following parameters:")
-        print(" ")
-        print("        # Configuration")
-        print("        self.export_pcl       = {}".format(self.export_pcl))
-        print("        self.enable_recursive = {}".format(self.enable_recursive))
-        print(" ")
-        print("        # Parameters for PCL Generation")
-        print("        self.c_u         = {}".format(self.c_u))
-        print("        self.c_v         = {}".format(self.c_v))
-        print("        self.b           = {}".format(self.b))
-        print("        self.f           = {}".format(self.f))
-        print(" ")
-        print("        # Parameters for (SemiGlobal)BlockMatching")
-        print("        self.blockmatching_blocksize           = {}".format(self.blockmatching_blocksize))
-        print("        self.blockmatching_window_size         = {}".format(self.blockmatching_window_size))
-        print("        self.blockmatching_minimum_disparities = {}".format(self.blockmatching_minimum_disparities))
-        print("        self.blockmatching_maximum_disparities = {}".format(self.blockmatching_maximum_disparities))
+        self.VerbosePrint("    Running RecursiveStereo with following parameters:")
+        self.VerbosePrint(" ")
+        self.VerbosePrint("        # Configuration")
+        self.VerbosePrint("        self.export_pcl       = {}".format(self.export_pcl))
+        self.VerbosePrint("        self.enable_recursive = {}".format(self.enable_recursive))
+        self.VerbosePrint(" ")
+        self.VerbosePrint("        # Parameters for PCL Generation")
+        self.VerbosePrint("        self.c_u         = {}".format(self.c_u))
+        self.VerbosePrint("        self.c_v         = {}".format(self.c_v))
+        self.VerbosePrint("        self.b           = {}".format(self.b))
+        self.VerbosePrint("        self.f           = {}".format(self.f))
+        self.VerbosePrint(" ")
+        self.VerbosePrint("        # Parameters for (SemiGlobal)BlockMatching")
+        self.VerbosePrint("        self.blockmatching_blocksize           = {}".format(self.blockmatching_blocksize))
+        self.VerbosePrint("        self.blockmatching_window_size         = {}".format(self.blockmatching_window_size))
+        self.VerbosePrint("        self.blockmatching_minimum_disparities = {}".format(self.blockmatching_minimum_disparities))
+        self.VerbosePrint("        self.blockmatching_maximum_disparities = {}".format(self.blockmatching_maximum_disparities))
     
     def GeneratePCLFromDisparity(self, disparity):
         Q = np.float32(
@@ -131,7 +144,7 @@ class RecursiveStereo:
     
     def Step(self):
         if self.RequirementsFulfilled():
-            print("Step")
+            self.PrintParameters()
             # Get disparity image
             self.disparity = self.GetDisparityImage()
             # Get point cloud
@@ -151,4 +164,4 @@ class RecursiveStereo:
             if self.enable_recursive == True:
                 pass
         else:
-            print("Not all requirements fulfilled for calculation step")
+            self.VerbosePrint("Not all requirements fulfilled for calculation step")
