@@ -3,3 +3,6 @@ Environments/
 Environments/*
 Environments/*.*
 Environments/*/*.*
+
+# Downloaded files
+*.zip
