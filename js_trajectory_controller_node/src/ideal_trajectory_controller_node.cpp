@@ -61,7 +61,7 @@ class TrajectoryControllerNode
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "ideal_trajectory_controller_node");
+    ros::init(argc, argv, "trajectory_controller_node");
         
     ROS_INFO("Starting trajectory controller node");
     
