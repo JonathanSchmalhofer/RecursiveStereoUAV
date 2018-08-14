@@ -16,7 +16,7 @@ class RecursiveStereoNode:
     def __init__(self):
         self.verbose          = rospy.get_param('/recursivestereo/parameters/verbose', False)
         self.rospack          = rospkg.RosPack() # get an instance of RosPack with the default search paths
-        self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.CallbackLeft, queue_size = 1)
+        self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.CallbackLeft,  queue_size = 1)
         self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.CallbackRight, queue_size = 1)
         self.publisher        = rospy.Publisher('/airsim/pointcloud', PointCloud, queue_size = 1)
         self.cv_bridge        = CvBridge()
@@ -35,7 +35,7 @@ class RecursiveStereoNode:
         self.algorithm.blockmatching_window_size         = rospy.get_param('/recursivestereo/parameters/blockmatching_window_size',           9)
         self.algorithm.blockmatching_minimum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_minimum_disparities',   1)
         self.algorithm.blockmatching_maximum_disparities = rospy.get_param('/recursivestereo/parameters/blockmatching_maximum_disparities',  65)
-        self.algorithm.export_pcl       = True
+        self.algorithm.export_pcl       = False
         self.algorithm.enable_recursive = True
     
     def VerbosePrint(self, string):
