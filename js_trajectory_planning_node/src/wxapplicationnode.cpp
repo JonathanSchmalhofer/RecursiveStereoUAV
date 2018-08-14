@@ -3,7 +3,7 @@
 #include <ros/ros.h>
 
 wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
-    EVT_IDLE(wxApplicationNode::DoUpdate)
+    EVT_IDLE(wxApplicationNode::UpdateDrawnCanvas)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTGLCanvas, wxGLCanvas)
     EVT_PAINT(RRTGLCanvas::OnPaint)
@@ -31,6 +31,8 @@ bool wxApplicationNode::OnInit()
         return false;
 
     frame_ = new RRTFrame();
+	
+	subscriber_ = node_handle_.subscribe("/stereo_vision/pointcloud", 1, &wxApplicationNode::PointCloudCallback, this);
 
     return true;
 }
@@ -70,15 +72,20 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
     return *rrt_gl_context;
 }
 
-void wxApplicationNode::DoUpdate(wxIdleEvent &event)
+void wxApplicationNode::PointCloudCallback(const js_messages::PointCloud::ConstPtr& pointcloud_message)
 {
-    if(ros::ok())
+    ROS_INFO("!!!!!!!!!!!!!Triggered Externally!!!!!!!!!!!!!!");
+	ROS_INFO("The sequence is: [%d]", pointcloud_message->header.seq);
+	
+	if(ros::ok())
     {
         planner_->Step();
         ros::spinOnce();
-        ros::Duration(1).sleep();
     }
+}
 
+void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)
+{
     ExtractStartAndGoalStateForContext();
     ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();
