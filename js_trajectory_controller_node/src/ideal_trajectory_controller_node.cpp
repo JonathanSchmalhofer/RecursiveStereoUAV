@@ -8,6 +8,7 @@
 #include <ros/ros.h>
 #include <js_common/common.h>
 #include <js_trajectory_controller_node/trajectory_point_to_airsim_class.h>
+#include <std_msgs/Bool.h>
 #include <js_messages/Trajectory3D.h>
 #include <js_messages/Trajectory3DPointStampedRoot_generated.h>
 
@@ -21,8 +22,9 @@ class TrajectoryControllerNode
             js_common::TryGetParameter("/recursivestereo/parameters/port_trajectory_control_to_airsim", port_trajectory_control_to_airsim, "6677");
             
             // Setup Subscriber and ZeroMQ Publisher
-            subscriber_    = node_handle_.subscribe("/trajectory_planning/trajectory3d", 1, &TrajectoryControllerNode::Trajectory3dCallback, this);
-            ros_to_airsim_ = new js_trajectory_controller_node::Trajectory3DPointToAirSimClass("tcp://*:" + port_trajectory_control_to_airsim);
+            subscriber_           = node_handle_.subscribe("/trajectory_planning/trajectory3d", 1, &TrajectoryControllerNode::Trajectory3dCallback, this);
+            subscriber_heartbeat_ = node_handle_.subscribe("/airsim/heartbeat",                 1, &TrajectoryControllerNode::ResendCallback,       this);
+            ros_to_airsim_        = new js_trajectory_controller_node::Trajectory3DPointToAirSimClass("tcp://*:" + port_trajectory_control_to_airsim);
             
             // Temporary
             current_z_ = 0;
@@ -51,10 +53,18 @@ class TrajectoryControllerNode
             ros_to_airsim_->SendTrajectory3DPoint();
         }
 
+        void ResendCallback(const std_msgs::Bool::ConstPtr& heartbeat_message)
+        {
+			ROS_INFO("Received a heartbeat - sending last message again");
+			// Send last set message again
+            ros_to_airsim_->SendTrajectory3DPoint();
+        }
+
     private:
         ros::NodeHandle                                                node_handle_; 
         js_trajectory_controller_node::Trajectory3DPointToAirSimClass* ros_to_airsim_;
         ros::Subscriber                                                subscriber_;
+        ros::Subscriber                                                subscriber_heartbeat_;
         double                                                         current_z_;
 
 };//End of class TrajectoryControllerNode

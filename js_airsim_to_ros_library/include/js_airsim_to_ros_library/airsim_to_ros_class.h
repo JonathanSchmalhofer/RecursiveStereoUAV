@@ -22,6 +22,9 @@ public:
     
     /// @brief Default Destructor to free dynamically allocated memory of received messages.
     ~AirSimToRosClass();
+	
+    /// @brief Connect to addr - useful to "reconnect" if connection was lost or could not be established on creation of object
+    void Connect(std::string const& addr);
     
     // @brief Returns true if a new, full message was received via ZeroMq, false otherwise
     int8_t ReceivedMessage();

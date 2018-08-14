@@ -8,6 +8,7 @@
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
 #include <js_common/common.h>
+#include <std_msgs/Bool.h>
 #include "js_airsim_to_ros_library/airsim_to_ros_class.h"
 
 sensor_msgs::Image airsim_image_left_msg, airsim_image_right_msg;
@@ -28,24 +29,45 @@ int main(int argc, char **argv)
     js_common::TryGetParameter("/recursivestereo/parameters/port_airsim_to_ros", port_airsim_to_ros, "5676");
     
     // Subscribe to IP of Host running AirSim
-    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros("tcp://" + ip_airsim + ":" + port_airsim_to_ros);
+	std::string connection_info = "tcp://" + ip_airsim + ":" + port_airsim_to_ros;
+	ROS_INFO("Subscribing to:    %s", connection_info.c_str());
+    js_airsim_to_ros_library::AirSimToRosClass airsim_to_ros(connection_info);
     
     ROS_INFO("Created airsim_to_ros");
 
     image_transport::ImageTransport image_transport(node_handle);
-    image_transport::Publisher left_stereoimage_chatter = image_transport.advertise("/airsim/left/image_raw", 1);
+    image_transport::Publisher left_stereoimage_chatter  = image_transport.advertise("/airsim/left/image_raw", 1);
     image_transport::Publisher right_stereoimage_chatter = image_transport.advertise("/airsim/right/image_raw", 1);
+	ros::Publisher publisher_heartbeat                   = node_handle.advertise<std_msgs::Bool>("/airsim/heartbeat", 1);
 
     std::uint32_t last_sequence_sent = 0;
+	std::uint32_t waiting_counter    = 0;
+	std::uint32_t waiting_threshold  = 10;
     while (ros::ok())
     {
         if ( verbose == true )
         {
             ROS_INFO("Waiting for data");
         }
+		if ( waiting_counter >= waiting_threshold )
+        {
+            if ( verbose == true )
+			{
+				ROS_INFO("Waiting too long - trying to reconnect to   %s", connection_info.c_str());
+			}
+			// Signalize within ROS, that we are still alive
+			std_msgs::Bool msg;
+            msg.data = true;
+			publisher_heartbeat.publish(msg);
+			// try to reconnect
+			airsim_to_ros.Connect(connection_info);
+			waiting_counter = 0;
+        }
+		waiting_counter++;
         int8_t received_return_value = airsim_to_ros.ReceivedMessage();
         if (1 == received_return_value)
         {
+			waiting_counter = 0;
             switch (airsim_to_ros.GetImageType())
             {
             case 0: // Unknown

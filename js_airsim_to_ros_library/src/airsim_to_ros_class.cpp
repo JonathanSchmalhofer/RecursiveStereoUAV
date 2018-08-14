@@ -34,6 +34,11 @@ AirSimToRosClass::AirSimToRosClass(std::string const& addr)
     image_data_size_            = 0;
     image_type_                 = 0;
 }
+
+void AirSimToRosClass::Connect(std::string const& addr)
+{
+	zmq_subscriber_.connect(addr);
+}
     
 AirSimToRosClass::~AirSimToRosClass()
 {
