@@ -4,7 +4,9 @@
 #include "planner_wrapper.h"
 #include "rrtglcontext.h"
 #include "rrtframe.h"
-#include <js_messages/PointCloud.h>
+//#include <js_messages/PointCloud.h>
+#include <sensor_msgs/PointCloud.h>
+#include <js_messages/Trajectory3D.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +26,7 @@ public:
     virtual int OnExit();
 
     void UpdateDrawnCanvas(wxIdleEvent &event);
-	void PointCloudCallback(const js_messages::PointCloud::ConstPtr& pointcloud_message);
+	void PointCloudCallback(const sensor_msgs::PointCloudConstPtr& pointcloud_message);
 
     RRTFrame* GetFrame();
     PlannerWrapper* GetPlanner();
@@ -39,6 +41,7 @@ private:
     RRTFrame *frame_;
 	ros::NodeHandle node_handle_;
 	ros::Subscriber subscriber_;
+    ros::Publisher publisher_;
 
     wxDECLARE_EVENT_TABLE();
 };

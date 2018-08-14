@@ -32,7 +32,9 @@ bool wxApplicationNode::OnInit()
 
     frame_ = new RRTFrame();
 	
-	subscriber_ = node_handle_.subscribe("/stereo_vision/pointcloud", 1, &wxApplicationNode::PointCloudCallback, this);
+    // Setup Subscriber and Publisher
+	subscriber_ = node_handle_.subscribe("/airsim/pointcloud", 1, &wxApplicationNode::PointCloudCallback, this);
+    publisher_  = node_handle_.advertise<js_messages::Trajectory3D>("/trajectory_planning/trajectory3d", 1);
 
     return true;
 }
@@ -72,7 +74,7 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
     return *rrt_gl_context;
 }
 
-void wxApplicationNode::PointCloudCallback(const js_messages::PointCloud::ConstPtr& pointcloud_message)
+void wxApplicationNode::PointCloudCallback(const sensor_msgs::PointCloudConstPtr& pointcloud_message)
 {
     ROS_INFO("!!!!!!!!!!!!!Triggered Externally!!!!!!!!!!!!!!");
 	ROS_INFO("The sequence is: [%d]", pointcloud_message->header.seq);
