@@ -35,6 +35,11 @@ RosToAirSimClass::~RosToAirSimClass()
 {
 }
 
+void RosToAirSimClass::Connect(std::string const& addr)
+{
+	zmq_subscriber_.connect(addr);
+}
+
 int8_t RosToAirSimClass::ReceivedMessage()
 {
     zmq::message_t zmq_received_message;

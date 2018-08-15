@@ -30,7 +30,7 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
 set(Boost_ADDITIONAL_VERSIONS "1.65" "1.65.0")
-find_package(Boost 1.65.0 REQUIRED COMPONENTS date_time)
+find_package(Boost 1.65.0 REQUIRED COMPONENTS date_time filesystem)
 
 ################################################################################
 #
@@ -137,6 +137,14 @@ add_executable(airsim_zmq_bridge
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )
 
+add_executable(airsim_offline_image_provider
+    src/airsim_offline_image_provider.cpp
+    src/StereoImageRpcClient.cpp
+    src/ros_to_airsim_class.cpp
+    ../externals/lodepng/src/lodepng.cpp
+    ${AIRSIM_ROS_INTERFACE_HEADERS}
+)
+
 target_link_libraries(airsim_rpc_client
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
@@ -144,6 +152,13 @@ target_link_libraries(airsim_rpc_client
 )
 
 target_link_libraries(airsim_zmq_bridge
+    "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Debug>:${ZMQ_LIBRARIES_DEBUG}>"
+    "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
+    ${Boost_LIBRARIES}
+)
+
+target_link_libraries(airsim_offline_image_provider
     "$<$<CONFIG:Debug>:${AIRSIM_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Debug>:${ZMQ_LIBRARIES_DEBUG}>"
     "$<$<CONFIG:Release>:${AIRSIM_LIBRARIES_RELEASE}>"
