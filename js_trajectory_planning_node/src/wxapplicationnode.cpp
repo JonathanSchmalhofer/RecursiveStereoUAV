@@ -23,6 +23,11 @@ IMPLEMENT_WX_THEME_SUPPORT;
 // wxApplicationNode
 // ----------------------------------------------------------------------------
 
+extern bool external_trigger_subscriber;
+extern bool external_trigger_publisher;
+
+
+
 bool wxApplicationNode::OnInit()
 {
     planner_ = new PlannerWrapper();
@@ -32,11 +37,12 @@ bool wxApplicationNode::OnInit()
 
     frame_ = new RRTFrame();
 	
-    // Setup Subscriber and Publisher
-	subscriber_ = node_handle_.subscribe("/airsim/pointcloud", 1, &wxApplicationNode::PointCloudCallback, this);
-    publisher_  = node_handle_.advertise<js_messages::Trajectory3D>("/trajectory_planning/trajectory3d", 1);
-
     return true;
+}
+
+int wxApplicationNode::OnRun()
+{
+	return wxApp::OnRun();
 }
 
 int wxApplicationNode::OnExit()
@@ -74,20 +80,25 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
     return *rrt_gl_context;
 }
 
-void wxApplicationNode::PointCloudCallback(const sensor_msgs::PointCloudConstPtr& pointcloud_message)
+void wxApplicationNode::PointCloudCallback()
 {
-    ROS_INFO("!!!!!!!!!!!!!Triggered Externally!!!!!!!!!!!!!!");
-	ROS_INFO("The sequence is: [%d]", pointcloud_message->header.seq);
-	
-	if(ros::ok())
-    {
-        planner_->Step();
-        ros::spinOnce();
-    }
+	//TODO //ROS_INFO("The sequence is: [%d]", pointcloud_message->header.seq);
+	planner_->Step();
+    external_trigger_publisher = true;
 }
 
 void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)
 {
+	if(ros::ok())
+    {
+        ros::spinOnce();
+    }
+	if(external_trigger_subscriber)
+	{
+		external_trigger_subscriber = false;
+        PointCloudCallback();
+	}
+	
     ExtractStartAndGoalStateForContext();
     ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();

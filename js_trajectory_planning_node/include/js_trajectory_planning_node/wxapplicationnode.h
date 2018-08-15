@@ -4,9 +4,6 @@
 #include "planner_wrapper.h"
 #include "rrtglcontext.h"
 #include "rrtframe.h"
-//#include <js_messages/PointCloud.h>
-#include <sensor_msgs/PointCloud.h>
-#include <js_messages/Trajectory3D.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -23,10 +20,11 @@ public:
 
     // virtual wxApp methods
     virtual bool OnInit();
+    virtual int OnRun();
     virtual int OnExit();
 
     void UpdateDrawnCanvas(wxIdleEvent &event);
-	void PointCloudCallback(const sensor_msgs::PointCloudConstPtr& pointcloud_message);
+	void PointCloudCallback();
 
     RRTFrame* GetFrame();
     PlannerWrapper* GetPlanner();
@@ -39,9 +37,8 @@ private:
     // the GL context we use for all our mono rendering windows
     RRTGLContext *context_;
     RRTFrame *frame_;
-	ros::NodeHandle node_handle_;
-	ros::Subscriber subscriber_;
-    ros::Publisher publisher_;
+	//ros::Subscriber subscriber_;
+    //ros::Publisher publisher_;
 
     wxDECLARE_EVENT_TABLE();
 };
