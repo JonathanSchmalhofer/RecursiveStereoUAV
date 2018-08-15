@@ -8,10 +8,13 @@
 #include "ros_to_airsim_class.h"
 #include "InputParser.hpp"
 
-bool debug_mode_activated = false;
-bool camera_calibration_mode_activated = false;
-bool no_zeromq_forwarding = false;
-std::string address = "tcp://127.0.0.1:6677";
+bool endless_looping                    = false;
+bool debug_mode_activated               = false;
+bool camera_calibration_mode_activated  = false;
+bool no_zeromq_forwarding               = false;
+std::string address                     = "tcp://127.0.0.1:6677";
+std::string left_folder                 = "";
+std::string right_folder                = "";
 
 // Source for GetFileList(): https://gist.github.com/vivithemage/9517678
 std::vector<std::string> GetFileList(const std::string& path)
@@ -35,13 +38,6 @@ std::vector<std::string> GetFileList(const std::string& path)
     return file_list;
 }
 
-
-void wait() 
-{ 
-    std::cout << "Press [Enter] to continue ..." << std::endl;
-    std::cin.get();
-} 
-
 // Copied from https://raw.githubusercontent.com/lvandeve/lodepng/master/examples/example_decode.cpp
 void decodeOneStep(const std::string filename, unsigned &width, unsigned &height, std::vector<unsigned char> &image)
 {
@@ -61,7 +57,11 @@ int main(int argc, const char *argv[])
     if (input_parser.cmdOptionExists("-d") || input_parser.cmdOptionExists("--debug"))
     {
         debug_mode_activated = true;
-    }    
+    }
+    if (input_parser.cmdOptionExists("-e") || input_parser.cmdOptionExists("--endless"))
+    {
+        endless_looping = true;
+    }
     if (input_parser.cmdOptionExists("-a"))
     {
         address = input_parser.getCmdOption("-a");
@@ -75,9 +75,33 @@ int main(int argc, const char *argv[])
         std::cout << "Camera calibration mode activated\n";
         camera_calibration_mode_activated = true;
     }
+    if (input_parser.cmdOptionExists("-l"))
+    {
+        left_folder = input_parser.getCmdOption("-l");
+        std::cout << "PNG files (left) will be imported from:" << std::endl;
+        std::cout << "    " << left_folder << std::endl;
+    }
+    if (input_parser.cmdOptionExists("--left-folder"))
+    {
+        left_folder = input_parser.getCmdOption("--left-folder");
+        std::cout << "PNG files (left) will be imported from:" << std::endl;
+        std::cout << "    " << left_folder << std::endl;
+    }
+    if (input_parser.cmdOptionExists("-r"))
+    {
+        right_folder = input_parser.getCmdOption("-r");
+        std::cout << "PNG files (right) will be imported from:" << std::endl;
+        std::cout << "    " << right_folder << std::endl;
+    }
+    if (input_parser.cmdOptionExists("--right-folder"))
+    {
+        right_folder = input_parser.getCmdOption("--right-folder");
+        std::cout << "PNG files (right) will be imported from:" << std::endl;
+        std::cout << "    " << right_folder << std::endl;
+    }
     
-    std::vector<std::string> left_file_list = GetFileList("D:\\zWork\\01_Fernuni_Hagen\\01 - M.Sc. Elektro- und Informationstechnik\\98 - Masterarbeit\\04_KITTI_Benchmark\\Road\\2011_09_26_drive_0027\\2011_09_26\\2011_09_26_drive_0027_sync\\image_00\\data");
-    std::vector<std::string> right_file_list = GetFileList("D:\\zWork\\01_Fernuni_Hagen\\01 - M.Sc. Elektro- und Informationstechnik\\98 - Masterarbeit\\04_KITTI_Benchmark\\Road\\2011_09_26_drive_0027\\2011_09_26\\2011_09_26_drive_0027_sync\\image_01\\data");
+    std::vector<std::string> left_file_list  = GetFileList(left_folder);
+    std::vector<std::string> right_file_list = GetFileList(right_folder);
        
     //  We send updates via this socket
     zmq::context_t context(1);
@@ -93,10 +117,11 @@ int main(int argc, const char *argv[])
     }
     ros_to_airsim::RosToAirSimClass ros_to_airsim(address);
     
-    //wait();
+    bool keep_looping           = true;
+    std::uint32_t send_counter  = 0;
+    std::uint32_t image_counter = 0;
     
-    bool keep_looping = true;
-    std::uint32_t send_counter = 0;
+    assert(left_file_list.size() == right_file_list.size());
     
     while(keep_looping)
     {
@@ -132,8 +157,21 @@ int main(int argc, const char *argv[])
         std::vector<unsigned char> image_png_left, image_png_right;
         int buffersize_left, buffersize_right;
         
-        decodeOneStep(left_file_list.at(0),  width_left,  height_left,  image_png_left);
-        decodeOneStep(right_file_list.at(0), width_right, height_right, image_png_right);
+        decodeOneStep(left_file_list.at(image_counter),  width_left,  height_left,  image_png_left);
+        decodeOneStep(right_file_list.at(image_counter), width_right, height_right, image_png_right);
+        image_counter++;
+        
+        if(image_counter >= left_file_list.size())
+        {
+            if(endless_looping)
+            {
+                image_counter = 0;
+            }
+            else
+            {
+                keep_looping = false;
+            }
+        }
         
         // Image Left
         auto image_left = airsim_to_ros::CreateImage(
@@ -241,6 +279,8 @@ int main(int argc, const char *argv[])
         mutex_data->trajectory_pose_.orientation_.w_ = ros_to_airsim.GetTrajectory3DPointPoseOrientationW();
         */
     }
+    
+    std::cout << "Finished" << std::endl;
 
     return 0;
 }
