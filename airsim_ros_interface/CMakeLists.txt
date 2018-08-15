@@ -141,6 +141,7 @@ add_executable(airsim_offline_image_provider
     src/airsim_offline_image_provider.cpp
     src/StereoImageRpcClient.cpp
     src/ros_to_airsim_class.cpp
+    src/kitti_utils.cpp
     ../externals/lodepng/src/lodepng.cpp
     ${AIRSIM_ROS_INTERFACE_HEADERS}
 )

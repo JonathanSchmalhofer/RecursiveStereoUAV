@@ -7,6 +7,7 @@
 #include "airsim_offline_image_provider.hpp"
 #include "ros_to_airsim_class.h"
 #include "InputParser.hpp"
+#include "kitti_utils.hpp"
 
 bool endless_looping                    = false;
 bool debug_mode_activated               = false;
@@ -15,28 +16,8 @@ bool no_zeromq_forwarding               = false;
 std::string address                     = "tcp://127.0.0.1:6677";
 std::string left_folder                 = "";
 std::string right_folder                = "";
-
-// Source for GetFileList(): https://gist.github.com/vivithemage/9517678
-std::vector<std::string> GetFileList(const std::string& path)
-{
-    std::vector<std::string> file_list;
-    if (!path.empty())
-    {
-        boost::filesystem::path apk_path(path);
-        boost::filesystem::recursive_directory_iterator end;
-
-        for (boost::filesystem::recursive_directory_iterator i(apk_path); i != end; ++i)
-        {
-            const boost::filesystem::path cp = (*i);
-            if (".png" == boost::filesystem::extension(cp.string()))
-            {
-                file_list.push_back(cp.string());
-            }
-        }
-    }
-    std::sort(file_list.begin(), file_list.end());
-    return file_list;
-}
+std::string oxts_folder                 = "";
+kitti_utils::KittiUtils utils;
 
 // Copied from https://raw.githubusercontent.com/lvandeve/lodepng/master/examples/example_decode.cpp
 void decodeOneStep(const std::string filename, unsigned &width, unsigned &height, std::vector<unsigned char> &image)
@@ -99,9 +80,17 @@ int main(int argc, const char *argv[])
         std::cout << "PNG files (right) will be imported from:" << std::endl;
         std::cout << "    " << right_folder << std::endl;
     }
+    if (input_parser.cmdOptionExists("-o"))
+    {
+        oxts_folder = input_parser.getCmdOption("-o");
+    }
+    if (input_parser.cmdOptionExists("--oxts-folder"))
+    {
+        oxts_folder = input_parser.getCmdOption("--oxts-folder");
+    }
     
-    std::vector<std::string> left_file_list  = GetFileList(left_folder);
-    std::vector<std::string> right_file_list = GetFileList(right_folder);
+    std::vector<std::string> left_file_list  = kitti_utils::GetFileList(left_folder,  ".png");
+    std::vector<std::string> right_file_list = kitti_utils::GetFileList(right_folder, ".png");
        
     //  We send updates via this socket
     zmq::context_t context(1);
@@ -117,11 +106,17 @@ int main(int argc, const char *argv[])
     }
     ros_to_airsim::RosToAirSimClass ros_to_airsim(address);
     
+    std::vector<long>        timestamps;
+    std::vector<std::string> filelist_oxts;
+    double                   scale;
+    utils.LoadOxtsLitePaths(oxts_folder, timestamps, filelist_oxts);
+    
     bool keep_looping           = true;
     std::uint32_t send_counter  = 0;
     std::uint32_t image_counter = 0;
     
     assert(left_file_list.size() == right_file_list.size());
+    assert(left_file_list.size() == filelist_oxts.size());
     
     while(keep_looping)
     {
@@ -157,8 +152,12 @@ int main(int argc, const char *argv[])
         std::vector<unsigned char> image_png_left, image_png_right;
         int buffersize_left, buffersize_right;
         
+        // Get image for frame = idx
         decodeOneStep(left_file_list.at(image_counter),  width_left,  height_left,  image_png_left);
         decodeOneStep(right_file_list.at(image_counter), width_right, height_right, image_png_right);
+        // Get pose for frame = idx
+        kitti_utils::oxts_data datapoint = utils.GetOxtsData(filelist_oxts, timestamps, image_counter, scale);
+        boost::numeric::ublas::matrix<double> pose = utils.ConvertOxtsToPose(datapoint, scale);
         image_counter++;
         
         if(image_counter >= left_file_list.size())
