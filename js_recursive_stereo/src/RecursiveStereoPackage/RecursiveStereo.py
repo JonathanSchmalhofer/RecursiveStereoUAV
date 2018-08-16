@@ -85,31 +85,53 @@ class RecursiveStereo:
         grid = np.int16(grid)
         return grid
     
-    def GetPCLFromDisparity(self, disparity):
+    def GetQ(self):
         Q    = np.float32(
                [[ 0,         0,         0,          self.f  ],
                 [-1.0000,    0,         0,          self.c_u],
                 [ 0,        -1.0000,    0,          self.c_v],
                 [ 0,         0,         1/self.b,   0       ]])
+        return Q
+    
+    def GetPCLFromDisparity(self, disparity):
+        Q    = self.GetQ()
         pcl  = cv2.reprojectImageTo3D(disparity, Q)
-        return pcl
+        
+        # Export point cloud
+        mask = ((disparity < disparity.max()) &
+                (disparity > disparity.min()) &
+                (np.isfinite(pcl[:,:,0]))          &
+                (np.isfinite(pcl[:,:,1]))          &
+                (np.isfinite(pcl[:,:,2])))
+        pcl = pcl[mask]
+        if self.color_image is None:
+            return pcl, None
+        else:
+            return pcl, self.color_image[mask]
     
     def GetReducedPCL(self, disparity):
         # Get Sampling Points
         grid              = self.Initialize2dCoordinates()
-        u_idx             = [x[1] for x in grid]
-        v_idx             = [x[0] for x in grid]
+        u_idx             = [x[1]-1 for x in grid]
+        v_idx             = [x[0]-1 for x in grid]
         disparity_reduced = disparity[v_idx,u_idx]
-        pcl_reduced       = self.GetPCLFromDisparity(disparity_reduced)
-        pcl_reduced       = np.squeeze(pcl_reduced)
+        
+        Q                 = self.GetQ()
+        y                 = np.float32([[x[1], x[0], disparity[x[0]-1,x[1]-1], 1] for x in grid ])
+        pcl               = np.dot(Q, np.transpose(y)).transpose()
+        pcl_norm          = np.array([x/x[3] for x in pcl]) # normalize
         # Due to the different dimensions, the reduced mask is slight differntly setup
         mask = ((disparity_reduced < disparity_reduced.max()) &
                 (disparity_reduced > disparity_reduced.min()) &
-                (np.isfinite(pcl_reduced[:,0]))               &
-                (np.isfinite(pcl_reduced[:,1]))               &
-                (np.isfinite(pcl_reduced[:,2])))
-        pcl_reduced       = pcl_reduced[mask]
-        return pcl_reduced
+                (np.isfinite(pcl_norm[:,0]))               &
+                (np.isfinite(pcl_norm[:,1]))               &
+                (np.isfinite(pcl_norm[:,2])))
+        pcl_reduced       = pcl_norm[mask]
+        if self.color_image is None:
+            return pcl_reduced, None
+        else:
+            color_reduced     = np.array([self.color_image[x[0]-1,x[1]-1] for x in grid ])
+            return pcl_reduced[:,0:3], color_reduced[mask]
     
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity   = self.blockmatching_minimum_disparities,
@@ -143,31 +165,21 @@ class RecursiveStereo:
             self.disparity = self.GetDisparityImage()
             
             # Get full point cloud
-            self.pcl = self.GetPCLFromDisparity(self.disparity)
+            self.pcl, colors = self.GetPCLFromDisparity(self.disparity)
             
-            # Export point cloud
-            mask = ((self.disparity < self.disparity.max()) &
-                    (self.disparity > self.disparity.min()) &
-                    (np.isfinite(self.pcl[:,:,0]))          &
-                    (np.isfinite(self.pcl[:,:,1]))          &
-                    (np.isfinite(self.pcl[:,:,2])))
-            self.pcl = self.pcl[mask]
             if self.export_pcl == True:
-                if self.color_image is None:
+                if colors is None:
                     self.ExportPCLToPly(self.pcl_filename, self.pcl)
                 else:
-                    self.ExportPCLToPly(self.pcl_filename, self.pcl, self.color_image[mask])
+                    self.ExportPCLToPly(self.pcl_filename, self.pcl, colors)
             
-            # TODO: currently not working!!! # Get reduced point cloud
-            #self.pcl = self.GetReducedPCL(self.disparity)
-            #if self.export_pcl == True:
-            #    self.ExportPCLToPly('reduced.ply', self.pcl)
-            
-            
-            
-            
-            
-            
+            # Get reduced point cloud
+            self.pcl, colors = self.GetReducedPCL(self.disparity)
+            if self.export_pcl == True:
+                if colors is None:
+                    self.ExportPCLToPly('reduced.ply', self.pcl)
+                else:
+                    self.ExportPCLToPly('reduced.ply', self.pcl, colors)    
             
             if self.enable_recursive == True:
                 pass

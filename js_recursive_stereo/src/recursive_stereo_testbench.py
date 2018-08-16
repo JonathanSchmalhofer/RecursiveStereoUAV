@@ -20,10 +20,10 @@ if __name__ == '__main__':
     
     # Run
     algorithm.Step()
-    image_color = cv2.imread('../resources/AirSimNeighbourhood/images/left_00012.png')
-    image_left  = cv2.imread('../resources/AirSimNeighbourhood/images/left_00012.png')
-    image_right = cv2.imread('../resources/AirSimNeighbourhood/images/right_00012.png')
-    algorithm.left_image  = image_left
-    algorithm.right_image = image_right
-    algorithm.color_image = image_color
+    color_image = cv2.imread('../resources/AirSimNeighbourhood/images/left_00012.png')
+    left_image  = cv2.imread('../resources/AirSimNeighbourhood/images/left_00012.png')
+    right_image = cv2.imread('../resources/AirSimNeighbourhood/images/right_00012.png')
+    algorithm.left_image  = left_image
+    algorithm.right_image = right_image
+    algorithm.color_image = color_image
     algorithm.Step()
