@@ -37,7 +37,7 @@ std::vector<std::string> GetFileList(const std::string& path, const std::string 
  *
  * Copied from: https://github.com/rpng/kitti_parser/blob/master/src/kitti_parser/util/Loader.cpp
  */
-oxts_data KittiUtils::GetOxtsData(std::vector<std::string> filelist, std::vector<long> timestamps, std::size_t idx, double &scale)
+oxts_data KittiUtils::GetOxtsData(std::vector<std::string> filelist, std::vector<long> timestamps, std::size_t idx)
 {
     // Make new measurement
     oxts_data datapoint;
@@ -90,14 +90,20 @@ oxts_data KittiUtils::GetOxtsData(std::vector<std::string> filelist, std::vector
     datapoint.posmode = (int)values.at(27);
     datapoint.velmode = (int)values.at(28);
     datapoint.orimode = (int)values.at(29);
-    
-    
+
+    // Return it
+    return datapoint;
+}
+
+
+double KittiUtils::GetScale(std::vector<std::string> filelist)
+{
     // also read first file
+    std::vector<double> values;
     std::ifstream first_file(filelist.at(0), std::ios::in);
-    values.clear();
 
     // Keep storing values from the text file so long as data exists
-    num = 0.0;
+    double num = 0.0;
     while (first_file >> num)
     {
         values.push_back(num);
@@ -105,17 +111,31 @@ oxts_data KittiUtils::GetOxtsData(std::vector<std::string> filelist, std::vector
     
     // compute mercator scale from latitude - always use first (!) latitude value for this, not idx
     // see also convertOxtsToPose.m in MATLAB dev kit from KITTI dataset
-    scale = std::cos(values.at(0) * boost::math::constants::pi<double>() / 180.0f);
+    double scale = std::cos(values.at(0) * boost::math::constants::pi<double>() / 180.0f);
 
     // Return it
-    return datapoint;
+    return scale;
 }
 
-boost::numeric::ublas::matrix<double> KittiUtils::ConvertOxtsToPose(oxts_data datapoint, double scale)
+boost::numeric::ublas::matrix<double> KittiUtils::GetTr0(std::vector<std::string> filelist, double scale)
+{
+    boost::numeric::ublas::matrix<double> Tr_0(4, 4);
+    std::vector<long> empty_timestamps;
+    empty_timestamps.push_back(0);
+    
+    // Get the first point of the oxts data...
+    oxts_data first_data_point = GetOxtsData(filelist, empty_timestamps, 0);   
+    
+    // ...and convert the oxts-data into the Transformation of the first point
+    Tr_0 = GetTransformation(first_data_point, scale);
+    
+    return Tr_0;
+}
+
+boost::numeric::ublas::matrix<double> KittiUtils::GetTransformation(oxts_data datapoint, double scale)
 {
     // Compare convertOxtsToPose.m from MATLAB DevKit of KITTI Dataset
-    boost::numeric::ublas::matrix<double> Tr_0(4, 4);
-    boost::numeric::ublas::matrix<double> pose(4, 4);
+    boost::numeric::ublas::matrix<double> Tr(4, 4);
     boost::numeric::ublas::matrix<double> Rx(3, 3);
     boost::numeric::ublas::matrix<double> Ry(3, 3);
     boost::numeric::ublas::matrix<double> Rz(3, 3);
@@ -124,43 +144,79 @@ boost::numeric::ublas::matrix<double> KittiUtils::ConvertOxtsToPose(oxts_data da
     // converts lat/lon coordinates to mercator coordinates using mercator scale
     // see latlonToMercator.m from MATLAB DevKit of KITTI Dataset
     double er = 6378137;
-    double mx = scale * oxts_data.lon * boost::math::constants::pi<double>() * er / 180.0f;
-    double my = scale * er * std::log( std::tan((90.0f+oxts_data.lat) * boost::math::constants::pi<double>() / 360.0f) );
-    double mz = oxts_data.alt;
+    double mx = scale * datapoint.lon * boost::math::constants::pi<double>() * er / 180.0f;
+    double my = scale * er * std::log( std::tan((90.0f+datapoint.lat) * boost::math::constants::pi<double>() / 360.0f) );
+    double mz = datapoint.alt;
     
     // rotation matrix (OXTS RT3000 user manual, page 71/92)
     //
     // base => nav  (level oxts => rotated oxts)
     Rx(0,0) = 1;                            Rx(0,1) = 0;                        Rx(0,2) = 0;
-    Rx(1,0) = 0;                            Rx(1,1) = std::cos(oxts_data.roll); Rx(1,2) = -std::sin(oxts_data.roll);
-    Rx(2,0) = 0;                            Rx(2,1) = std::sin(oxts_data.roll); Rx(2,2) =  std::cos(oxts_data.roll);
+    Rx(1,0) = 0;                            Rx(1,1) = std::cos(datapoint.roll); Rx(1,2) = -std::sin(datapoint.roll);
+    Rx(2,0) = 0;                            Rx(2,1) = std::sin(datapoint.roll); Rx(2,2) =  std::cos(datapoint.roll);
     // base => nav  (level oxts => rotated oxts)
-    Ry(0,0) =  std::cos(oxts_data.pitch);   Ry(0,1) = 0;                        Ry(0,2) = std::sin(oxts_data.pitch);
-    Ry(1,0) =  0;                           Rx(1,1) = 1;                        Ry(1,2) = 0;
-    Ry(2,0) = -std::sin(oxts_data.pitch);   Ry(2,1) = 0;                        Ry(2,2) =  std::cos(oxts_data.pitch);
+    Ry(0,0) =  std::cos(datapoint.pitch);   Ry(0,1) = 0;                        Ry(0,2) = std::sin(datapoint.pitch);
+    Ry(1,0) =  0;                           Ry(1,1) = 1;                        Ry(1,2) = 0;
+    Ry(2,0) = -std::sin(datapoint.pitch);   Ry(2,1) = 0;                        Ry(2,2) =  std::cos(datapoint.pitch);
     // base => nav  (level oxts => rotated oxts)
-    Rz(0,0) = std::cos(oxts_data.yaw);      Rz(0,1) = -std::sin(oxts_data.yaw); Rz(0,2) = 0;
-    Rz(1,0) = std::sin(oxts_data.yaw);      Rz(1,1) =  std::cos(oxts_data.yaw); Rz(1,2) = 0;
+    Rz(0,0) = std::cos(datapoint.yaw);      Rz(0,1) = -std::sin(datapoint.yaw); Rz(0,2) = 0;
+    Rz(1,0) = std::sin(datapoint.yaw);      Rz(1,1) =  std::cos(datapoint.yaw); Rz(1,2) = 0;
     Rz(2,0) = 0;                            Rz(2,1) =  0;                       Rz(2,2) =  1;
     // R = Rz*Ry*Rx;
-    R = boost::numeric::ublas::prod(Ry, Rx);
-    R = boost::numeric::ublas::prod(Rz, R);
+    std::cout << "Rx = " << Rx << std::endl;
+    std::cout << "Ry = " << Ry << std::endl;
+    std::cout << "Rz = " << Rz << std::endl;
+    std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+    std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+    R = boost::numeric::ublas::prod(Ry, Rx); std::cout << "Ry*Rx    = " << R << std::endl;
+    R = boost::numeric::ublas::prod(Rz, R);  std::cout << "Rz*Ry*Rx = " << R << std::endl;
     
-    // in Matlab notation: Tr_0 = [R t;0 0 0 1];
-    project(Tr_0, (0,2), (0,2)) = R;
-    Tr_0(0,3)                   = mx;
-    Tr_0(1,3)                   = my;
-    Tr_0(2,3)                   = mz;
-    Tr_0(3,0) = 0; Tr_0(3,1) = 0; Tr_0(3,2) = 0;  Tr_0(3,3) = 1;
+    // in Matlab notation: Tr = [R t;0 0 0 1];
+    // DOES NOT WORK: boost::numeric::ublas::project(Tr, boost::numeric::ublas::range(0,2), boost::numeric::ublas::range(0,2)) = R;
+    Tr(0,0) = R(0,0); Tr(0,1) = R(0,1); Tr(0,2) = R(0,2); Tr(0,3) = mx;
+    Tr(1,0) = R(1,0); Tr(1,1) = R(1,1); Tr(1,2) = R(1,2); Tr(1,3) = my;
+    Tr(2,0) = R(2,0); Tr(2,1) = R(2,1); Tr(2,2) = R(2,2); Tr(2,3) = mz;
+    Tr(3,0) = 0;      Tr(3,1) = 0;      Tr(3,2) = 0;      Tr(3,3) = 1;
+    
+    return Tr;
+}
+
+
+
+boost::numeric::ublas::matrix<double> KittiUtils::ConvertOxtsToPose(oxts_data datapoint, double scale, boost::numeric::ublas::matrix<double> Tr_0_inv)
+{
+    boost::numeric::ublas::matrix<double> pose(4, 4);
+    boost::numeric::ublas::matrix<double> Tr(4, 4);
     
     // in Matlab notation: pose = inv(Tr_0) * [R t;0 0 0 1]
-
-    /*
-    for (unsigned i = 0; i < m.size1 (); ++ i)
-        for (unsigned j = 0; j < m.size2 (); ++ j)
-            m (i, j) = 3 * i + j;
-    */
+    // with Tr = [R t;0 0 0 1]
+    Tr = GetTransformation(datapoint, scale);
+    pose = boost::numeric::ublas::prod(Tr_0_inv, Tr);
+ 
     return pose;
+}
+
+void KittiUtils::GetEulerAngles(boost::numeric::ublas::matrix<double> pose, double &roll, double &pitch, double &yaw)
+{
+    // Normalize
+    pose /= pose(3,3);
+    Eigen::Matrix3d rot_matrix;
+    rot_matrix(0,0) = pose(0,0); rot_matrix(0,1) = pose(0,1); rot_matrix(0,2) = pose(0,2);
+    rot_matrix(1,0) = pose(1,0); rot_matrix(1,1) = pose(1,1); rot_matrix(1,2) = pose(1,2);
+    rot_matrix(2,0) = pose(2,0); rot_matrix(2,1) = pose(2,1); rot_matrix(2,2) = pose(2,2);
+    Eigen::Vector3d rot = rot_matrix.eulerAngles(0, 1, 2); // order: roll - pitch - yaw
+    roll  = rot(0);
+    pitch = rot(1);
+    yaw   = rot(2);
+}
+
+void KittiUtils::GetPosition(boost::numeric::ublas::matrix<double> pose, double &x, double &y, double &z)
+{
+    // Normalize
+    pose /= pose(3,3);
+    x     = pose(0,3);
+    y     = pose(1,3);
+    z     = pose(2,3);
 }
 
 KittiUtils::KittiUtils()

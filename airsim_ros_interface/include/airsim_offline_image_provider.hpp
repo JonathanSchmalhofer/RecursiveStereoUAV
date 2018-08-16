@@ -10,6 +10,7 @@
 #include "StereoImageRpcClient.hpp" // for StereoImageType
 
 #include <js_messages/Image_generated.h>
+#include <js_messages/PoseMessageRoot_generated.h>
 #include <zeromq_cpp/zmq.hpp>
 
 #include <boost/filesystem.hpp>

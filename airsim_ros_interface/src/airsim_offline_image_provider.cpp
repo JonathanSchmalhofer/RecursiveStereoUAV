@@ -19,6 +19,8 @@ std::string right_folder                = "";
 std::string oxts_folder                 = "";
 kitti_utils::KittiUtils utils;
 
+double pose_x, pose_y, pose_z, pose_roll, pose_pitch, pose_yaw;
+
 // Copied from https://raw.githubusercontent.com/lvandeve/lodepng/master/examples/example_decode.cpp
 void decodeOneStep(const std::string filename, unsigned &width, unsigned &height, std::vector<unsigned char> &image)
 {
@@ -95,9 +97,12 @@ int main(int argc, const char *argv[])
     //  We send updates via this socket
     zmq::context_t context(1);
     
-    // Publisher
-    zmq::socket_t publish_socket = zmq::socket_t(context, ZMQ_PUB);
-    publish_socket.bind("tcp://*:5676");
+    // Publisher - Images
+    zmq::socket_t publish_socket_image = zmq::socket_t(context, ZMQ_PUB);
+    publish_socket_image.bind("tcp://*:5676");
+    // Publisher - Pose
+    zmq::socket_t publish_socket_pose = zmq::socket_t(context, ZMQ_PUB);
+    publish_socket_pose.bind("tcp://*:5677");
     
     // Subscriber
     if (debug_mode_activated)
@@ -106,10 +111,22 @@ int main(int argc, const char *argv[])
     }
     ros_to_airsim::RosToAirSimClass ros_to_airsim(address);
     
-    std::vector<long>        timestamps;
-    std::vector<std::string> filelist_oxts;
-    double                   scale;
+    std::vector<long>                       timestamps;
+    std::vector<std::string>                filelist_oxts;
+    double                                  scale;
+    boost::numeric::ublas::matrix<double>   Tr_0(4, 4);
+    boost::numeric::ublas::matrix<double>   Tr_0_inv(4, 4);
     utils.LoadOxtsLitePaths(oxts_folder, timestamps, filelist_oxts);
+    scale    = utils.GetScale(filelist_oxts);
+    Tr_0     = utils.GetTr0(filelist_oxts, scale);
+    bool inversion_succeeded = InvertMatrix(Tr_0, Tr_0_inv);
+    assert(inversion_succeeded==true);
+	if (debug_mode_activated)
+	{
+		std::cout << "   scale   = " << scale << std::endl;
+		std::cout << "    Tr_0   = " << Tr_0 << std::endl;
+		std::cout << "inv(Tr_0)  = " << Tr_0_inv << std::endl;
+	}
     
     bool keep_looping           = true;
     std::uint32_t send_counter  = 0;
@@ -118,11 +135,13 @@ int main(int argc, const char *argv[])
     assert(left_file_list.size() == right_file_list.size());
     assert(left_file_list.size() == filelist_oxts.size());
     
+    
     while(keep_looping)
     {
         // copy image into flatbuffers
         flatbuffers::FlatBufferBuilder fbb_left;
         flatbuffers::FlatBufferBuilder fbb_right;
+        flatbuffers::FlatBufferBuilder fbb_pose;
         
         // Image.header.stamp
         airsim_to_ros::time message_time(
@@ -148,17 +167,32 @@ int main(int argc, const char *argv[])
             );
         fbb_right.Finish(header_right);
         
+        // PoseMessage.header
+        auto header_pose = airsim_to_ros::CreateHeader(
+            fbb_pose, 
+            send_counter,               // header_seq_
+            &message_time,
+            fbb_pose.CreateString("")   // header_frame_id_
+            );
+        fbb_pose.Finish(header_pose);
+        
         unsigned width_left, width_right, height_left, height_right;
         std::vector<unsigned char> image_png_left, image_png_right;
-        int buffersize_left, buffersize_right;
+        int buffersize_left, buffersize_right, buffersize_pose;
         
         // Get image for frame = idx
         decodeOneStep(left_file_list.at(image_counter),  width_left,  height_left,  image_png_left);
         decodeOneStep(right_file_list.at(image_counter), width_right, height_right, image_png_right);
         // Get pose for frame = idx
-        kitti_utils::oxts_data datapoint = utils.GetOxtsData(filelist_oxts, timestamps, image_counter, scale);
-        boost::numeric::ublas::matrix<double> pose = utils.ConvertOxtsToPose(datapoint, scale);
-        image_counter++;
+        kitti_utils::oxts_data datapoint = utils.GetOxtsData(filelist_oxts, timestamps, image_counter);
+        boost::numeric::ublas::matrix<double> pose = utils.ConvertOxtsToPose(datapoint, scale, Tr_0_inv);
+        if (debug_mode_activated)
+        {
+            std::cout << "   pose(idx=" << image_counter << ") = " << pose << std::endl;
+        }
+        utils.GetEulerAngles(pose, pose_roll, pose_pitch, pose_yaw);
+        utils.GetPosition(   pose, pose_x,    pose_y,     pose_z);
+		image_counter++;
         
         if(image_counter >= left_file_list.size())
         {
@@ -198,6 +232,28 @@ int main(int argc, const char *argv[])
             fbb_right.CreateVector<std::uint8_t>(image_png_right)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
         fbb_right.Finish(image_right);
         
+        // PoseMessage.position
+        airsim_to_ros::Point pose_position(
+            pose_x, // x
+            pose_y, // y
+            pose_z  // z
+        );
+        
+        // PoseMessage.orientation
+        airsim_to_ros::Orientation pose_orientation(
+            pose_roll,  // roll
+            pose_pitch, // pitch
+            pose_yaw    // yaw
+        );
+        
+        // Pose
+        auto pose_message = airsim_to_ros::CreatePoseMessage(
+            fbb_pose,
+            header_pose,
+            &pose_position,     // position
+            &pose_orientation); // orientation
+        fbb_pose.Finish(pose_message);
+        
         // Copy flatbuffers into zmq message and send it
         buffersize_left = fbb_left.GetSize();
         zmq::message_t image_msg_left(buffersize_left);
@@ -207,9 +263,14 @@ int main(int argc, const char *argv[])
         zmq::message_t image_msg_right(buffersize_right);
         memcpy((void *)image_msg_right.data(), fbb_right.GetBufferPointer(), buffersize_right);
         
+        buffersize_pose = fbb_pose.GetSize();
+        zmq::message_t pose_msg(buffersize_pose);
+        memcpy((void *)pose_msg.data(), fbb_pose.GetBufferPointer(), buffersize_pose);
+        
         // Send left and right
-        publish_socket.send(image_msg_left);
-        publish_socket.send(image_msg_right);
+        publish_socket_image.send(image_msg_left);
+        publish_socket_image.send(image_msg_right);
+        publish_socket_pose.send(pose_msg);
         send_counter++;
         
         if (debug_mode_activated)
@@ -232,6 +293,16 @@ int main(int argc, const char *argv[])
             std::cout << "    width: "      << unsigned(width_right) << std::endl;
             std::cout << "    step: "       << unsigned(4 * width_right) << std::endl;
             std::cout << "    encoding: "   << "rgba8" << std::endl;
+            std::cout << " " << std::endl;
+            std::cout << "P O S E" << std::endl;
+            std::cout << "Sent flatbuffer message via zmq: " << buffersize_pose << std::endl;
+            std::cout << "    x: "     << pose_x     << std::endl;
+            std::cout << "    y: "     << pose_y     << std::endl;
+            std::cout << "    z: "     << pose_z     << std::endl;
+            std::cout << "    roll: "  << pose_roll  << std::endl;
+            std::cout << "    pitch: " << pose_pitch << std::endl;
+            std::cout << "    yaw: "   << pose_yaw   << std::endl;
+            std::cout << " " << std::endl;
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         }
         

@@ -1,0 +1,23 @@
+include "Header.fbs";
+
+namespace airsim_to_ros;
+
+struct Point {
+    x: double;
+    y: double;
+    z: double;
+}
+
+struct Orientation {
+    roll:  double;
+    pitch: double;
+    yaw:   double;
+}
+
+table PoseMessage {
+    header: Header;
+    position: Point;
+    orientation: Orientation;
+}
+
+root_type PoseMessage;

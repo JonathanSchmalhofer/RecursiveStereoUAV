@@ -41,6 +41,10 @@ goto :downloadflatbufferssrc
 :prebuildstep5
 goto :installflatbufferssrc
 :prebuildstep6
+goto :downloadeigensrc
+:prebuildstep7
+goto :installeigensrc
+:prebuildstep8
 cmake -G"Visual Studio 14 2015 Win64" ..
 cmake --build . --config Debug
 REM // cmake --build . --config Release
@@ -153,6 +157,25 @@ if not exist "include" mkdir include && cd include && if not exist "flatbuffers_
 cd %ROOT_DIR%\build
 robocopy "flatbuffers-1.8.0/include/flatbuffers" "include/flatbuffers_src/flatbuffers"
 goto :prebuildstep6
+
+:downloadeigensrc
+cd %ROOT_DIR%\build
+if exist "include/Eigen/src/Cholesky/LDLT.h" goto :prebuildstep8
+echo Downloading Eigen 3.3.5
+powershell -ExecutionPolicy Unrestricted -file "%ROOT_DIR%\..\tools\http_get_powershell.ps1" -url_download "https://github.com/eigenteam/eigen-git-mirror/archive/3.3.5.tar.gz"
+if ERRORLEVEL 1 goto :buildfailed
+echo Decompressing 3.3.5.tar.gz
+%ROOT_DIR%\..\tools\TarTool "3.3.5.tar.gz" ./
+if ERRORLEVEL 1 goto :buildfailed
+del 3.3.5.tar.gz
+goto :prebuildstep7
+
+:installeigensrc
+cd %ROOT_DIR%\build
+if not exist "include" mkdir include && cd include && if not exist "Eigen" mkdir Eigen 
+cd %ROOT_DIR%\build
+robocopy "eigen-git-mirror-3.3.5/Eigen" "include/Eigen" /E
+goto :prebuildstep8
 
 
 :cmakefailed

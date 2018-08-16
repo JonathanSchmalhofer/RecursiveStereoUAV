@@ -79,6 +79,12 @@ set(FLATBUFFERS_INCLUDES
     build/include/flatbuffers_src
 )
 
+set(EIGEN_INCLUDES
+    build/include
+    build/include/Eigen
+    build/include/Eigen/src
+)
+
 set(AIRSIM_INCLUDES
     ${AIRSIM_ROOT_DIR}/AirLib/include
 	${AIRSIM_ROOT_DIR}/external/rpclib/include
@@ -104,6 +110,7 @@ include_directories(
     ${ZMQ_INCLUDES}
     ${FLATBUFFERS_INCLUDES}
     ${Boost_INCLUDE_DIRS}
+    ${EIGEN_INCLUDES}
     ../js_messages/include/
     ../externals/lodepng/include/
 )
