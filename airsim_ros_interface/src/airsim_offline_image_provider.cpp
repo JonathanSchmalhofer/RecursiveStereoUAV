@@ -268,9 +268,9 @@ int main(int argc, const char *argv[])
         memcpy((void *)pose_msg.data(), fbb_pose.GetBufferPointer(), buffersize_pose);
         
         // Send left and right
+        publish_socket_pose.send(pose_msg);
         publish_socket_image.send(image_msg_left);
         publish_socket_image.send(image_msg_right);
-        publish_socket_pose.send(pose_msg);
         send_counter++;
         
         if (debug_mode_activated)
