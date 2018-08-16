@@ -18,6 +18,8 @@ class RecursiveStereo:
     def __init__(self):
         # Attributes
         self.verbose     = False
+        self.pose        = None
+        self.last_pose   = None
         self.color_image = None
         self.left_image  = None
         self.right_image = None

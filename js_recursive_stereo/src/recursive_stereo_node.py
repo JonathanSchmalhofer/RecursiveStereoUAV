@@ -5,7 +5,7 @@ import rospy
 import rospkg
 from std_msgs.msg      import String, Header
 from sensor_msgs.msg   import Image
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Pose
 from sensor_msgs.msg   import PointCloud
 from cv_bridge         import CvBridge, CvBridgeError
 
@@ -18,6 +18,7 @@ class RecursiveStereoNode:
         self.rospack          = rospkg.RosPack() # get an instance of RosPack with the default search paths
         self.subscriber_left  = rospy.Subscriber('/airsim/left/image_raw',  Image, self.CallbackLeft,  queue_size = 1)
         self.subscriber_right = rospy.Subscriber('/airsim/right/image_raw', Image, self.CallbackRight, queue_size = 1)
+        self.subscriber_pose  = rospy.Subscriber('/airsim/pose',            Pose,  self.CallbackPose,  queue_size = 1)
         self.publisher        = rospy.Publisher('/airsim/pointcloud', PointCloud, queue_size = 1)
         self.cv_bridge        = CvBridge()
         self.sequence_left    = None
@@ -62,6 +63,10 @@ class RecursiveStereoNode:
         self.algorithm.right_image  = cv_image_right
         self.sequence_right         = image.header.seq
         self.CallbackCalculate()
+    
+    def CallbackPose(self, new_pose):
+        self.algorithm.last_pose  = self.algorithm.pose
+        self.algorithm.pose       = new_pose
     
     def CallbackCalculate(self):
         if ((self.sequence_left is None) or (self.sequence_right is None)):
