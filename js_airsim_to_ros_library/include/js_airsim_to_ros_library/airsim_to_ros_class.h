@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <zeromq_cpp/zmq.hpp>
 #include <js_messages/Image_generated.h>
+#include <js_messages/PoseMessageRoot_generated.h>
 
 namespace js_airsim_to_ros_library
 {
@@ -25,6 +26,9 @@ class AirSimToRosClass
 public:
     /// @brief Initializes a AirSimToRos class instance.
     AirSimToRosClass(std::string const& addr);
+    
+    /// @brief Initializes a AirSimToRos class instance.
+    AirSimToRosClass(std::string const& addr, AirSimToRosType type);
     
     /// @brief Default Destructor to free dynamically allocated memory of received messages.
     ~AirSimToRosClass();

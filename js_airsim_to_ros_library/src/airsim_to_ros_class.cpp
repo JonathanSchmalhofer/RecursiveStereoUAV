@@ -49,6 +49,46 @@ AirSimToRosClass::AirSimToRosClass(std::string const& addr)
     pose_orientation_yaw_       = 0;
 }
 
+AirSimToRosClass::AirSimToRosClass(std::string const& addr, AirSimToRosType type)
+    : zmq_context_(1)
+    , zmq_subscriber_(zmq_context_, ZMQ_SUB)
+{
+    receiver_type_ = type;
+    zmq_subscriber_.setsockopt(ZMQ_IDENTITY, "AirSimToRosSubscriber", 5);
+    zmq_subscriber_.setsockopt(ZMQ_SUBSCRIBE, "", 0);
+    zmq_subscriber_.setsockopt(ZMQ_RCVTIMEO, 5000);
+    zmq_subscriber_.connect(addr);
+    
+    // Image.Header
+    image_header_seq_           = 0;
+    image_header_stamp_sec_     = 0;
+    image_header_stamp_nsec_    = 0;
+    image_header_frame_id_      = "";
+    // Image
+    image_height_               = 0;
+    image_width_                = 0;
+    image_encoding_             = "";
+    image_is_bigendian_         = 0;
+    image_step_                 = 0;
+    image_data_                 = NULL;
+    image_data_size_            = 0;
+    image_type_                 = 0;
+    
+    // PoseMessage.Header
+    pose_header_seq_            = 0;
+    pose_header_stamp_sec_      = 0;
+    pose_header_stamp_nsec_     = 0;
+    pose_header_frame_id_       = "";
+    // PoseMessage.position
+    pose_position_x_            = 0;
+    pose_position_y_            = 0;
+    pose_position_z_            = 0;
+    // PoseMessage.orientation
+    pose_orientation_roll_      = 0;
+    pose_orientation_pitch_     = 0;
+    pose_orientation_yaw_       = 0;
+}
+
 void AirSimToRosClass::Connect(std::string const& addr)
 {
 	zmq_subscriber_.connect(addr);
@@ -238,7 +278,7 @@ int8_t AirSimToRosClass::GetImageType()
     
 uint32_t AirSimToRosClass::GetPoseHeaderSeq()
 {
-    return pmage_header_seq_;
+    return pose_header_seq_;
 }
     
 uint32_t AirSimToRosClass::GetPoseHeaderStampSec()
