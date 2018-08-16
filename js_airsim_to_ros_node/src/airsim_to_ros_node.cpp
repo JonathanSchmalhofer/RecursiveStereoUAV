@@ -65,6 +65,7 @@ int main(int argc, char **argv)
         {
             if ( verbose == true )
             {
+                ROS_INFO("Waiting too long - trying to reconnect to   %s", connection_info_image.c_str());
                 ROS_INFO("Waiting too long - trying to reconnect to   %s", connection_info_pose.c_str());
             }
             // Signalize within ROS, that we are still alive
@@ -72,8 +73,11 @@ int main(int argc, char **argv)
             msg.data = true;
             publisher_heartbeat.publish(msg);
             // try to reconnect
+            airsim_to_ros_image.Connect(connection_info_image);
             airsim_to_ros_pose.Connect(connection_info_pose);
-            waiting_counter_pose = 0;
+            // Reset both counters or there could be two heartbeats sent shortly after one another
+            waiting_counter_image = 0;
+            waiting_counter_pose  = 0;
         }
         waiting_counter_pose++;
         int8_t received_return_value_pose  = airsim_to_ros_pose.ReceivedMessage();
@@ -135,6 +139,7 @@ int main(int argc, char **argv)
             if ( verbose == true )
             {
                 ROS_INFO("Waiting too long - trying to reconnect to   %s", connection_info_image.c_str());
+                ROS_INFO("Waiting too long - trying to reconnect to   %s", connection_info_pose.c_str());
             }
             // Signalize within ROS, that we are still alive
             std_msgs::Bool msg;
@@ -142,7 +147,10 @@ int main(int argc, char **argv)
             publisher_heartbeat.publish(msg);
             // try to reconnect
             airsim_to_ros_image.Connect(connection_info_image);
+            airsim_to_ros_pose.Connect(connection_info_pose);
+            // Reset both counters or there could be two heartbeats sent shortly after one another
             waiting_counter_image = 0;
+            waiting_counter_pose  = 0;
         }
         waiting_counter_image++;
         int8_t received_return_value_image = airsim_to_ros_image.ReceivedMessage();
