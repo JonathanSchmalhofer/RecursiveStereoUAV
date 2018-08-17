@@ -93,23 +93,79 @@ class RecursiveStereo:
                 [ 0,         0,         1/self.b,   0       ]])
         return Q
     
+    def GetPoseMatrix(self):
+        if self.pose == None:
+            return np.float32(np.identity(4))
+        # Based on: https://www.euclideanspace.com/maths/geometry/affine/conversions/quaternionToMatrix/index.htm
+        sqw = self.pose.orientation.w*self.pose.orientation.w
+        sqx = self.pose.orientation.x*self.pose.orientation.x
+        sqy = self.pose.orientation.y*self.pose.orientation.y
+        sqz = self.pose.orientation.z*self.pose.orientation.z
+        m00 = sqx - sqy - sqz + sqw # since sqw + sqx + sqy + sqz =1
+        m11 = -sqx + sqy - sqz + sqw
+        m22 = -sqx - sqy + sqz + sqw
+        
+        tmp1 = self.pose.orientation.x*self.pose.orientation.y
+        tmp2 = self.pose.orientation.z*self.pose.orientation.w
+        m01 = 2.0 * (tmp1 + tmp2)
+        m10 = 2.0 * (tmp1 - tmp2)
+        
+        tmp1 = self.pose.orientation.x*self.pose.orientation.z
+        tmp2 = self.pose.orientation.y*self.pose.orientation.w
+        m02 = 2.0 * (tmp1 - tmp2)
+        m20 = 2.0 * (tmp1 + tmp2)
+        
+        tmp1 = self.pose.orientation.y*self.pose.orientation.z
+        tmp2 = self.pose.orientation.x*self.pose.orientation.w
+        m12 = 2.0 * (tmp1 + tmp2)
+        m21 = 2.0 * (tmp1 - tmp2)
+        
+        a1 = self.pose.position.x
+        a2 = self.pose.position.y
+        a3 = self.pose.position.z
+
+        m03 = a1 - a1 * m00 - a2 * m01 - a3 * m02
+        m13 = a2 - a1 * m10 - a2 * m11 - a3 * m12
+        m23 = a3 - a1 * m20 - a2 * m21 - a3 * m22
+        m30 = m31 = m32 = 0.0
+        m33 = 1.0
+        T    = np.float32(
+               [[ m00, m01, m02, m03 ],
+                [ m10, m11, m12, m13 ],
+                [ m20, m21, m22, m23 ],
+                [ m30, m31, m32, m33 ]])
+        return T
+    
+    def GetPoseColorMatrix(self):
+        D = np.float32(np.identity(7))
+        T = self.GetPoseMatrix()
+        D[0:4,0:4] = T # set upper left 4x4 matrix to T, rest to identity (for color)
+        return D
+    
     def GetPCLFromDisparity(self, disparity):
         Q    = self.GetQ()
-        pcl  = cv2.reprojectImageTo3D(disparity, Q)
+        pcl  = cv2.reprojectImageTo3D(disparity, Q) # returns shape (height,width,3)
         
-        # Export point cloud
+        ## NOT NEEDED, AS APPLYING THE MASK WILL ALLREADY RESHAPE
+        # Reshape from (height,width,3) to (height*width,3)
+        #pcl = np.array(pcl).reshape(-1,1,3).squeeze()
+        
+        # Filter out invalid points
         mask = ((disparity < disparity.max()) &
                 (disparity > disparity.min()) &
                 (np.isfinite(pcl[:,:,0]))          &
                 (np.isfinite(pcl[:,:,1]))          &
                 (np.isfinite(pcl[:,:,2])))
-        pcl = pcl[mask]
+        pcl = pcl[mask] # returns shape ((height*width)-x,3) with x being the number of points filtered out by mask
+        
+        # If no color image was given, make all points black
         if self.color_image is None:
-            return pcl, None
+            pcl_c = np.append(pcl.transpose(),[np.zeros(pcl.shape[0])],axis=0).transpose() # format: [x, y, z, r, g, b] with r = g = b = 0 (black)
         else:
-            return pcl, self.color_image[mask]
+            pcl_c = np.append(pcl,self.color_image[mask],axis=1) # format: [x, y, z, r, g, b]
+        return pcl_c
     
-    def GetReducedPCL(self, disparity):
+    def GetReducedPCLFromDisparity(self, disparity):
         # Get Sampling Points
         grid              = self.Initialize2dCoordinates()
         u_idx             = [x[1]-1 for x in grid]
@@ -117,7 +173,7 @@ class RecursiveStereo:
         disparity_reduced = disparity[v_idx,u_idx]
         
         Q                 = self.GetQ()
-        y                 = np.float32([[x[1], x[0], disparity[x[0]-1,x[1]-1], 1] for x in grid ])
+        y                 = np.float32([[x[1], x[0], disparity[x[0]-1,x[1]-1], 1] for x in grid ]) # [u,v,disp(v,u),1]
         pcl               = np.dot(Q, np.transpose(y)).transpose()
         pcl_norm          = np.array([x/x[3] for x in pcl]) # normalize
         # Due to the different dimensions, the reduced mask is slight differntly setup
@@ -127,11 +183,40 @@ class RecursiveStereo:
                 (np.isfinite(pcl_norm[:,1]))               &
                 (np.isfinite(pcl_norm[:,2])))
         pcl_reduced       = pcl_norm[mask]
+        
+        # If no color image was given, make all points black
         if self.color_image is None:
-            return pcl_reduced, None
+            pcl_reduced_c = np.append(pcl_reduced.transpose(),[np.zeros(pcl_reduced.shape[0])],axis=0).transpose() # format: [x, y, z, r, g, b] with r = g = b = 0 (black)
         else:
-            color_reduced     = np.array([self.color_image[x[0]-1,x[1]-1] for x in grid ])
-            return pcl_reduced[:,0:3], color_reduced[mask]
+            color_reduced = np.array([self.color_image[x[0]-1,x[1]-1] for x in grid ])
+            pcl_reduced_c = np.append(pcl_reduced,color_reduced[mask],axis=1) # format: [x, y, z, r, g, b]
+        return pcl_reduced_c
+    
+    def TransformPCL(self, pcl):
+        # make affine coordinates: [[x,y,z,r,g,b],...] to [[x,y,z,1,r,g,b],...]
+        pcl_aff = np.vstack((pcl[:,0],
+                             pcl[:,1],
+                             pcl[:,2],
+                             [np.ones(pcl.shape[0])],
+                             pcl[:,3],
+                             pcl[:,4],
+                             pcl[:,5]))
+        D = self.GetPoseColorMatrix()
+        
+        pcl_transf = np.dot(D,pcl_aff).transpose()
+        pcl_transf = np.array([[x[0]/x[3],
+                                x[1]/x[3],
+                                x[2]/x[3],
+                                x[4],
+                                x[5],
+                                x[6]] for x in pcl_transf]) # normalize and back to format [[x,y,z,r,g,b],...]
+        return pcl_transf
+    
+    def AppendPCL(self, new_pcl):
+        if self.pcl is None:
+            self.pcl = new_pcl
+        else:
+            self.pcl = np.append(self.pcl,new_pcl,axis=0)
     
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity   = self.blockmatching_minimum_disparities,
@@ -145,41 +230,43 @@ class RecursiveStereo:
             return disparity
     
     # Copied from https://github.com/opencv/opencv/blob/master/samples/python/stereo_match.py
-    def ExportPCLToPly(self, filename, vertices, colors = None):
-        vertices = vertices.reshape(-1, 3)
-        if colors is not None:
-            colors = colors.reshape(-1, 3)
-            vertices = np.hstack([vertices, colors])
+    def ExportPCLToPly(self, filename, vertices_with_color):
+        vertices_with_color = vertices_with_color.reshape(-1, 6)
         with open(filename, 'wb') as file:
-            file.write((ply_header % dict(vert_num=len(vertices))).encode('utf-8'))
-            if colors is None:
-                np.savetxt(file, vertices, fmt='%f %f %f 0 0 0 ')
-            else:
-                np.savetxt(file, vertices, fmt='%f %f %f %d %d %d ')
+            file.write((ply_header % dict(vert_num=len(vertices_with_color))).encode('utf-8'))
+            np.savetxt(file, vertices_with_color, fmt='%f %f %f %d %d %d ')
     
     def Step(self):
         if self.RequirementsFulfilled():
             self.PrintParameters()
             
+            ## F U L L
             # Get disparity image
             self.disparity = self.GetDisparityImage()
             
-            # Get full point cloud
-            self.pcl, colors = self.GetPCLFromDisparity(self.disparity)
+            # Get full point cloud - in camera coordinate system
+            pcl_cam = self.GetPCLFromDisparity(self.disparity)
             
-            if self.export_pcl == True:
-                if colors is None:
-                    self.ExportPCLToPly(self.pcl_filename, self.pcl)
-                else:
-                    self.ExportPCLToPly(self.pcl_filename, self.pcl, colors)
+            # Transform to inertial coordinate system
+            pcl_inert = self.TransformPCL(pcl_cam)
             
-            # Get reduced point cloud
-            self.pcl, colors = self.GetReducedPCL(self.disparity)
+            # Save
+            self.AppendPCL(pcl_inert)
+            
+            # Export
             if self.export_pcl == True:
-                if colors is None:
-                    self.ExportPCLToPly('reduced.ply', self.pcl)
-                else:
-                    self.ExportPCLToPly('reduced.ply', self.pcl, colors)    
+                self.ExportPCLToPly(self.pcl_filename, self.pcl)
+            
+            print("Reduced")
+            ## R E D U C E D
+            # Get reduced point cloud - in camera coordinate system
+            pcl_red_cam   = self.GetReducedPCLFromDisparity(self.disparity)
+            
+            # Transform to inertial coordinate system
+            pcl_red_inert = self.TransformPCL(pcl_red_cam)
+
+            if self.export_pcl == True:
+                self.ExportPCLToPly('reduced.ply', pcl_red_inert)
             
             if self.enable_recursive == True:
                 pass
