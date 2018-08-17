@@ -21,8 +21,8 @@ class RecursiveStereoNode:
         self.subscriber_pose  = rospy.Subscriber('/airsim/pose',            Pose,  self.CallbackPose,  queue_size = 1)
         self.publisher        = rospy.Publisher('/airsim/pointcloud', PointCloud, queue_size = 1)
         self.cv_bridge        = CvBridge()
-        self.sequence_left    = None
-        self.sequence_right   = None
+        self.timestamp_left   = None
+        self.timestamp_right  = None
         
         # Recursive Stereo
         self.algorithm = RecursiveStereo()
@@ -51,7 +51,7 @@ class RecursiveStereoNode:
             self.VerbosePrint(e)
         self.algorithm.left_image  = cv_image_left
         self.algorithm.color_image = cv_image_left
-        self.sequence_left         = image.header.seq
+        self.timestamp_left        = image.header.stamp.sec*1e9 + image.header.stamp.nsec # ns
         self.CallbackCalculate()
     
     def CallbackRight(self, image):
@@ -61,7 +61,7 @@ class RecursiveStereoNode:
         except CvBridgeError as e:
             self.VerbosePrint(e)
         self.algorithm.right_image  = cv_image_right
-        self.sequence_right         = image.header.seq
+        self.timestamp_right        = image.header.stamp.sec*1e9 + image.header.stamp.nsec # ns
         self.CallbackCalculate()
     
     def CallbackPose(self, new_pose):
@@ -77,10 +77,10 @@ class RecursiveStereoNode:
         self.algorithm.pose['orientation']['w']  = new_pose.orientation.w
     
     def CallbackCalculate(self):
-        if ((self.sequence_left is None) or (self.sequence_right is None)):
+        if ((self.timestamp_left is None) or (self.timestamp_right is None)):
             return
-        if self.sequence_left == self.sequence_right:
-            self.algorithm.pcl_filename = 'airsim_pcl_seq_{}.ply'.format(self.sequence_left)
+        if self.timestamp_left == self.timestamp_right:
+            self.algorithm.pcl_filename = 'airsim_pcl_time_{}.ply'.format(self.timestamp_left)
             self.algorithm.Step()
             pointcloud = PointCloud()
             self.VerbosePrint('Calculating')
@@ -90,9 +90,9 @@ class RecursiveStereoNode:
                                                 self.algorithm.pcl[i,2]))
             self.publisher.publish(pointcloud)
         else:
-            self.VerbosePrint('Sequence of left image and rigt image do not match (yet)')
-            self.VerbosePrint('   Seq(Left)  = {}'.format(self.sequence_left))
-            self.VerbosePrint('   Seq(Right) = {}'.format(self.sequence_right))
+            self.VerbosePrint('Timestamp of left image and rigt image do not match (yet)')
+            self.VerbosePrint('   T(Left)  = {}'.format(self.timestamp_left))
+            self.VerbosePrint('   T(Right) = {}'.format(self.timestamp_right))
     
 if __name__ == '__main__':
     rospy.init_node('recursive_stereo_node', anonymous=True)
