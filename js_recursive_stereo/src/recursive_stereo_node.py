@@ -78,6 +78,7 @@ class RecursiveStereoNode:
     
     def CallbackCalculate(self):
         if ((self.timestamp_left is None) or (self.timestamp_right is None)):
+            rospy.loginfo("Timestamp(s) missing")
             return
         if self.timestamp_left == self.timestamp_right:
             self.algorithm.pcl_filename = 'airsim_pcl_time_{}.ply'.format(self.timestamp_left)
@@ -89,6 +90,7 @@ class RecursiveStereoNode:
                                                 self.algorithm.pcl[i,1], 
                                                 self.algorithm.pcl[i,2]))
             self.publisher.publish(pointcloud)
+            rospy.loginfo("Sending PointCloud")
         else:
             self.VerbosePrint('Timestamp of left image and rigt image do not match (yet)')
             self.VerbosePrint('   T(Left)  = {}'.format(self.timestamp_left))

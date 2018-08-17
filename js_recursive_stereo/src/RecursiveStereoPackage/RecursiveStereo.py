@@ -17,7 +17,7 @@ end_header
 class RecursiveStereo:
     def __init__(self):
         # Attributes
-        self.verbose     = False
+        self.verbose     = True
         self.pose        = self.EmptyPose()
         self.last_pose   = self.EmptyPose()
         self.color_image = None
@@ -264,17 +264,17 @@ class RecursiveStereo:
             self.disparity = self.GetDisparityImage()
             
             # Get full point cloud - in camera coordinate system
-            pcl_cam = self.GetPCLFromDisparity(self.disparity)
+            #pcl_cam = self.GetPCLFromDisparity(self.disparity)
             
             # Transform to inertial coordinate system
-            pcl_inert = self.TransformPCL(pcl_cam)
+            #pcl_inert = self.TransformPCL(pcl_cam)
             
             # Save
-            self.AppendPCL(pcl_inert)
+            #self.AppendPCL(pcl_inert)
             
             # Export
-            if self.export_pcl == True:
-                self.ExportPCLToPly(self.pcl_filename, self.pcl)
+            #if self.export_pcl == True:
+            #    self.ExportPCLToPly(self.pcl_filename, self.pcl)
             
             ## R E D U C E D
             # Get reduced point cloud - in camera coordinate system
@@ -283,12 +283,13 @@ class RecursiveStereo:
             # Transform to inertial coordinate system
             pcl_red_inert = self.TransformPCL(pcl_red_cam)
             
+            self.pcl = pcl_red_inert
             # Save
-            self.AppendPCLReduced(pcl_red_inert)
+            #self.AppendPCLReduced(pcl_red_inert)
             
             # Export
-            if self.export_pcl == True:
-                self.ExportPCLToPly('reduced.ply', self.pcl_reduced)
+            #if self.export_pcl == True:
+            #    self.ExportPCLToPly('reduced.ply', self.pcl_reduced)
             
             if self.enable_recursive == True:
                 pass
