@@ -24,6 +24,7 @@ class RecursiveStereo:
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
+        self.pcl_reduced = None
         self.disparity   = None
         self.orb         = cv2.ORB_create(nfeatures=50, scoreType=cv2.ORB_FAST_SCORE) # Initiate ORB  detector
         self.sift        = cv2.xfeatures2d.SIFT_create(nfeatures=50)                  # Initiate SIFT detector
@@ -230,6 +231,12 @@ class RecursiveStereo:
         else:
             self.pcl = np.append(self.pcl,new_pcl,axis=0)
     
+    def AppendPCLReduced(self, new_pcl):
+        if self.pcl_reduced is None:
+            self.pcl_reduced = new_pcl
+        else:
+            self.pcl_reduced = np.append(self.pcl_reduced,new_pcl,axis=0)
+    
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity   = self.blockmatching_minimum_disparities,
                                            numDisparities = (self.blockmatching_maximum_disparities-self.blockmatching_minimum_disparities),
@@ -269,16 +276,19 @@ class RecursiveStereo:
             if self.export_pcl == True:
                 self.ExportPCLToPly(self.pcl_filename, self.pcl)
             
-            print("Reduced")
             ## R E D U C E D
             # Get reduced point cloud - in camera coordinate system
             pcl_red_cam   = self.GetReducedPCLFromDisparity(self.disparity)
             
             # Transform to inertial coordinate system
             pcl_red_inert = self.TransformPCL(pcl_red_cam)
-
+            
+            # Save
+            self.AppendPCLReduced(pcl_red_inert)
+            
+            # Export
             if self.export_pcl == True:
-                self.ExportPCLToPly('reduced.ply', pcl_red_inert)
+                self.ExportPCLToPly('reduced.ply', self.pcl_reduced)
             
             if self.enable_recursive == True:
                 pass
