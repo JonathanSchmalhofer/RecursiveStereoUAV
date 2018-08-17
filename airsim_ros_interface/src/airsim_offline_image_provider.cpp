@@ -121,6 +121,7 @@ int main(int argc, const char *argv[])
     Tr_0     = utils.GetTr0(filelist_oxts, scale);
     bool inversion_succeeded = InvertMatrix(Tr_0, Tr_0_inv);
     assert(inversion_succeeded==true);
+    long t_0 = timestamps.at(0);
 	if (debug_mode_activated)
 	{
 		std::cout << "   scale   = " << scale << std::endl;
@@ -144,15 +145,16 @@ int main(int argc, const char *argv[])
         flatbuffers::FlatBufferBuilder fbb_pose;
         
         // Image.header.stamp
+        long current_time_ms = timestamps.at(image_counter)-t_0;
         airsim_to_ros::time message_time(
-            0, // header_stamp_sec_
-            0  // header_stamp_nsec_
+            std::floor(current_time_ms/1e3),        // header_stamp_sec_
+            (unsigned)((current_time_ms%1000)*1e6)   // header_stamp_nsec_
         );
         
         // Image.header left
         auto header_left = airsim_to_ros::CreateHeader(
             fbb_left, 
-            send_counter,               // header_seq_
+            0,                          // header_seq_
             &message_time,
             fbb_left.CreateString("")   // header_frame_id_
             );
@@ -161,7 +163,7 @@ int main(int argc, const char *argv[])
         // Image.header right
         auto header_right = airsim_to_ros::CreateHeader(
             fbb_right, 
-            send_counter,               // header_seq_
+            0,                          // header_seq_
             &message_time,
             fbb_right.CreateString("")  // header_frame_id_
             );
@@ -170,7 +172,7 @@ int main(int argc, const char *argv[])
         // PoseMessage.header
         auto header_pose = airsim_to_ros::CreateHeader(
             fbb_pose, 
-            send_counter,               // header_seq_
+            0,                          // header_seq_
             &message_time,
             fbb_pose.CreateString("")   // header_frame_id_
             );
@@ -276,6 +278,7 @@ int main(int argc, const char *argv[])
         if (debug_mode_activated)
         {
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+            std::cout << "Timestamp = " << current_time_ms << std::endl;
             std::cout << "L E F T" << std::endl;
             std::cout << "Sent flatbuffer message via zmq: " << buffersize_left << std::endl;
             std::cout << "    buffersize: " << buffersize_left << std::endl;
@@ -308,6 +311,7 @@ int main(int argc, const char *argv[])
         
         uint8_t wait_loop_counter = 0;
         int8_t  received_message  = 0;
+        ros_to_airsim.Connect(address);
         do
         {
             received_message = ros_to_airsim.ReceivedMessage();

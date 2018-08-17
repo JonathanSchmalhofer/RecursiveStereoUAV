@@ -51,7 +51,7 @@ int main(int argc, char **argv)
     ros::Publisher publisher_heartbeat                   = node_handle.advertise<std_msgs::Bool>("/airsim/heartbeat", 1);
     ros::Publisher pose_chatter                          = node_handle.advertise<geometry_msgs::Pose>("/airsim/pose", 1);
 
-    std::uint32_t last_sequence_sent       = 0;
+    std::uint32_t last_timestamp_sent_ms   = 0;
     std::uint32_t waiting_counter_image    = 0;
     std::uint32_t waiting_counter_pose     = 0;
     std::uint32_t waiting_threshold        = 10;
@@ -218,9 +218,12 @@ int main(int argc, char **argv)
                 ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros_image.GetImageDataSize()));
             }
             
+            std::uint32_t current_timestamp_ms = static_cast<std::uint32_t>((header.stamp.sec * 1e9 + header.stamp.nsec)/1e6);
+            
             if (
-                    airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
-                &&  airsim_image_left_msg.header.seq > last_sequence_sent
+                    airsim_image_left_msg.header.stamp.sec  == airsim_image_right_msg.header.stamp.sec
+                &&  airsim_image_left_msg.header.stamp.nsec == airsim_image_right_msg.header.stamp.nsec
+                &&  current_timestamp_ms > last_timestamp_sent_ms
             )
             {
                 if ( verbose == true )
@@ -229,6 +232,7 @@ int main(int argc, char **argv)
                 }
                 left_stereoimage_chatter.publish(airsim_image_left_msg);
                 right_stereoimage_chatter.publish(airsim_image_right_msg);
+                last_timestamp_sent_ms = current_timestamp_ms;
             }
         }
         else if (-1 == received_return_value_image)
