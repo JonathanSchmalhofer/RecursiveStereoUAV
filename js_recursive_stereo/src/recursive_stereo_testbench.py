@@ -26,4 +26,12 @@ if __name__ == '__main__':
     algorithm.left_image  = left_image
     algorithm.right_image = right_image
     algorithm.color_image = color_image
+    algorithm.pcl_filename = 'step_1.ply'
+    algorithm.Step()
+    
+    # Set a pose
+    new_pose = algorithm.EmptyPose()
+    new_pose['position']['x'] = 10
+    algorithm.pose = new_pose
+    algorithm.pcl_filename = 'step_2.ply'    
     algorithm.Step()

@@ -66,21 +66,15 @@ class RecursiveStereoNode:
     
     def CallbackPose(self, new_pose):
         # Save last pose
-        self.algorithm.last_pose.position.x     = self.algorithm.pose.position.x
-        self.algorithm.last_pose.position.y     = self.algorithm.pose.position.y
-        self.algorithm.last_pose.position.z     = self.algorithm.pose.position.z
-        self.algorithm.last_pose.orientation.x  = self.algorithm.pose.orientation.x
-        self.algorithm.last_pose.orientation.y  = self.algorithm.pose.orientation.y
-        self.algorithm.last_pose.orientation.z  = self.algorithm.pose.orientation.z
-        self.algorithm.last_pose.orientation.w  = self.algorithm.pose.orientation.w
+        self.algorithm.last_pose = self.algorithm.pose
         # Set new pose
-        self.algorithm.pose.position.x     = new_pose.position.x
-        self.algorithm.pose.position.y     = new_pose.position.y
-        self.algorithm.pose.position.z     = new_pose.position.z
-        self.algorithm.pose.orientation.x  = new_pose.orientation.x
-        self.algorithm.pose.orientation.y  = new_pose.orientation.y
-        self.algorithm.pose.orientation.z  = new_pose.orientation.z
-        self.algorithm.pose.orientation.w  = new_pose.orientation.w
+        self.algorithm.pose['position']['x']     = new_pose.position.x
+        self.algorithm.pose['position']['y']     = new_pose.position.y
+        self.algorithm.pose['position']['z']     = new_pose.position.z
+        self.algorithm.pose['orientation']['x']  = new_pose.orientation.x
+        self.algorithm.pose['orientation']['y']  = new_pose.orientation.y
+        self.algorithm.pose['orientation']['z']  = new_pose.orientation.z
+        self.algorithm.pose['orientation']['w']  = new_pose.orientation.w
     
     def CallbackCalculate(self):
         if ((self.sequence_left is None) or (self.sequence_right is None)):

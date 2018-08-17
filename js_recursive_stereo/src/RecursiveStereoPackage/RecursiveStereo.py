@@ -18,8 +18,8 @@ class RecursiveStereo:
     def __init__(self):
         # Attributes
         self.verbose     = False
-        self.pose        = None
-        self.last_pose   = None
+        self.pose        = self.EmptyPose()
+        self.last_pose   = self.EmptyPose()
         self.color_image = None
         self.left_image  = None
         self.right_image = None
@@ -52,6 +52,11 @@ class RecursiveStereo:
     def VerbosePrint(self, text):
         if self.verbose == True:
             print(text)
+    
+    def EmptyPose(self):
+        pose = {'position':    { 'x': 0, 'y': 0, 'z': 0 },
+                'orientation': { 'x': 0, 'y': 0, 'z': 0, 'w': 1 }}
+        return pose
     
     def GetSiftKeyPoints(self, image):
         # find the keypoints and compute the descriptors with SIFT
@@ -93,48 +98,55 @@ class RecursiveStereo:
                 [ 0,         0,         1/self.b,   0       ]])
         return Q
     
+    # Copied from: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+    def QuaternionToRollPitchYaw(self, q):
+        t0 = +2.0 * (q['w'] * q['x'] + q['y'] * q['z'])
+        t1 = +1.0 - 2.0 * (q['x'] * q['x'] + q['y'] * q['y'])
+        roll = np.arctan2(t0, t1)
+        
+        t2 = +2.0 * (q['w'] * q['y'] - q['z'] * q['x'])
+        t2 = +1.0 if t2 > +1.0 else t2
+        t2 = -1.0 if t2 < -1.0 else t2
+        pitch = np.arcsin(t2)
+        
+        t3 = +2.0 * (q['w'] * q['z'] + q['x'] * q['y'])
+        t4 = +1.0 - 2.0 * (q['y'] * q['y'] + q['z'] * q['z'])
+        yaw = np.arctan2(t3, t4)
+        return roll, pitch, yaw
+    
     def GetPoseMatrix(self):
-        if self.pose == None:
-            return np.float32(np.identity(4))
-        # Based on: https://www.euclideanspace.com/maths/geometry/affine/conversions/quaternionToMatrix/index.htm
-        sqw = self.pose.orientation.w*self.pose.orientation.w
-        sqx = self.pose.orientation.x*self.pose.orientation.x
-        sqy = self.pose.orientation.y*self.pose.orientation.y
-        sqz = self.pose.orientation.z*self.pose.orientation.z
-        m00 = sqx - sqy - sqz + sqw # since sqw + sqx + sqy + sqz =1
-        m11 = -sqx + sqy - sqz + sqw
-        m22 = -sqx - sqy + sqz + sqw
+        # init as identity
+        Rx = np.identity(4)
+        Rx = np.identity(4)
+        Ry = np.identity(4)
+        Rz = np.identity(4)
+        Tr = np.identity(4)
         
-        tmp1 = self.pose.orientation.x*self.pose.orientation.y
-        tmp2 = self.pose.orientation.z*self.pose.orientation.w
-        m01 = 2.0 * (tmp1 + tmp2)
-        m10 = 2.0 * (tmp1 - tmp2)
+        # Get current orientation in r-p-y
+        roll, pitch, yaw = self.QuaternionToRollPitchYaw(self.pose['orientation'])
         
-        tmp1 = self.pose.orientation.x*self.pose.orientation.z
-        tmp2 = self.pose.orientation.y*self.pose.orientation.w
-        m02 = 2.0 * (tmp1 - tmp2)
-        m20 = 2.0 * (tmp1 + tmp2)
+        Rx[0,0] = 1;                Rx[0,1] = 0;            Rx[0,2] = 0
+        Rx[1,0] = 0;                Rx[1,1] = np.cos(roll); Rx[1,2] = -np.sin(roll)
+        Rx[2,0] = 0;                Rx[2,1] = np.sin(roll); Rx[2,2] =  np.cos(roll)
         
-        tmp1 = self.pose.orientation.y*self.pose.orientation.z
-        tmp2 = self.pose.orientation.x*self.pose.orientation.w
-        m12 = 2.0 * (tmp1 + tmp2)
-        m21 = 2.0 * (tmp1 - tmp2)
+        Ry[0,0] =  np.cos(pitch);   Ry[0,1] = 0;            Ry[0,2] = np.sin(pitch)
+        Ry[1,0] =  0;               Ry[1,1] = 1;            Ry[1,2] = 0
+        Ry[2,0] = -np.sin(pitch);   Ry[2,1] = 0;            Ry[2,2] = np.cos(pitch)
         
-        a1 = self.pose.position.x
-        a2 = self.pose.position.y
-        a3 = self.pose.position.z
-
-        m03 = a1 - a1 * m00 - a2 * m01 - a3 * m02
-        m13 = a2 - a1 * m10 - a2 * m11 - a3 * m12
-        m23 = a3 - a1 * m20 - a2 * m21 - a3 * m22
-        m30 = m31 = m32 = 0.0
-        m33 = 1.0
-        T    = np.float32(
-               [[ m00, m01, m02, m03 ],
-                [ m10, m11, m12, m13 ],
-                [ m20, m21, m22, m23 ],
-                [ m30, m31, m32, m33 ]])
-        return T
+        Rz[0,0] = np.cos(yaw);      Rz[0,1] = -np.sin(yaw); Rz[0,2] = 0
+        Rz[1,0] = np.sin(yaw);      Rz[1,1] =  np.cos(yaw); Rz[1,2] = 0
+        Rz[2,0] = 0;                Rz[2,1] =  0;           Rz[2,2] = 1
+        
+        # R = Rz*(Ry*Rx)
+        R = np.dot(Ry, Rx)
+        R = np.dot(Rz, R)
+        
+        # in Matlab notation: Tr = [R t;0 0 0 1];
+        Tr[0,0] = R[0,0]; Tr[0,1] = R[0,1]; Tr[0,2] = R[0,2]; Tr[0,3] = self.pose['position']['x']
+        Tr[1,0] = R[1,0]; Tr[1,1] = R[1,1]; Tr[1,2] = R[1,2]; Tr[1,3] = self.pose['position']['y']
+        Tr[2,0] = R[2,0]; Tr[2,1] = R[2,1]; Tr[2,2] = R[2,2]; Tr[2,3] = self.pose['position']['z']
+        Tr[3,0] = 0;      Tr[3,1] = 0;      Tr[3,2] = 0;      Tr[3,3] = 1;
+        return Tr
     
     def GetPoseColorMatrix(self):
         D = np.float32(np.identity(7))
