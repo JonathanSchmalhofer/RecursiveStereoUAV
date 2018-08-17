@@ -55,6 +55,14 @@ int main(int argc, char **argv)
     std::uint32_t waiting_counter_image    = 0;
     std::uint32_t waiting_counter_pose     = 0;
     std::uint32_t waiting_threshold        = 10;
+    
+    if (ros::ok())
+    {
+        // Signalize within ROS, that we just went "online"
+        std_msgs::Bool msg;
+        msg.data = true;
+        publisher_heartbeat.publish(msg);
+    }
     while (ros::ok())
     {
         if ( verbose == true )
@@ -217,23 +225,91 @@ int main(int argc, char **argv)
                 ROS_INFO("  Image.step %d", airsim_to_ros_image.GetImageStep());
                 ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros_image.GetImageDataSize()));
             }
-            
-            if (
-                    airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
-                &&  airsim_image_left_msg.header.seq > last_sequence_sent
-            )
+        }
+        else if (-1 == received_return_value_image)
+        {
+            ROS_INFO("Invalid Image received - did not forward");
+        }
+        received_return_value_image = airsim_to_ros_image.ReceivedMessage();
+        if (1 == received_return_value_image)
+        {
+            waiting_counter_image = 0;
+            switch (airsim_to_ros_image.GetImageType())
             {
+            case 0: // Unknown
+                break;
+            case 1: // Left
                 if ( verbose == true )
                 {
-                    ROS_INFO("Images forwarded");
+                    ROS_INFO("Left image received");
                 }
-                left_stereoimage_chatter.publish(airsim_image_left_msg);
-                right_stereoimage_chatter.publish(airsim_image_right_msg);
+                // Header
+                airsim_image_left_msg.header.seq         = airsim_to_ros_image.GetImageHeaderSeq();
+                airsim_image_left_msg.header.stamp.sec   = airsim_to_ros_image.GetImageHeaderStampSec();
+                airsim_image_left_msg.header.stamp.nsec  = airsim_to_ros_image.GetImageHeaderStampNsec();
+                airsim_image_left_msg.header.frame_id    = airsim_to_ros_image.GetImageHeaderFrameid();
+                // Image
+                airsim_image_left_msg.height             = airsim_to_ros_image.GetImageHeight();
+                airsim_image_left_msg.width              = airsim_to_ros_image.GetImageWidth();
+                airsim_image_left_msg.encoding           = airsim_to_ros_image.GetImageEncoding();
+                airsim_image_left_msg.is_bigendian       = airsim_to_ros_image.GetImageIsBigendian();
+                airsim_image_left_msg.step               = airsim_to_ros_image.GetImageStep();
+                airsim_image_left_msg.data.resize(airsim_to_ros_image.GetImageDataSize());
+                memcpy((char*)(&airsim_image_left_msg.data[0]), airsim_to_ros_image.GetImageData(), airsim_to_ros_image.GetImageDataSize());
+                break;
+            case 2: // Right
+                if ( verbose == true )
+                {
+                    ROS_INFO("Right image received");
+                }
+                // Header
+                airsim_image_right_msg.header.seq         = airsim_to_ros_image.GetImageHeaderSeq();
+                airsim_image_right_msg.header.stamp.sec   = airsim_to_ros_image.GetImageHeaderStampSec();
+                airsim_image_right_msg.header.stamp.nsec  = airsim_to_ros_image.GetImageHeaderStampNsec();
+                airsim_image_right_msg.header.frame_id    = airsim_to_ros_image.GetImageHeaderFrameid();
+                // Image
+                airsim_image_right_msg.height             = airsim_to_ros_image.GetImageHeight();
+                airsim_image_right_msg.width              = airsim_to_ros_image.GetImageWidth();
+                airsim_image_right_msg.encoding           = airsim_to_ros_image.GetImageEncoding();
+                airsim_image_right_msg.is_bigendian       = airsim_to_ros_image.GetImageIsBigendian();
+                airsim_image_right_msg.step               = airsim_to_ros_image.GetImageStep();
+                airsim_image_right_msg.data.resize(airsim_to_ros_image.GetImageDataSize());
+                memcpy((char*)(&airsim_image_right_msg.data[0]), airsim_to_ros_image.GetImageData(), airsim_to_ros_image.GetImageDataSize());
+                break;
+            default:
+                break;
+            }
+            
+            if ( verbose == true )
+            {
+                ROS_INFO("Image received");
+                ROS_INFO("  Image.header.seq %d", airsim_to_ros_image.GetImageHeaderSeq());
+                ROS_INFO("  Image.header.stamp.sec %d", airsim_to_ros_image.GetImageHeaderStampSec());
+                ROS_INFO("  Image.header.stamp.nsec %d", airsim_to_ros_image.GetImageHeaderStampNsec());
+                ROS_INFO("  Image.header.frame_id %s", airsim_to_ros_image.GetImageHeaderFrameid().c_str());
+                ROS_INFO("  Image.height %d", airsim_to_ros_image.GetImageHeight());
+                ROS_INFO("  Image.width %d", airsim_to_ros_image.GetImageWidth());
+                ROS_INFO("  Image.encoding %s", airsim_to_ros_image.GetImageEncoding().c_str());
+                ROS_INFO("  Image.is_bigendian %d", airsim_to_ros_image.GetImageIsBigendian());
+                ROS_INFO("  Image.step %d", airsim_to_ros_image.GetImageStep());
+                ROS_INFO("  size(Image.data) %d", static_cast<int>(airsim_to_ros_image.GetImageDataSize()));
             }
         }
         else if (-1 == received_return_value_image)
         {
             ROS_INFO("Invalid Image received - did not forward");
+        }
+        if (
+                airsim_image_left_msg.header.seq == airsim_image_right_msg.header.seq 
+            &&  airsim_image_left_msg.header.seq > last_sequence_sent
+        )
+        {
+            if ( verbose == true )
+            {
+                ROS_INFO("Images forwarded");
+            }
+            left_stereoimage_chatter.publish(airsim_image_left_msg);
+            right_stereoimage_chatter.publish(airsim_image_right_msg);
         }
     }
 
