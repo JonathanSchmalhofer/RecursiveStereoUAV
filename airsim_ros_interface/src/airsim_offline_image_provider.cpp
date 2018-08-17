@@ -97,12 +97,9 @@ int main(int argc, const char *argv[])
     //  We send updates via this socket
     zmq::context_t context(1);
     
-    // Publisher - Images
-    zmq::socket_t publish_socket_image = zmq::socket_t(context, ZMQ_PUB);
-    publish_socket_image.bind("tcp://*:5676");
-    // Publisher - Pose
-    zmq::socket_t publish_socket_pose = zmq::socket_t(context, ZMQ_PUB);
-    publish_socket_pose.bind("tcp://*:5677");
+    // Publisher - Stereo Images + Pose
+    zmq::socket_t publish_socket = zmq::socket_t(context, ZMQ_PUB);
+    publish_socket.bind("tcp://*:5676");
     
     // Subscriber
     if (debug_mode_activated)
@@ -139,48 +136,28 @@ int main(int argc, const char *argv[])
     
     while(keep_looping)
     {
-        // copy image into flatbuffers
-        flatbuffers::FlatBufferBuilder fbb_left;
-        flatbuffers::FlatBufferBuilder fbb_right;
-        flatbuffers::FlatBufferBuilder fbb_pose;
+        // copy images and pose into flatbuffers
+        flatbuffers::FlatBufferBuilder fbb;
         
-        // Image.header.stamp
+        // StereoImagePose.header.stamp
         long current_time_ms = timestamps.at(image_counter)-t_0;
         airsim_to_ros::time message_time(
-            std::floor(current_time_ms/1e3),        // header_stamp_sec_
+            std::floor(current_time_ms/1e3),         // header_stamp_sec_
             (unsigned)((current_time_ms%1000)*1e6)   // header_stamp_nsec_
         );
         
-        // Image.header left
-        auto header_left = airsim_to_ros::CreateHeader(
-            fbb_left, 
-            0,                          // header_seq_
+        // StereoImagePose.header
+        auto header = airsim_to_ros::CreateHeader(
+            fbb, 
+            0,                     // header_seq_
             &message_time,
-            fbb_left.CreateString("")   // header_frame_id_
+            fbb.CreateString("")   // header_frame_id_
             );
-        fbb_left.Finish(header_left);
-        
-        // Image.header right
-        auto header_right = airsim_to_ros::CreateHeader(
-            fbb_right, 
-            0,                          // header_seq_
-            &message_time,
-            fbb_right.CreateString("")  // header_frame_id_
-            );
-        fbb_right.Finish(header_right);
-        
-        // PoseMessage.header
-        auto header_pose = airsim_to_ros::CreateHeader(
-            fbb_pose, 
-            0,                          // header_seq_
-            &message_time,
-            fbb_pose.CreateString("")   // header_frame_id_
-            );
-        fbb_pose.Finish(header_pose);
+        fbb.Finish(header);
         
         unsigned width_left, width_right, height_left, height_right;
         std::vector<unsigned char> image_png_left, image_png_right;
-        int buffersize_left, buffersize_right, buffersize_pose;
+        int buffersize;
         
         // Get image for frame = idx
         decodeOneStep(left_file_list.at(image_counter),  width_left,  height_left,  image_png_left);
@@ -209,30 +186,26 @@ int main(int argc, const char *argv[])
         }
         
         // Image Left
-        auto image_left = airsim_to_ros::CreateImage(
-            fbb_left,
-            static_cast<std::int8_t>(StereoImageType::LeftStereoImage), // type_
-            header_left,
+        auto image_left = airsim_to_ros::CreateStereoImage(
+            fbb,
             height_left,                        // height_
             width_left,                         // width_
-            fbb_left.CreateString("rgba8"),     // encoding_
+            fbb.CreateString("rgba8"),          // encoding_
             false,                              // is_bigendian_
             4 * width_left,                     // step_ (4 * width)
-            fbb_left.CreateVector<std::uint8_t>(image_png_left)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
-        fbb_left.Finish(image_left);
+            fbb.CreateVector<std::uint8_t>(image_png_left)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
+        fbb.Finish(image_left);
        
         // Image Left
-        auto image_right = airsim_to_ros::CreateImage(
-            fbb_right,
-            static_cast<std::int8_t>(StereoImageType::RightStereoImage), // type_
-            header_right,
+        auto image_right = airsim_to_ros::CreateStereoImage(
+            fbb,
             height_right,                       // height_
             width_right,                        // width_
-            fbb_right.CreateString("rgba8"),    // encoding_
+            fbb.CreateString("rgba8"),          // encoding_
             false,                              // is_bigendian_
             4 * width_right,                    // step_ (4 * width)
-            fbb_right.CreateVector<std::uint8_t>(image_png_right)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
-        fbb_right.Finish(image_right);
+            fbb.CreateVector<std::uint8_t>(image_png_right)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
+        fbb.Finish(image_right);
         
         // PoseMessage.position
         airsim_to_ros::Point pose_position(
@@ -249,56 +222,39 @@ int main(int argc, const char *argv[])
         );
         
         // Pose
-        auto pose_message = airsim_to_ros::CreatePoseMessage(
-            fbb_pose,
-            header_pose,
+        auto pose_message = airsim_to_ros::CreatePose(
+            fbb,
             &pose_position,     // position
             &pose_orientation); // orientation
-        fbb_pose.Finish(pose_message);
+        fbb.Finish(pose_message);
         
         // Copy flatbuffers into zmq message and send it
-        buffersize_left = fbb_left.GetSize();
-        zmq::message_t image_msg_left(buffersize_left);
-        memcpy((void *)image_msg_left.data(), fbb_left.GetBufferPointer(), buffersize_left);
+        buffersize = fbb.GetSize();
+        zmq::message_t stereo_images_pose(buffersize);
+        memcpy((void *)stereo_images_pose.data(), fbb.GetBufferPointer(), buffersize);
         
-        buffersize_right = fbb_right.GetSize();
-        zmq::message_t image_msg_right(buffersize_right);
-        memcpy((void *)image_msg_right.data(), fbb_right.GetBufferPointer(), buffersize_right);
-        
-        buffersize_pose = fbb_pose.GetSize();
-        zmq::message_t pose_msg(buffersize_pose);
-        memcpy((void *)pose_msg.data(), fbb_pose.GetBufferPointer(), buffersize_pose);
-        
-        // Send left and right
-        publish_socket_pose.send(pose_msg);
-        publish_socket_image.send(image_msg_left);
-        publish_socket_image.send(image_msg_right);
+        // Send Stereo Images and Pose
+        publish_socket.send(stereo_images_pose);
         send_counter++;
         
         if (debug_mode_activated)
         {
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
+            std::cout << "Sent flatbuffer message via zmq: " << buffersize << std::endl;
             std::cout << "Timestamp = " << current_time_ms << std::endl;
             std::cout << "L E F T" << std::endl;
-            std::cout << "Sent flatbuffer message via zmq: " << buffersize_left << std::endl;
-            std::cout << "    buffersize: " << buffersize_left << std::endl;
-            std::cout << "    type: "       << unsigned(StereoImageType::LeftStereoImage) << std::endl;
             std::cout << "    height: "     << unsigned(height_left) << std::endl;
             std::cout << "    width: "      << unsigned(width_left) << std::endl;
             std::cout << "    step: "       << unsigned(4 * width_left) << std::endl;
             std::cout << "    encoding: "   << "rgba8" << std::endl;
             std::cout << " " << std::endl;
             std::cout << "R I G H T" << std::endl;
-            std::cout << "Sent flatbuffer message via zmq: " << buffersize_right << std::endl;
-            std::cout << "    buffersize: " << buffersize_right << std::endl;
-            std::cout << "    type: "       << unsigned(StereoImageType::RightStereoImage) << std::endl;
             std::cout << "    height: "     << unsigned(height_right) << std::endl;
             std::cout << "    width: "      << unsigned(width_right) << std::endl;
             std::cout << "    step: "       << unsigned(4 * width_right) << std::endl;
             std::cout << "    encoding: "   << "rgba8" << std::endl;
             std::cout << " " << std::endl;
             std::cout << "P O S E" << std::endl;
-            std::cout << "Sent flatbuffer message via zmq: " << buffersize_pose << std::endl;
             std::cout << "    x: "     << pose_x     << std::endl;
             std::cout << "    y: "     << pose_y     << std::endl;
             std::cout << "    z: "     << pose_z     << std::endl;
