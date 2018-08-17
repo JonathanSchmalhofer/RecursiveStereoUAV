@@ -1,0 +1,38 @@
+include "Header.fbs";
+
+namespace airsim_to_ros;
+
+struct Point {
+    x: double;
+    y: double;
+    z: double;
+}
+
+struct Orientation {
+    roll:  double;
+    pitch: double;
+    yaw:   double;
+}
+
+table Pose {
+    position: Point;
+    orientation: Orientation;
+}
+
+table StereoImage {
+    height: uint;
+    width: uint;
+    encoding: string;
+    is_bigendian: ubyte;
+    step: uint;
+    data: [ubyte];
+}
+
+table StereoImagePose {
+    header: Header;
+    left: StereoImage;
+    right: StereoImage;
+    pose: Pose;
+}
+
+root_type StereoImagePose;

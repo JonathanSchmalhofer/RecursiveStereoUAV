@@ -9,3 +9,6 @@ Call for trajectory3d point as root and dependencies:
     
 Call for Pose from airsim to ros as root and dependencies:
     flatc --cpp PoseMessageRoot.fbs Header.fbs time.fbs
+
+Call for StereoImagePose and dependencies:
+    flatc --cpp StereoImagePose.fbs Header.fbs time.fbs
