@@ -158,7 +158,7 @@ int main(int argc, const char *argv[])
         unsigned width_left, width_right, height_left, height_right;
         std::vector<unsigned char> image_png_left, image_png_right;
         int buffersize;
-        
+
         // Get image for frame = idx
         decodeOneStep(left_file_list.at(image_counter),  width_left,  height_left,  image_png_left);
         decodeOneStep(right_file_list.at(image_counter), width_right, height_right, image_png_right);
@@ -195,8 +195,8 @@ int main(int argc, const char *argv[])
             4 * width_left,                     // step_ (4 * width)
             fbb.CreateVector<std::uint8_t>(image_png_left)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
         fbb.Finish(image_left);
-       
-        // Image Left
+        
+        // Image Right
         auto image_right = airsim_to_ros::CreateStereoImage(
             fbb,
             height_right,                       // height_
@@ -206,27 +206,36 @@ int main(int argc, const char *argv[])
             4 * width_right,                    // step_ (4 * width)
             fbb.CreateVector<std::uint8_t>(image_png_right)); // For reinterpret_cast<> see: https://stackoverflow.com/questions/16260033/reinterpret-cast-between-char-and-stduint8-t-safe
         fbb.Finish(image_right);
-        
+
         // PoseMessage.position
-        airsim_to_ros::Point pose_position(
+        airsim_to_ros::PointRPY pose_position(
             pose_x, // x
             pose_y, // y
             pose_z  // z
         );
         
         // PoseMessage.orientation
-        airsim_to_ros::Orientation pose_orientation(
+        airsim_to_ros::OrientationRPY pose_orientation(
             pose_roll,  // roll
             pose_pitch, // pitch
             pose_yaw    // yaw
         );
         
         // Pose
-        auto pose_message = airsim_to_ros::CreatePose(
+        auto pose_message = airsim_to_ros::CreatePoseRPY(
             fbb,
             &pose_position,     // position
             &pose_orientation); // orientation
         fbb.Finish(pose_message);
+        
+        // StereoImagePose
+        auto stereo_image_pose = airsim_to_ros::CreateStereoImagePose(
+            fbb,
+            header,             // header
+            image_left,         // left
+            image_right,        // right
+            pose_message);      // pose
+        fbb.Finish(stereo_image_pose);
         
         // Copy flatbuffers into zmq message and send it
         buffersize = fbb.GetSize();

@@ -1,0 +1,9 @@
+include "PointRPY.fbs";
+include "OrientationRPY.fbs";
+
+namespace airsim_to_ros;
+
+table PoseRPY {
+    position: PointRPY;
+    orientation: OrientationRPY;
+}

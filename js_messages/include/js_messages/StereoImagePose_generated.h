@@ -7,233 +7,15 @@
 #include "flatbuffers/flatbuffers.h"
 
 #include "Header_generated.h"
+#include "OrientationRPY_generated.h"
+#include "PointRPY_generated.h"
+#include "PoseRPY_generated.h"
+#include "StereoImage_generated.h"
 #include "time_generated.h"
 
 namespace airsim_to_ros {
 
-struct Point;
-
-struct Orientation;
-
-struct Pose;
-
-struct StereoImage;
-
 struct StereoImagePose;
-
-MANUALLY_ALIGNED_STRUCT(8) Point FLATBUFFERS_FINAL_CLASS {
- private:
-  double x_;
-  double y_;
-  double z_;
-
- public:
-  Point() {
-    memset(this, 0, sizeof(Point));
-  }
-  Point(double _x, double _y, double _z)
-      : x_(flatbuffers::EndianScalar(_x)),
-        y_(flatbuffers::EndianScalar(_y)),
-        z_(flatbuffers::EndianScalar(_z)) {
-  }
-  double x() const {
-    return flatbuffers::EndianScalar(x_);
-  }
-  double y() const {
-    return flatbuffers::EndianScalar(y_);
-  }
-  double z() const {
-    return flatbuffers::EndianScalar(z_);
-  }
-};
-STRUCT_END(Point, 24);
-
-MANUALLY_ALIGNED_STRUCT(8) Orientation FLATBUFFERS_FINAL_CLASS {
- private:
-  double roll_;
-  double pitch_;
-  double yaw_;
-
- public:
-  Orientation() {
-    memset(this, 0, sizeof(Orientation));
-  }
-  Orientation(double _roll, double _pitch, double _yaw)
-      : roll_(flatbuffers::EndianScalar(_roll)),
-        pitch_(flatbuffers::EndianScalar(_pitch)),
-        yaw_(flatbuffers::EndianScalar(_yaw)) {
-  }
-  double roll() const {
-    return flatbuffers::EndianScalar(roll_);
-  }
-  double pitch() const {
-    return flatbuffers::EndianScalar(pitch_);
-  }
-  double yaw() const {
-    return flatbuffers::EndianScalar(yaw_);
-  }
-};
-STRUCT_END(Orientation, 24);
-
-struct Pose FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_POSITION = 4,
-    VT_ORIENTATION = 6
-  };
-  const Point *position() const {
-    return GetStruct<const Point *>(VT_POSITION);
-  }
-  const Orientation *orientation() const {
-    return GetStruct<const Orientation *>(VT_ORIENTATION);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<Point>(verifier, VT_POSITION) &&
-           VerifyField<Orientation>(verifier, VT_ORIENTATION) &&
-           verifier.EndTable();
-  }
-};
-
-struct PoseBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_position(const Point *position) {
-    fbb_.AddStruct(Pose::VT_POSITION, position);
-  }
-  void add_orientation(const Orientation *orientation) {
-    fbb_.AddStruct(Pose::VT_ORIENTATION, orientation);
-  }
-  explicit PoseBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  PoseBuilder &operator=(const PoseBuilder &);
-  flatbuffers::Offset<Pose> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<Pose>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<Pose> CreatePose(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    const Point *position = 0,
-    const Orientation *orientation = 0) {
-  PoseBuilder builder_(_fbb);
-  builder_.add_orientation(orientation);
-  builder_.add_position(position);
-  return builder_.Finish();
-}
-
-struct StereoImage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
-  enum {
-    VT_HEIGHT = 4,
-    VT_WIDTH = 6,
-    VT_ENCODING = 8,
-    VT_IS_BIGENDIAN = 10,
-    VT_STEP = 12,
-    VT_DATA = 14
-  };
-  uint32_t height() const {
-    return GetField<uint32_t>(VT_HEIGHT, 0);
-  }
-  uint32_t width() const {
-    return GetField<uint32_t>(VT_WIDTH, 0);
-  }
-  const flatbuffers::String *encoding() const {
-    return GetPointer<const flatbuffers::String *>(VT_ENCODING);
-  }
-  uint8_t is_bigendian() const {
-    return GetField<uint8_t>(VT_IS_BIGENDIAN, 0);
-  }
-  uint32_t step() const {
-    return GetField<uint32_t>(VT_STEP, 0);
-  }
-  const flatbuffers::Vector<uint8_t> *data() const {
-    return GetPointer<const flatbuffers::Vector<uint8_t> *>(VT_DATA);
-  }
-  bool Verify(flatbuffers::Verifier &verifier) const {
-    return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_HEIGHT) &&
-           VerifyField<uint32_t>(verifier, VT_WIDTH) &&
-           VerifyOffset(verifier, VT_ENCODING) &&
-           verifier.Verify(encoding()) &&
-           VerifyField<uint8_t>(verifier, VT_IS_BIGENDIAN) &&
-           VerifyField<uint32_t>(verifier, VT_STEP) &&
-           VerifyOffset(verifier, VT_DATA) &&
-           verifier.Verify(data()) &&
-           verifier.EndTable();
-  }
-};
-
-struct StereoImageBuilder {
-  flatbuffers::FlatBufferBuilder &fbb_;
-  flatbuffers::uoffset_t start_;
-  void add_height(uint32_t height) {
-    fbb_.AddElement<uint32_t>(StereoImage::VT_HEIGHT, height, 0);
-  }
-  void add_width(uint32_t width) {
-    fbb_.AddElement<uint32_t>(StereoImage::VT_WIDTH, width, 0);
-  }
-  void add_encoding(flatbuffers::Offset<flatbuffers::String> encoding) {
-    fbb_.AddOffset(StereoImage::VT_ENCODING, encoding);
-  }
-  void add_is_bigendian(uint8_t is_bigendian) {
-    fbb_.AddElement<uint8_t>(StereoImage::VT_IS_BIGENDIAN, is_bigendian, 0);
-  }
-  void add_step(uint32_t step) {
-    fbb_.AddElement<uint32_t>(StereoImage::VT_STEP, step, 0);
-  }
-  void add_data(flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data) {
-    fbb_.AddOffset(StereoImage::VT_DATA, data);
-  }
-  explicit StereoImageBuilder(flatbuffers::FlatBufferBuilder &_fbb)
-        : fbb_(_fbb) {
-    start_ = fbb_.StartTable();
-  }
-  StereoImageBuilder &operator=(const StereoImageBuilder &);
-  flatbuffers::Offset<StereoImage> Finish() {
-    const auto end = fbb_.EndTable(start_);
-    auto o = flatbuffers::Offset<StereoImage>(end);
-    return o;
-  }
-};
-
-inline flatbuffers::Offset<StereoImage> CreateStereoImage(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t height = 0,
-    uint32_t width = 0,
-    flatbuffers::Offset<flatbuffers::String> encoding = 0,
-    uint8_t is_bigendian = 0,
-    uint32_t step = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint8_t>> data = 0) {
-  StereoImageBuilder builder_(_fbb);
-  builder_.add_data(data);
-  builder_.add_step(step);
-  builder_.add_encoding(encoding);
-  builder_.add_width(width);
-  builder_.add_height(height);
-  builder_.add_is_bigendian(is_bigendian);
-  return builder_.Finish();
-}
-
-inline flatbuffers::Offset<StereoImage> CreateStereoImageDirect(
-    flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t height = 0,
-    uint32_t width = 0,
-    const char *encoding = nullptr,
-    uint8_t is_bigendian = 0,
-    uint32_t step = 0,
-    const std::vector<uint8_t> *data = nullptr) {
-  return airsim_to_ros::CreateStereoImage(
-      _fbb,
-      height,
-      width,
-      encoding ? _fbb.CreateString(encoding) : 0,
-      is_bigendian,
-      step,
-      data ? _fbb.CreateVector<uint8_t>(*data) : 0);
-}
 
 struct StereoImagePose FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -251,8 +33,8 @@ struct StereoImagePose FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const StereoImage *right() const {
     return GetPointer<const StereoImage *>(VT_RIGHT);
   }
-  const Pose *pose() const {
-    return GetPointer<const Pose *>(VT_POSE);
+  const PoseRPY *pose() const {
+    return GetPointer<const PoseRPY *>(VT_POSE);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -280,7 +62,7 @@ struct StereoImagePoseBuilder {
   void add_right(flatbuffers::Offset<StereoImage> right) {
     fbb_.AddOffset(StereoImagePose::VT_RIGHT, right);
   }
-  void add_pose(flatbuffers::Offset<Pose> pose) {
+  void add_pose(flatbuffers::Offset<PoseRPY> pose) {
     fbb_.AddOffset(StereoImagePose::VT_POSE, pose);
   }
   explicit StereoImagePoseBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -300,7 +82,7 @@ inline flatbuffers::Offset<StereoImagePose> CreateStereoImagePose(
     flatbuffers::Offset<Header> header = 0,
     flatbuffers::Offset<StereoImage> left = 0,
     flatbuffers::Offset<StereoImage> right = 0,
-    flatbuffers::Offset<Pose> pose = 0) {
+    flatbuffers::Offset<PoseRPY> pose = 0) {
   StereoImagePoseBuilder builder_(_fbb);
   builder_.add_pose(pose);
   builder_.add_right(right);

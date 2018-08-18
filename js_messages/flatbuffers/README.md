@@ -11,4 +11,4 @@ Call for Pose from airsim to ros as root and dependencies:
     flatc --cpp PoseMessageRoot.fbs Header.fbs time.fbs
 
 Call for StereoImagePose and dependencies:
-    flatc --cpp StereoImagePose.fbs Header.fbs time.fbs
+    flatc --cpp StereoImagePose.fbs Header.fbs time.fbs StereoImage.fbs PoseRPY.fbs PointRPY.fbs OrientationRPY.fbs
