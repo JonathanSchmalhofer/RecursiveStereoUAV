@@ -29,7 +29,6 @@ void ExternalTriggerSubscriber(const sensor_msgs::PointCloudConstPtr& pointcloud
         current_point_cloud.points[i].y = pointcloud_message->points.at(i).y;
         current_point_cloud.points[i].z = pointcloud_message->points.at(i).z;
     }
-    ROS_INFO("PCL copied to wxApp");
     external_trigger_subscriber = true; // Setting to true will make the wxApplication call PointCloudCallback()
 }
 void ExternalTriggerPublisher()
@@ -38,7 +37,6 @@ void ExternalTriggerPublisher()
     {
         external_trigger_publisher = false;
         publisher_.publish(current_trajectory_3d);
-        ROS_INFO("Trajectory3d published");
     }
 }
 

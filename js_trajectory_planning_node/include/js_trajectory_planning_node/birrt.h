@@ -27,8 +27,10 @@ public:
 
     void Reset()
     {
-        start_tree_.Reset();
-        goal_tree_.Reset();
+        start_tree_.Reset(true);
+        goal_tree_.Reset(true);
+        start_tree_.ClearWaypoints();
+        goal_tree_.ClearWaypoints();
 
         count_iterations_ = 0;
 

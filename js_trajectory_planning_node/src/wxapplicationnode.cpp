@@ -36,7 +36,9 @@ void ExternalTriggerPublisher();
 
 bool wxApplicationNode::OnInit()
 {
-    planner_ = new PlannerWrapper();
+    planner_ = new PlannerWrapper(Eigen::Vector3d(800,800,800),  // size
+                                  Eigen::Vector3d(  0,  0,  0),  // start
+                                  Eigen::Vector3d(400,400,400)); // goal
 
     if ( !wxApp::OnInit() )
         return false;
@@ -112,7 +114,6 @@ void wxApplicationNode::GetTrajectory3D()
         // push point to the trajectory
         current_trajectory_3d.trajectory.push_back(new_point);
     }
-    ROS_INFO("Trajectory3D created (dummy)");
 }
 
 void wxApplicationNode::ExternalPublisherEvent(wxIdleEvent &event)
@@ -122,6 +123,9 @@ void wxApplicationNode::ExternalPublisherEvent(wxIdleEvent &event)
 
 void wxApplicationNode::PointCloudCallback()
 {
+    planner_->Reset();
+    planner_->SetStartState(Eigen::Vector3d(  0,  0,  0));
+    planner_->SetGoalState(Eigen::Vector3d(400,400,400));
     InjectCurrentPointCloudAsObstacles();
     planner_->Step();
     GetTrajectory3D();
@@ -166,7 +170,6 @@ void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
             }
         }
     }
-    ROS_INFO("Converted PCL to Obstacles: %d", count);
 }
 
 void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)

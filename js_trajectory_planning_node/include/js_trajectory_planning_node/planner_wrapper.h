@@ -14,17 +14,22 @@
 class PlannerWrapper
 {
 public:
-    PlannerWrapper();
+    PlannerWrapper(Eigen::Vector3d size, Eigen::Vector3d start, Eigen::Vector3d goal);
     void Step();
+    void Reset();
 
     Eigen::Vector3d GetStartVelocity();
     Eigen::Vector3d GetGoalVelocity();
+    void SetStartState(Eigen::Vector3d state);
+    void SetGoalState(Eigen::Vector3d state);
     std::vector<Eigen::Vector3d> GetPreviousSolution();
 
     std::shared_ptr<RRT::GridStateSpace> statespace_;
     std::unique_ptr<RRT::BiRRT<Eigen::Vector3d>> birrt_;
 
 private:
+    Eigen::Vector3d start_state_;
+    Eigen::Vector3d goal_state_;
     Eigen::Vector3d start_velocity_;
     Eigen::Vector3d goal_velocity_;
     std::vector<Eigen::Vector3d> previous_solution_;
