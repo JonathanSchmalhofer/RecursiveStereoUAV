@@ -24,7 +24,10 @@ class RecursiveStereo:
         self.left_image  = None
         self.right_image = None
         self.pcl         = None
-        self.pcl_reduced = None
+        self.pcl_t_min_0 = None
+        self.pcl_t_min_1 = None
+        self.pcl_t_min_2 = None
+        self.pcl_t_min_3 = None
         self.disparity   = None
         self.orb         = cv2.ORB_create(nfeatures=50, scoreType=cv2.ORB_FAST_SCORE) # Initiate ORB  detector
         self.sift        = cv2.xfeatures2d.SIFT_create(nfeatures=50)                  # Initiate SIFT detector
@@ -35,8 +38,8 @@ class RecursiveStereo:
         self.pcl_filename     = 'out.ply'
         
         # Grid Coordinates
-        self.u_step_px = 10
-        self.v_step_px = 10
+        self.u_step_px = 50
+        self.v_step_px = 50
         
         # Parameters for PCL Generation
         self.c_u         = None # default from KITTI: 609.5593
@@ -60,11 +63,18 @@ class RecursiveStereo:
         return pose
     
     def CreateWallBehindCamera(self, min_distance = 1):
+        min_distance = np.absolute(min_distance)
         pcl_wall = []
         brick_size = 0.2
-        for x in np.arange(-1,+0.6,brick_size):
-            for y in np.arange(-1.4,+1.4,brick_size):
-                for z in np.arange(-1.5,+1.5,brick_size):
+        for x in np.arange(-min_distance-2*brick_size,
+                            0,
+                            brick_size):
+            for y in np.arange(-min_distance-2*brick_size,
+                                min_distance+2*brick_size,
+                                brick_size):
+                for z in np.arange(-min_distance-2*brick_size,
+                                    min_distance+2*brick_size,
+                                    brick_size):
                     dist_to_cam = np.linalg.norm(np.array([x,y,z]) - np.array([0,0,0]))
                     if dist_to_cam >= min_distance:
                         new_point = np.array([x,y,z,1,0,0,0]) # format [x,y,z,1,r,g,b]
@@ -179,6 +189,7 @@ class RecursiveStereo:
         # Filter out invalid points
         mask = ((disparity < disparity.max()) &
                 (disparity > disparity.min()) &
+                (pcl[:,:,0] > 2        )           &
                 (np.isfinite(pcl[:,:,0]))          &
                 (np.isfinite(pcl[:,:,1]))          &
                 (np.isfinite(pcl[:,:,2])))
@@ -205,6 +216,7 @@ class RecursiveStereo:
         # Due to the different dimensions, the reduced mask is slight differntly setup
         mask = ((disparity_reduced < disparity_reduced.max()) &
                 (disparity_reduced > disparity_reduced.min()) &
+                (pcl_norm[:,0] > 2        )                &
                 (np.isfinite(pcl_norm[:,0]))               &
                 (np.isfinite(pcl_norm[:,1]))               &
                 (np.isfinite(pcl_norm[:,2])))
@@ -239,6 +251,8 @@ class RecursiveStereo:
         return pcl_transf
     
     def AppendPCL(self, current, to_append):
+        if to_append is None:
+            return current
         if current is None:
             current = to_append
         else:
@@ -262,6 +276,12 @@ class RecursiveStereo:
         with open(filename, 'wb') as file:
             file.write((ply_header % dict(vert_num=len(vertices_with_color))).encode('utf-8'))
             np.savetxt(file, vertices_with_color, fmt='%f %f %f %d %d %d ')
+    
+    def PushFrontPclStack(self, pcl):
+        self.pcl_t_min_3 = self.pcl_t_min_2
+        self.pcl_t_min_2 = self.pcl_t_min_1
+        self.pcl_t_min_1 = self.pcl_t_min_0
+        self.pcl_t_min_0 = pcl
     
     def Step(self):
         if self.RequirementsFulfilled():
@@ -287,15 +307,23 @@ class RecursiveStereo:
             ## R E D U C E D
             # Get reduced point cloud - in camera coordinate system
             pcl_reduced_cam = self.GetReducedPCLFromDisparity(self.disparity)
-            pcl_wall        = self.CreateWallBehindCamera()
+            pcl_wall        = self.CreateWallBehindCamera(3)
 
             pcl_reduced_cam = self.AppendPCL(pcl_reduced_cam, pcl_wall)
             
             # Transform to inertial coordinate system
             pcl_reduced_inert = self.TransformPCL(pcl_reduced_cam)
             
+            self.PushFrontPclStack(pcl_reduced_inert)
+            
             # Save
-            self.pcl = self.AppendPCL(self.pcl, pcl_reduced_inert)
+            #self.pcl = None
+            #self.pcl = self.AppendPCL(self.pcl, self.pcl_t_min_0)
+            #self.pcl = self.AppendPCL(self.pcl, self.pcl_t_min_1)
+            #self.pcl = self.AppendPCL(self.pcl, self.pcl_t_min_2)
+            #self.pcl = self.AppendPCL(self.pcl, self.pcl_t_min_3)
+            
+            self.pcl = pcl_reduced_inert
             
             # Export
             #if self.export_pcl == True:

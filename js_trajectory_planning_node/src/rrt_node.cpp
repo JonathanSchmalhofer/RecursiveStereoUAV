@@ -77,9 +77,9 @@ int main(int argc, char **argv)
     js_common::TryGetParameter("/trajectory_planning/parameters/goal_x", goal_x, 400.0f);
     js_common::TryGetParameter("/trajectory_planning/parameters/goal_y", goal_y,   0.0f);
     js_common::TryGetParameter("/trajectory_planning/parameters/goal_z", goal_z,  10.0f);
-    js_common::TryGetParameter("/trajectory_planning/parameters/size_x", size_x, 800.0f);
-    js_common::TryGetParameter("/trajectory_planning/parameters/size_y", size_y, 800.0f);
-    js_common::TryGetParameter("/trajectory_planning/parameters/size_z", size_z,  50.0f);
+    js_common::TryGetParameter("/trajectory_planning/parameters/size_x", size_x, 500.0f);
+    js_common::TryGetParameter("/trajectory_planning/parameters/size_y", size_y, 200.0f);
+    js_common::TryGetParameter("/trajectory_planning/parameters/size_z", size_z,  30.0f);
 
     wxEntryStart( argc, argv );
     wxTheApp->CallOnInit();

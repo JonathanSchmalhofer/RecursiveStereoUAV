@@ -106,6 +106,24 @@ void wxApplicationNode::GetTrajectory3D()
     current_trajectory_3d.header.stamp = ros::Time::now();
     current_trajectory_3d.header.frame_id = "";
     
+    for(auto const &traj_point : planner_->GetSolution())
+    {
+        js_messages::Trajectory3DPointStamped new_point;
+        
+        // Point
+        new_point.pose.position.x = traj_point[0];
+        new_point.pose.position.y = traj_point[1];
+        new_point.pose.position.z = traj_point[2];
+        // Orientation - not calculated within path planner, a trajectory planner would provide this
+        new_point.pose.orientation.x = 0;
+        new_point.pose.orientation.y = 0;
+        new_point.pose.orientation.z = 0;
+        new_point.pose.orientation.w = 1;
+        
+        // push point to the trajectory
+        current_trajectory_3d.trajectory.push_back(new_point);
+    }
+    /*
     // Points
     for (int i = 0; i < 10; i++)
     {
@@ -123,6 +141,7 @@ void wxApplicationNode::GetTrajectory3D()
         // push point to the trajectory
         current_trajectory_3d.trajectory.push_back(new_point);
     }
+    */
 }
 
 void wxApplicationNode::PointCloudCallback()

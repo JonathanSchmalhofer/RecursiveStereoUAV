@@ -71,7 +71,7 @@ private:
     DynamicEDTOctomap* distance_map_;
 
     /// @brief Resolution of octomap
-    const double kresolution_octomap = 1;
+    const double kresolution_octomap = 0.2;
 
     /// @brief Minimum extent in x-direction to be considered for uniform sampling in planning space
     const double kminimum_uniform_extent_x = 100;
