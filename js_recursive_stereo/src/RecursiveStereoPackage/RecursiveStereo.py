@@ -35,8 +35,8 @@ class RecursiveStereo:
         self.pcl_filename     = 'out.ply'
         
         # Grid Coordinates
-        self.u_step_px = 50
-        self.v_step_px = 50
+        self.u_step_px = 10
+        self.v_step_px = 10
         
         # Parameters for PCL Generation
         self.c_u         = None # default from KITTI: 609.5593
@@ -58,6 +58,19 @@ class RecursiveStereo:
         pose = {'position':    { 'x': 0, 'y': 0, 'z': 0 },
                 'orientation': { 'x': 0, 'y': 0, 'z': 0, 'w': 1 }}
         return pose
+    
+    def CreateWallBehindCamera(self, min_distance = 1):
+        pcl_wall = []
+        brick_size = 0.2
+        for x in np.arange(-1,+0.6,brick_size):
+            for y in np.arange(-1.4,+1.4,brick_size):
+                for z in np.arange(-1.5,+1.5,brick_size):
+                    dist_to_cam = np.linalg.norm(np.array([x,y,z]) - np.array([0,0,0]))
+                    if dist_to_cam >= min_distance:
+                        new_point = np.array([x,y,z,1,0,0,0]) # format [x,y,z,1,r,g,b]
+                        pcl_wall.append(new_point) 
+        return np.array(pcl_wall)
+                    
     
     def GetSiftKeyPoints(self, image):
         # find the keypoints and compute the descriptors with SIFT
@@ -225,17 +238,12 @@ class RecursiveStereo:
                                 x[6]] for x in pcl_transf]) # normalize and back to format [[x,y,z,r,g,b],...]
         return pcl_transf
     
-    def AppendPCL(self, new_pcl):
-        if self.pcl is None:
-            self.pcl = new_pcl
+    def AppendPCL(self, current, to_append):
+        if current is None:
+            current = to_append
         else:
-            self.pcl = np.append(self.pcl,new_pcl,axis=0)
-    
-    def AppendPCLReduced(self, new_pcl):
-        if self.pcl_reduced is None:
-            self.pcl_reduced = new_pcl
-        else:
-            self.pcl_reduced = np.append(self.pcl_reduced,new_pcl,axis=0)
+            current = np.append(current,to_append,axis=0)
+        return current
     
     def GetDisparityImage(self):
             stereo = cv2.StereoSGBM_create(minDisparity   = self.blockmatching_minimum_disparities,
@@ -257,7 +265,7 @@ class RecursiveStereo:
     
     def Step(self):
         if self.RequirementsFulfilled():
-            self.PrintParameters()
+            #self.PrintParameters()
             
             ## F U L L
             # Get disparity image
@@ -270,7 +278,7 @@ class RecursiveStereo:
             #pcl_inert = self.TransformPCL(pcl_cam)
             
             # Save
-            #self.AppendPCL(pcl_inert)
+            #self.pcl = self.AppendPCL(self.pcl,pcl_inert)
             
             # Export
             #if self.export_pcl == True:
@@ -278,14 +286,16 @@ class RecursiveStereo:
             
             ## R E D U C E D
             # Get reduced point cloud - in camera coordinate system
-            pcl_red_cam   = self.GetReducedPCLFromDisparity(self.disparity)
+            pcl_reduced_cam = self.GetReducedPCLFromDisparity(self.disparity)
+            pcl_wall        = self.CreateWallBehindCamera()
+
+            pcl_reduced_cam = self.AppendPCL(pcl_reduced_cam, pcl_wall)
             
             # Transform to inertial coordinate system
-            pcl_red_inert = self.TransformPCL(pcl_red_cam)
+            pcl_reduced_inert = self.TransformPCL(pcl_reduced_cam)
             
-            self.pcl = pcl_red_inert
             # Save
-            #self.AppendPCLReduced(pcl_red_inert)
+            self.pcl = self.AppendPCL(self.pcl, pcl_reduced_inert)
             
             # Export
             #if self.export_pcl == True:

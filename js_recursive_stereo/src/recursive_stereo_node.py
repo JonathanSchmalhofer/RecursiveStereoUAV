@@ -11,6 +11,9 @@ from cv_bridge         import CvBridge, CvBridgeError
 
 from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
 
+import warnings
+warnings.simplefilter("ignore")
+
 
 class RecursiveStereoNode:
     def __init__(self):

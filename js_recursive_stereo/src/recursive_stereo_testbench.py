@@ -3,6 +3,9 @@ import os
 import cv2
 from RecursiveStereoPackage.RecursiveStereo import RecursiveStereo
 
+import warnings
+warnings.simplefilter("ignore")
+
 if __name__ == '__main__':
     algorithm = RecursiveStereo()
     # Set parameters
