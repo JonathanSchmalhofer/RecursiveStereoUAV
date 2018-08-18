@@ -3,6 +3,7 @@
 
 #include <Eigen/Dense>
 #include "tree_to_draw.h"
+#include <sensor_msgs/PointCloud.h>
 
 // the rendering context used by all GL canvases
 class RRTGLContext : public wxGLContext

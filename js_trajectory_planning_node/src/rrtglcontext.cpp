@@ -6,6 +6,8 @@
 // RRTGLContext
 // ----------------------------------------------------------------------------
 
+extern sensor_msgs::PointCloud current_point_cloud;     // input
+
 RRTGLContext::RRTGLContext(wxGLCanvas *canvas)
     : wxGLContext(canvas),
       view_azimuth_(0),
@@ -90,6 +92,20 @@ void RRTGLContext::DrawNow()
                            colored_line.first.second.z());
             }
         glEnd(); // end drawing of lines
+    }
+    
+    
+    for (int i = 0; i < current_point_cloud.points.size(); i++)
+    {
+        glPointSize(5.0f); //set point size to 5 pixels
+    
+        // Start Point
+        glColor3f(0.86f,0.86f,0.86f); // GAINSBORO for OBSTACLE
+        glBegin(GL_POINTS); // starts drawing of obstacle
+            glVertex3f(current_point_cloud.points.at(i).x,
+                       current_point_cloud.points.at(i).y,
+                       current_point_cloud.points.at(i).z);
+        glEnd(); // end drawing of obstacle
     }
 
     glPointSize(20.0f); //set point size to 20 pixels
