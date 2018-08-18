@@ -1,6 +1,6 @@
 <launch>
     <group>
-        <include file="$(find js_agent_scripts)/launch/agent_open_loop.launch" />
+        <include file="$(find js_agent_scripts)/launch/open_loop.launch" />
         <include file="$(find js_trajectory_planning_node)/launch/trajectory_planning_node.launch" />
     </group>
 </launch>
