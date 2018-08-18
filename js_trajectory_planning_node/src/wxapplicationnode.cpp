@@ -4,6 +4,7 @@
 
 wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
     EVT_IDLE(wxApplicationNode::UpdateDrawnCanvas)
+    //EVT_IDLE(wxApplicationNode::ExternalPublisherEvent)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTGLCanvas, wxGLCanvas)
     EVT_PAINT(RRTGLCanvas::OnPaint)
@@ -29,6 +30,8 @@ extern bool external_trigger_publisher;                 // output
 extern sensor_msgs::PointCloud current_point_cloud;     // input
 extern js_messages::Trajectory3D current_trajectory_3d; // output
 
+void ExternalTriggerPublisher();
+
 
 
 bool wxApplicationNode::OnInit()
@@ -39,13 +42,13 @@ bool wxApplicationNode::OnInit()
         return false;
 
     frame_ = new RRTFrame();
-	
+    
     return true;
 }
 
 int wxApplicationNode::OnRun()
 {
-	return wxApp::OnRun();
+    return wxApp::OnRun();
 }
 
 int wxApplicationNode::OnExit()
@@ -86,7 +89,7 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
 void wxApplicationNode::GetTrajectory3D()
 {
     // Clear array
-	current_trajectory_3d.trajectory.clear();
+    current_trajectory_3d.trajectory.clear();
     
     // Header
     current_trajectory_3d.header.stamp = ros::Time::now();
@@ -97,31 +100,38 @@ void wxApplicationNode::GetTrajectory3D()
     {
         js_messages::Trajectory3DPointStamped new_point;
         // Point
-        new_point.position.x = i;
-        new_point.position.y = i;
-        new_point.position.z = i;
+        new_point.pose.position.x = i;
+        new_point.pose.position.y = i;
+        new_point.pose.position.z = i;
         // Orientation
-        new_point.orientation.x = 0;
-        new_point.orientation.y = 0;
-        new_point.orientation.z = 0;
-        new_point.orientation.w = 1;
+        new_point.pose.orientation.x = 0;
+        new_point.pose.orientation.y = 0;
+        new_point.pose.orientation.z = 0;
+        new_point.pose.orientation.w = 1;
         
         // push point to the trajectory
         current_trajectory_3d.trajectory.push_back(new_point);
     }
-    
+    ROS_INFO("Trajectory3D created (dummy)");
+}
+
+void wxApplicationNode::ExternalPublisherEvent(wxIdleEvent &event)
+{
+    //ExternalTriggerPublisher();
 }
 
 void wxApplicationNode::PointCloudCallback()
 {
     InjectCurrentPointCloudAsObstacles();
-	planner_->Step();
+    planner_->Step();
     GetTrajectory3D();
     external_trigger_publisher = true;
+    ExternalTriggerPublisher();
 }
 
 void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
 {
+    int count = 0;
     for (int i = 0; i < current_point_cloud.points.size(); i++)
     {
         // Center
@@ -129,6 +139,7 @@ void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
                                     current_point_cloud.points.at(i).y, 
                                     current_point_cloud.points.at(i).z);
         GetPlanner()->statespace_->GetObstacleGrid().InsertOccupiedMeasurement(cloud_point);
+        count++;
         
         // Neighbouring Cells as well?
         bool extend_space_around_point = true;
@@ -148,25 +159,28 @@ void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
                                                               current_point_cloud.points.at(i).y + delta * y_i, 
                                                               current_point_cloud.points.at(i).z + delta * z_i);
                             GetPlanner()->statespace_->GetObstacleGrid().InsertOccupiedMeasurement(delta_cloud_point);
+                            count++;
                         }
                     }
                 }
             }
         }
+    }
+    ROS_INFO("Converted PCL to Obstacles: %d", count);
 }
 
 void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)
 {
-	if(ros::ok())
+    if(ros::ok())
     {
         ros::spinOnce();
     }
-	if(external_trigger_subscriber)
-	{
-		external_trigger_subscriber = false;
+    if(external_trigger_subscriber)
+    {
+        external_trigger_subscriber = false;
         PointCloudCallback();
-	}
-	
+    }
+    
     ExtractStartAndGoalStateForContext();
     ExtractPointsAndLinesFromTreeForContext();
     GetFrame()->GetCanvas()->DrawNow();

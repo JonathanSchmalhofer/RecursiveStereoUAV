@@ -27,7 +27,8 @@ public:
     virtual int OnExit();
 
     void UpdateDrawnCanvas(wxIdleEvent &event);
-	void PointCloudCallback();
+    void ExternalPublisherEvent(wxIdleEvent &event);
+    void PointCloudCallback();
 
     RRTFrame* GetFrame();
     PlannerWrapper* GetPlanner();
@@ -42,7 +43,7 @@ private:
     // the GL context we use for all our mono rendering windows
     RRTGLContext *context_;
     RRTFrame *frame_;
-	//ros::Subscriber subscriber_;
+    //ros::Subscriber subscriber_;
     //ros::Publisher publisher_;
 
     wxDECLARE_EVENT_TABLE();
