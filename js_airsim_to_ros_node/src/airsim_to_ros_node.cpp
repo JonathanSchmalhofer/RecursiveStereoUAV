@@ -73,7 +73,7 @@ int main(int argc, char **argv)
         int8_t received_return_value  = airsim_to_ros.ReceivedMessage();
         if (1 == received_return_value)
         {
-            waiting_counter_pose = 0;
+            waiting_counter = 0;
             if ( verbose == true )
             {
                 ROS_INFO("StereoImagePose received");
