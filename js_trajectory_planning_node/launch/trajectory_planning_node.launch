@@ -1,3 +1,6 @@
 <launch>
+    <param name="/trajectory_planning/parameters/goal_x" type="double" value="350" />
+    <param name="/trajectory_planning/parameters/goal_y" type="double" value="10" />
+    <param name="/trajectory_planning/parameters/goal_z" type="double" value="20" />
     <node name="trajectory_planning_node" pkg="js_trajectory_planning_node" type="trajectory_planning_node" output="screen"/>
 </launch>

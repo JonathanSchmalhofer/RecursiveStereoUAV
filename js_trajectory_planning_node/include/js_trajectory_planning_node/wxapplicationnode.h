@@ -6,6 +6,7 @@
 #include "rrtframe.h"
 
 #include <sensor_msgs/PointCloud.h>
+#include <geometry_msgs/Pose.h>
 #include <js_messages/Trajectory3D.h>
 
 
@@ -27,8 +28,8 @@ public:
     virtual int OnExit();
 
     void UpdateDrawnCanvas(wxIdleEvent &event);
-    void ExternalPublisherEvent(wxIdleEvent &event);
     void PointCloudCallback();
+    void PoseCallback();
 
     RRTFrame* GetFrame();
     PlannerWrapper* GetPlanner();

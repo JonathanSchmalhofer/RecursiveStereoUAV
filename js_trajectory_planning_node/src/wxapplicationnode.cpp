@@ -4,7 +4,6 @@
 
 wxBEGIN_EVENT_TABLE(wxApplicationNode, wxApp)
     EVT_IDLE(wxApplicationNode::UpdateDrawnCanvas)
-    //EVT_IDLE(wxApplicationNode::ExternalPublisherEvent)
 wxEND_EVENT_TABLE()
 wxBEGIN_EVENT_TABLE(RRTGLCanvas, wxGLCanvas)
     EVT_PAINT(RRTGLCanvas::OnPaint)
@@ -24,11 +23,21 @@ IMPLEMENT_WX_THEME_SUPPORT;
 // wxApplicationNode
 // ----------------------------------------------------------------------------
 
-extern bool external_trigger_subscriber;                // input
+extern bool external_trigger_subscriber_pcl;            // input
+extern bool external_trigger_subscriber_pose;           // input
 extern bool external_trigger_publisher;                 // output
 
 extern sensor_msgs::PointCloud current_point_cloud;     // input
+extern geometry_msgs::Pose current_pose;                // input
 extern js_messages::Trajectory3D current_trajectory_3d; // output
+
+extern double goal_x;
+extern double goal_y;
+extern double goal_z;
+
+extern double size_x;
+extern double size_y;
+extern double size_z;
 
 void ExternalTriggerPublisher();
 
@@ -36,9 +45,9 @@ void ExternalTriggerPublisher();
 
 bool wxApplicationNode::OnInit()
 {
-    planner_ = new PlannerWrapper(Eigen::Vector3d(800,800,800),  // size
-                                  Eigen::Vector3d(  0,  0,  0),  // start
-                                  Eigen::Vector3d(400,400,400)); // goal
+    planner_ = new PlannerWrapper(Eigen::Vector3d(size_x,size_y,size_z),  // size
+                                  Eigen::Vector3d(current_pose.position.x,current_pose.position.y,current_pose.position.z),  // start
+                                  Eigen::Vector3d(goal_x,goal_y,goal_z)); // goal
 
     if ( !wxApp::OnInit() )
         return false;
@@ -116,21 +125,25 @@ void wxApplicationNode::GetTrajectory3D()
     }
 }
 
-void wxApplicationNode::ExternalPublisherEvent(wxIdleEvent &event)
-{
-    //ExternalTriggerPublisher();
-}
-
 void wxApplicationNode::PointCloudCallback()
 {
     planner_->Reset();
-    planner_->SetStartState(Eigen::Vector3d(  0,  0,  0));
-    planner_->SetGoalState(Eigen::Vector3d(400,400,400));
+    PoseCallback();
     InjectCurrentPointCloudAsObstacles();
     planner_->Step();
     GetTrajectory3D();
     external_trigger_publisher = true;
     ExternalTriggerPublisher();
+}
+
+void wxApplicationNode::PoseCallback()
+{
+    planner_->SetStartState(Eigen::Vector3d(current_pose.position.x,
+                                            current_pose.position.y,
+                                            current_pose.position.z));
+    planner_->SetGoalState(Eigen::Vector3d(goal_x,
+                                           goal_y,
+                                           goal_z));
 }
 
 void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
@@ -178,9 +191,14 @@ void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)
     {
         ros::spinOnce();
     }
-    if(external_trigger_subscriber)
+    if(external_trigger_subscriber_pose)
     {
-        external_trigger_subscriber = false;
+        external_trigger_subscriber_pose = false;
+        PoseCallback();
+    }
+    if(external_trigger_subscriber_pcl)
+    {
+        external_trigger_subscriber_pcl = false;
         PointCloudCallback();
     }
     

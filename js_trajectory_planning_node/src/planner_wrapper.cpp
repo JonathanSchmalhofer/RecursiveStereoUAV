@@ -19,9 +19,9 @@ PlannerWrapper::PlannerWrapper(Eigen::Vector3d size,
     birrt_->SetStepSize(10);
     birrt_->SetMaxIterations(1000);
     birrt_->SetAdaptiveScalingEnable(true);
-    birrt_->SetGoalBias(0.6);
-    birrt_->SetWaypointBias(0.2);
-    birrt_->SetMaxDistanceToGoal(5);
+    birrt_->SetGoalBias(0.4);
+    birrt_->SetWaypointBias(0.4);
+    birrt_->SetMaxDistanceToGoal(0.5);
 
     start_velocity_ = Eigen::Vector3d(3, 0, 0);
     goal_velocity_ = Eigen::Vector3d(0, 3, 0);

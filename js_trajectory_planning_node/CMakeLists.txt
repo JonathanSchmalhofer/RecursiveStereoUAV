@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     roslaunch
     js_messages
+    js_common
     octomap_ros
     octomap_msgs
 )
@@ -24,6 +25,8 @@ find_package(Flann REQUIRED)
 add_library(Flann STATIC IMPORTED)
 
 find_package(js_messages REQUIRED)
+
+find_package(js_common REQUIRED)
 
 find_package(dynamicedt3d_catkin REQUIRED)
 
@@ -62,7 +65,7 @@ find_package(GLUT REQUIRED)
 catkin_package(
     INCLUDE_DIRS ${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} ${OCTOMAP_INCLUDE_DIRS}
     LIBRARIES ${EIGEN3_INCLUDE_DIRS} ${wxWidgets_LIBRARIES} ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} ${dynamicedt3d_catkin_LIBRARIES} ${OCTOMAP_LIBRARIES}
-    CATKIN_DEPENDS roscpp js_messages octomap_ros dynamicedt3d_catkin
+    CATKIN_DEPENDS roscpp js_messages js_common octomap_ros dynamicedt3d_catkin
     DEPENDS octomap
 )
 
@@ -75,6 +78,7 @@ include_directories(
     include/js_trajectory_planning_node
     ${js_messages_INCLUDE_DIRS}/includes
     ${js_messages_INCLUDE_DIRS}
+    ${js_common_INCLUDE_DIRS}
     ${catkin_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
     ${OPENGL_INCLUDE_DIRS}
