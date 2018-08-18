@@ -90,7 +90,6 @@ class RecursiveStereoNode:
                                                 self.algorithm.pcl[i,1], 
                                                 self.algorithm.pcl[i,2]))
             self.publisher.publish(pointcloud)
-            rospy.loginfo("Sending PointCloud")
         else:
             self.VerbosePrint('Timestamp of left image and rigt image do not match (yet)')
             self.VerbosePrint('   T(Left)  = {}'.format(self.timestamp_left))
