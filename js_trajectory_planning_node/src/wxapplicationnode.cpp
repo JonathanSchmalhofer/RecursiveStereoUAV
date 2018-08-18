@@ -23,8 +23,11 @@ IMPLEMENT_WX_THEME_SUPPORT;
 // wxApplicationNode
 // ----------------------------------------------------------------------------
 
-extern bool external_trigger_subscriber;
-extern bool external_trigger_publisher;
+extern bool external_trigger_subscriber;                // input
+extern bool external_trigger_publisher;                 // output
+
+extern sensor_msgs::PointCloud current_point_cloud;     // input
+extern js_messages::Trajectory3D current_trajectory_3d; // output
 
 
 
@@ -80,11 +83,76 @@ RRTGLContext& wxApplicationNode::GetContext(wxGLCanvas *canvas)
     return *rrt_gl_context;
 }
 
+void wxApplicationNode::GetTrajectory3D()
+{
+    // Clear array
+	current_trajectory_3d.trajectory.clear();
+    
+    // Header
+    current_trajectory_3d.header.stamp = ros::Time::now();
+    current_trajectory_3d.header.frame_id = "";
+    
+    // Points
+    for (int i = 0; i < 10; i++)
+    {
+        js_messages::Trajectory3DPointStamped new_point;
+        // Point
+        new_point.position.x = i;
+        new_point.position.y = i;
+        new_point.position.z = i;
+        // Orientation
+        new_point.orientation.x = 0;
+        new_point.orientation.y = 0;
+        new_point.orientation.z = 0;
+        new_point.orientation.w = 1;
+        
+        // push point to the trajectory
+        current_trajectory_3d.trajectory.push_back(new_point);
+    }
+    
+}
+
 void wxApplicationNode::PointCloudCallback()
 {
-	//TODO //ROS_INFO("The sequence is: [%d]", pointcloud_message->header.seq);
+    InjectCurrentPointCloudAsObstacles();
 	planner_->Step();
+    GetTrajectory3D();
     external_trigger_publisher = true;
+}
+
+void wxApplicationNode::InjectCurrentPointCloudAsObstacles()
+{
+    for (int i = 0; i < current_point_cloud.points.size(); i++)
+    {
+        // Center
+        Eigen::Vector3d cloud_point(current_point_cloud.points.at(i).x, 
+                                    current_point_cloud.points.at(i).y, 
+                                    current_point_cloud.points.at(i).z);
+        GetPlanner()->statespace_->GetObstacleGrid().InsertOccupiedMeasurement(cloud_point);
+        
+        // Neighbouring Cells as well?
+        bool extend_space_around_point = true;
+        double delta = 1.0; // [m] (?)
+        if(extend_space_around_point)
+        {
+            for(int x_i = -1; x_i < 2; x_i++)
+            {
+                for(int y_i = -1; y_i < 2; y_i++)
+                {
+                    for(int z_i = -1; z_i < 2; z_i++)
+                    {
+                        // Skip the center point
+                        if( x_i != 0 || y_i != 0 || z_i != 0 )
+                        {
+                            Eigen::Vector3d delta_cloud_point(current_point_cloud.points.at(i).x + delta * x_i, 
+                                                              current_point_cloud.points.at(i).y + delta * y_i, 
+                                                              current_point_cloud.points.at(i).z + delta * z_i);
+                            GetPlanner()->statespace_->GetObstacleGrid().InsertOccupiedMeasurement(delta_cloud_point);
+                        }
+                    }
+                }
+            }
+        }
 }
 
 void wxApplicationNode::UpdateDrawnCanvas(wxIdleEvent &event)

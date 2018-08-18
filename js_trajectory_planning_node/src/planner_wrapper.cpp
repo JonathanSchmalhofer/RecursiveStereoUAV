@@ -25,6 +25,7 @@ PlannerWrapper::PlannerWrapper()
 
 
     // add test wall
+    /*
     ROS_INFO("Make Octomap great again");
     double x_wall, y_wall, z_wall;
     y_wall = 400;
@@ -37,6 +38,7 @@ PlannerWrapper::PlannerWrapper()
         }
     }
     ROS_INFO("Trump was here");
+    */
 }
 
 void PlannerWrapper::Step()

@@ -5,6 +5,9 @@
 #include "rrtglcontext.h"
 #include "rrtframe.h"
 
+#include <sensor_msgs/PointCloud.h>
+#include <js_messages/Trajectory3D.h>
+
 
 ////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,6 +31,8 @@ public:
 
     RRTFrame* GetFrame();
     PlannerWrapper* GetPlanner();
+    void GetTrajectory3D();
+    void InjectCurrentPointCloudAsObstacles();
 
 private:
     void ExtractStartAndGoalStateForContext();
