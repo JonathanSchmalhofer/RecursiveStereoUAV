@@ -51,7 +51,7 @@ class RecursiveStereoNode:
             self.VerbosePrint(e)
         self.algorithm.left_image  = cv_image_left
         self.algorithm.color_image = cv_image_left
-        self.timestamp_left        = image.header.stamp.sec*1e9 + image.header.stamp.nsec # ns
+        self.timestamp_left        = image.header.stamp.secs*1e9 + image.header.stamp.nsecs # ns
         self.CallbackCalculate()
     
     def CallbackRight(self, image):
@@ -61,7 +61,7 @@ class RecursiveStereoNode:
         except CvBridgeError as e:
             self.VerbosePrint(e)
         self.algorithm.right_image  = cv_image_right
-        self.timestamp_right        = image.header.stamp.sec*1e9 + image.header.stamp.nsec # ns
+        self.timestamp_right        = image.header.stamp.secs*1e9 + image.header.stamp.nsecs # ns
         self.CallbackCalculate()
     
     def CallbackPose(self, new_pose):
