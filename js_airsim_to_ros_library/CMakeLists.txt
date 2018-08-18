@@ -71,6 +71,6 @@ install(DIRECTORY include/${PROJECT_NAME}/
 #############
 
 if(CATKIN_ENABLE_TESTING)
-    catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
-    target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES} ${zeromq_catkin_LIBRARY} ${flatbuffers_catkin_LIBRARIES})
+    #catkin_add_gtest(airsim_to_ros_library_tests test/test_airsim_to_ros_class.cpp)
+    #target_link_libraries(airsim_to_ros_library_tests airsim_to_ros_library ${catkin_LIBRARIES} ${zeromq_catkin_LIBRARY} ${flatbuffers_catkin_LIBRARIES})
 endif()
