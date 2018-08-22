@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+from plyfile import PlyData
 from matplotlib import pyplot as plt
 
 ply_header = '''ply
@@ -276,6 +277,13 @@ class RecursiveStereo:
         with open(filename, 'wb') as file:
             file.write((ply_header % dict(vert_num=len(vertices_with_color))).encode('utf-8'))
             np.savetxt(file, vertices_with_color, fmt='%f %f %f %d %d %d ')
+
+    def ImportPCL(self, filename):
+        ply = PlyData.read(filename)
+        vertex = ply['vertex']
+        [x, y, z] = [vertex[t] for t in ('x', 'y', 'z')]
+        pcl = np.array([vertex[t] for t in ('x', 'y', 'z')]).transpose()
+        return pcl
     
     def PushFrontPclStack(self, pcl):
         self.pcl_t_min_3 = self.pcl_t_min_2
