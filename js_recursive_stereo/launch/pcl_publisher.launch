@@ -1,0 +1,4 @@
+<launch>
+    <node pkg="js_recursive_stereo" type="pcl_publisher_node.py" name="pcl_publisher_node" output="screen">
+    </node>
+</launch>
