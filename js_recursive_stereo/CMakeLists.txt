@@ -48,6 +48,7 @@ include_directories(
 ## in contrast to setup.py, you can choose the destination
 install(PROGRAMS
     src/recursive_stereo_node.py
+    src/pcl_publisher_node.py
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
