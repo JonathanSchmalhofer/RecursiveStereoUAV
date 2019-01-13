@@ -1,0 +1,15 @@
+Checkerboard:
+==============
+
+-Horizontal mehr Quadrate als Vertikal (besonders für ROS - siehe http://wiki.ros.org/camera_calibration/Tutorials/StereoCalibration)
+-Unreal Engine Einheit cm
+-Standardquader ist 100 x 100 x 100
+-Entscheidung:
+  -Verwende 10 x 15 Quadrate auf Schachbrettmuster mit Seitenlänge 10cm je Quadrat
+  -1px soll 1mm entsprechen ==> Ein Quadrat soll 100px Seitenlänge haben
+  -die Textur soll 1000px x 1500px groß sein
+  -das Gesamtschachbrett wird damit 1.0m x 1.5m groß sein ==> Skalierung: 1.0 x 1.5 x 1 (beliebig)
+
+
+
+rosrun camera_calibration cameracalibrator.py --size 14x9 --square 1.000 right:=/airsim/right/image_raw left:=/airsim/left/image_raw

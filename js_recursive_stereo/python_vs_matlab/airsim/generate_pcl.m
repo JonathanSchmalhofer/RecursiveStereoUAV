@@ -74,3 +74,8 @@ colors_all{ 1 }   = colors;
 
 mergedPointCloud = pointCloud( x_all{ 1 }, 'Color', uint8( colors_all{ 1 } ) );
 pcwrite( mergedPointCloud, 'mergedPointCloud', 'PLYFormat', 'binary' );
+
+figure; axis off;
+showPointCloud(mergedPointCloud, 'MarkerSize', 100);
+set(gca, 'CameraPosition', [0,0,0]);
+set(gca, 'CameraTarget', [65,0,0]);
